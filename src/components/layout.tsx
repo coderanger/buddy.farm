@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link } from 'gatsby'
+import { Link, navigate } from 'gatsby'
 import Container from "react-bootstrap/Container"
 import Nav from "react-bootstrap/Nav"
 import NavDropdown from "react-bootstrap/NavDropdown"
@@ -10,10 +10,14 @@ import "bootstrap/dist/css/bootstrap.css"
 
 interface LayoutProps {
     pageTitle: string
+    query?: string | null | undefined
+    onSearch?: (query: string) => void
     children: JSX.Element[] | JSX.Element
 }
 
-const Layout = ({ pageTitle, children }: LayoutProps) => {
+const defaultOnSearch = (query: string) => navigate(`/search/?q=${encodeURIComponent(query)}`)
+
+const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, children }: LayoutProps) => {
     return (
         <div>
             <Helmet>
@@ -26,7 +30,7 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
                         Buddy's Almanac
                     </Link>
                     <form className="d-flex" css={{flexGrow: 1, maxWidth: 600}}>
-                        <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                        <input id="nav-search" className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={query || undefined} onChange={evt => onSearch(evt.target.value)} />
                     </form>
                     <Link className="btn btn-primary" to="/">Settings</Link>
                 </Container>
