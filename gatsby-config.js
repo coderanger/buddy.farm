@@ -1,5 +1,10 @@
 // @ts-check
 
+const DATA_ROOT = process.env.FARMRPG_DATA_ROOT
+if (!DATA_ROOT) {
+  throw "Set $FARMRPG_DATA_ROOT"
+}
+
 /** @type {import('gatsby').GatsbyConfig} */
 module.exports = {
   siteMetadata: {
@@ -30,7 +35,7 @@ module.exports = {
       resolve: 'gatsby-source-filesystem',
       options: {
         "name": "data",
-        "path": "./farmrpg-ext/data/"
+        "path": DATA_ROOT,
       },
     }
   ]

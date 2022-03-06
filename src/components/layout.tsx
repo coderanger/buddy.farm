@@ -19,7 +19,6 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
             <Helmet>
                 <meta charSet="utf-8" />
                 <title>{pageTitle}</title>
-                <link rel="canonical" href="http://mysite.com/example" />
             </Helmet>
             <Navbar bg="light" expand="lg">
                 <Container>
@@ -44,7 +43,6 @@ const Layout = ({ pageTitle, children }: LayoutProps) => {
             </Navbar>
             <main>
                 <Container>
-                    <h1>{pageTitle}</h1>
                     {children}
                 </Container>
             </main>
