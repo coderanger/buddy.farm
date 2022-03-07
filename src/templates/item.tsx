@@ -54,7 +54,9 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
     lineOne: location,
     lineTwo: MODES[normalDropsMap[location]?.mode] || "Explores/drop",
     value: normalDropsMap[location]?.rate.toFixed(2) || "?",
+    _sortValue: normalDropsMap[location]?.rate || 100000000,
   }))
+  listItems.sort((a, b) => a._sortValue - b._sortValue)
 
   return <Layout pageTitle={item.name}>
     <h1>
