@@ -37,6 +37,14 @@ module.exports = {
         "name": "data",
         "path": DATA_ROOT,
       },
-    }
+    },
+    {
+      resolve: `gatsby-plugin-s3`,
+      options: {
+        bucketName: "buddy.farm",
+        protocol: "https",
+        hostname: "buddy.farm"
+      },
+    },
   ]
 };

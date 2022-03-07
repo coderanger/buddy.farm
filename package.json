@@ -13,7 +13,8 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "gatsby-plugin-s3 deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.8.1",
@@ -26,6 +27,7 @@
     "gatsby-plugin-google-analytics": "^4.9.0",
     "gatsby-plugin-mdx": "^3.9.0",
     "gatsby-plugin-react-helmet": "^5.9.0",
+    "gatsby-plugin-s3": "^0.3.8",
     "gatsby-plugin-sass": "^5.9.0",
     "gatsby-source-filesystem": "^4.9.0",
     "gatsby-transformer-json": "^4.9.0",
