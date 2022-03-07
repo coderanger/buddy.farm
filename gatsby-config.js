@@ -15,9 +15,9 @@ module.exports = {
     "gatsby-plugin-sass",
     "gatsby-plugin-emotion",
     {
-      resolve: 'gatsby-plugin-google-analytics',
+      resolve: 'gatsby-plugin-google-gtag',
       options: {
-        "trackingId": "G-RYLMF5ZX56"
+        "trackingIds": ["G-RYLMF5ZX56"],
       }
     },
     "gatsby-plugin-react-helmet",
