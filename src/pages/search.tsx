@@ -45,9 +45,9 @@ export default () => {
     }
     // Transform to a scored list.
     const scored: ScoredResult[] = []
-    for (const { name, image, href } of searchables) {
+    for (const { name, image, searchText, href } of searchables) {
       // TODO better search
-      const score = name.includes(query.toLowerCase()) ? 1 : 0
+      const score = searchText.includes(query.toLowerCase()) ? 1 : 0
       if (score > 0) {
         scored.push({ name, image, href, score })
       }
@@ -60,7 +60,7 @@ export default () => {
     <div>Search results</div>
     <ListGroup variant="flush">
       {results.map(result => (
-        <ListGroup.Item className="d-flex w-100 justify-content-between" onClick={evt => { evt.preventDefault(); navigate(result.href) }}>
+        <ListGroup.Item className="d-flex w-100 justify-flex-start" onClick={evt => { evt.preventDefault(); navigate(result.href) }}>
           <img src={"https://farmrpg.com" + result.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
           <span css={{ fontSize: 32 }}>{result.name}</span>
         </ListGroup.Item>

@@ -19,11 +19,12 @@ interface Searchable {
   name: string
   image: string
   href: string
+  searchText: string
 }
 
 const nodeToSearchable = (node: { name: string, image: string }) => {
   const searchName = node.name.toLowerCase()
-  return { name: searchName, image: node.image, href: `/${searchName.replace(/\s+/g, '-')}/` }
+  return { name: node.name, image: node.image, searchText: searchName, href: `/${searchName.replace(/\s+/g, '-')}/` }
 }
 
 export const useSearchables = () => {
