@@ -25,6 +25,11 @@ interface ItemProps {
   }
 }
 
+const MODES: { [key: string]: string } = {
+  "harvests": "Plot harvests/drop",
+  "fishes": "Fishes/drop",
+}
+
 export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops } }: ItemProps) => {
   const items = useItems()
   const locations = useLocations()
@@ -44,10 +49,10 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
   }
 
   const listItems = Object.keys(allLocationKeys).map(location => ({
-    image: normalDropsMap[location]?.mode === "harvest" ? items[location].image : locations[location]?.image,
-    hrefSlugify: normalDropsMap[location]?.mode !== "harvest" && location,
+    image: normalDropsMap[location]?.mode === "harvests" ? items[location].image : locations[location]?.image,
+    hrefSlugify: normalDropsMap[location]?.mode !== "harvests" && location,
     lineOne: location,
-    lineTwo: "",
+    lineTwo: MODES[normalDropsMap[location]?.mode] || "Explores/drop",
     value: normalDropsMap[location]?.rate.toFixed(2) || "?",
   }))
 
