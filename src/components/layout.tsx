@@ -29,10 +29,10 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, children }: Layo
                     <Link className='navbar-brand' to="/">
                         Buddy's Almanac
                     </Link>
-                    <form className="d-flex" css={{flexGrow: 1, maxWidth: 600}}>
+                    <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }}>
                         <input id="nav-search" className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={query || undefined} onChange={evt => onSearch(evt.target.value)} />
                     </form>
-                    <Link className="btn btn-primary" to="/">Settings</Link>
+                    <Link className="btn btn-primary" to="/settings/">Settings</Link>
                 </Container>
             </Navbar>
             <main>
