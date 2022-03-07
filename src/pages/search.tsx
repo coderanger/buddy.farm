@@ -1,15 +1,47 @@
-import { navigate } from 'gatsby';
-import ListGroup from "react-bootstrap/ListGroup"
-import { useEffect, useState } from 'react';
+import { navigate } from 'gatsby'
+import { useEffect, useState } from 'react'
+import ListGroup from 'react-bootstrap/ListGroup'
 
-import Layout from '../components/layout';
-import { useSearchables } from '../hooks/searchables';
+import Layout from '../components/layout'
+import { useSearchables } from '../hooks/searchables'
 
 interface ScoredResult {
   name: string
   image: string
   href: string
   score: number
+}
+
+const prepScoring = (query: string) => {
+  const pattern = ["(.*?)"]
+  for (const letter of query) {
+    pattern.push(letter, "(.*?)")
+  }
+  return new RegExp(pattern.join(""))
+}
+
+const scoreSearchable = (name: string, query: string, queryRegex: RegExp) => {
+  // The scoring algorithm:
+  // * An exact match is always at the top.
+  // * If the letters of the query do not appear anywhere in the name, return a
+  //   score high enough to always exclude from results.
+  // * If there is a match, look at how many extra letters there are. Sequences at the
+  //   front and back count linearly, sequences between letters get squared so they "hurt" more.
+  //
+  // Example: name=stone query=sn => StoNe, the "to" is squared for 4 points and the "e" is 1 point, 5 points total.
+  if (name === query) {
+    return 0
+  }
+  const match = name.match(queryRegex)
+  if (match === null) {
+    return 1000
+  }
+  let total = match[1].length
+  for (let i = 2; i < match.length - 1; i++) {
+    total += Math.pow(match[i].length, 2)
+  }
+  total += match[match.length - 1].length
+  return total
 }
 
 export default () => {
@@ -33,7 +65,7 @@ export default () => {
 
   const onSearch = (query: string) => {
     setQuery(query)
-    navigate(`/search/?q=${encodeURIComponent(query)}`, { replace: true })
+    navigate(`?q=${encodeURIComponent(query)}`, { replace: true })
   }
 
   // Filter and sort the results.
@@ -43,12 +75,16 @@ export default () => {
       setResults([])
       return
     }
+
+    // Setup for scoring.
+    const queryLower = query.toLowerCase()
+    const queryRegexp = prepScoring(queryLower)
+
     // Transform to a scored list.
     const scored: ScoredResult[] = []
     for (const { name, image, searchText, href } of searchables) {
-      // TODO better search
-      const score = searchText.includes(query.toLowerCase()) ? 1 : 0
-      if (score > 0) {
+      const score = scoreSearchable(searchText, queryLower, queryRegexp)
+      if (score <= 500) {
         scored.push({ name, image, href, score })
       }
     }
