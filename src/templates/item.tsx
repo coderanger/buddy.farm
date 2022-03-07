@@ -32,7 +32,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
   const ironDepotDropsMap = Object.fromEntries(ironDepotDrops.nodes.map(n => [n.location, n]))
   const manualFishingDropsMap = Object.fromEntries(manualFishingDrops.nodes.map(n => [n.location, n]))
 
-  const allLocationKeys: {[key: string]: boolean} = {}
+  const allLocationKeys: { [key: string]: boolean } = {}
   for (const key in normalDropsMap) {
     allLocationKeys[key] = true
   }
@@ -44,7 +44,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
   }
 
   const listItems = Object.keys(allLocationKeys).map(location => ({
-    image: normalDropsMap[location]?.mode === "harvest" ? items[location].image : locations[location].image,
+    image: normalDropsMap[location]?.mode === "harvest" ? items[location].image : locations[location]?.image,
     hrefSlugify: normalDropsMap[location]?.mode !== "harvest" && location,
     lineOne: location,
     lineTwo: "",
@@ -53,7 +53,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
 
   return <Layout pageTitle={item.name}>
     <h1>
-      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{marginRight: 10, boxSizing: "border-box"}} />
+      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {item.name}
     </h1>
     <List items={listItems} />

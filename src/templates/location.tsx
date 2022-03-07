@@ -38,13 +38,13 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     image: items[item].image,
     hrefSlugify: item,
     lineOne: item,
-    lineTwo: location.type === "fishing" ? "Fishes" : "Explores",
+    lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
     value: normalDropsMap[item]?.toFixed(2) || "?",
   }))
 
   return <Layout pageTitle={location.name}>
     <h1>
-      <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{marginRight: 10, boxSizing: "border-box"}} />
+      <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {location.name}
     </h1>
     <List items={listItems} />
