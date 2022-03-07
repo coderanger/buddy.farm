@@ -36,7 +36,7 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, children }: Layo
                 </Container>
             </Navbar>
             <main>
-                <Container>
+                <Container css={{ paddingTop: 10 }}>
                     {children}
                 </Container>
             </main>
