@@ -12,12 +12,13 @@ interface LayoutProps {
     pageTitle: string
     query?: string | null | undefined
     onSearch?: (query: string) => void
+    onSearchFocus?: (focus: boolean) => void
     children: JSX.Element[] | JSX.Element
 }
 
 const defaultOnSearch = (query: string) => navigate(`/search/?q=${encodeURIComponent(query)}`)
 
-const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, children }: LayoutProps) => {
+const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, onSearchFocus, children }: LayoutProps) => {
     return (
         <div>
             <Helmet>
@@ -30,7 +31,11 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, children }: Layo
                         Buddy's Almanac
                     </Link>
                     <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }}>
-                        <input id="nav-search" className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={query || undefined} onChange={evt => onSearch(evt.target.value)} />
+                        <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
+                            aria-label="Search" value={query || undefined}
+                            onChange={evt => onSearch(evt.target.value)}
+                            onFocus={onSearchFocus && (() => onSearchFocus(true))}
+                            onBlur={onSearchFocus && (() => onSearchFocus(false))} />
                     </form>
                     <Link className="btn btn-primary" to="/settings/">Settings</Link>
                 </Container>

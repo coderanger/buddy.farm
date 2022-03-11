@@ -46,13 +46,14 @@ const scoreSearchable = (name: string, query: string, queryRegex: RegExp) => {
 
 export default () => {
   const searchables = useSearchables()
+  const [inputFocus, setInputFocus] = useState(false)
   const [query, setQuery] = useState<string | undefined>(undefined)
   const inBrowser = typeof document !== 'undefined'
 
   // Get the search query from the URL.
   // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
   useEffect(() => {
-    if (inBrowser) {
+    if (inBrowser && !inputFocus) {
       const params = new URLSearchParams(document.location.search)
       const q = params.get("q")
       if (q !== null) {
@@ -66,6 +67,10 @@ export default () => {
   const onSearch = (query: string) => {
     setQuery(query)
     navigate(`?q=${encodeURIComponent(query)}`, { replace: true })
+  }
+
+  const onSearchFocus = (focus: boolean) => {
+    setInputFocus(focus)
   }
 
   // Filter and sort the results.
@@ -92,7 +97,7 @@ export default () => {
     setResults(scored)
   }, [query])
 
-  return <Layout pageTitle="Buddy's Almanac" query={query} onSearch={onSearch}>
+  return <Layout pageTitle="Buddy's Almanac" query={query} onSearch={onSearch} onSearchFocus={onSearchFocus}>
     <div>Search results</div>
     <ListGroup variant="flush">
       {results.map(result => (
