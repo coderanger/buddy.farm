@@ -89,12 +89,12 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
   const [drops, setDrops] = useState(normalDrops)
 
   useEffect(() => {
-    if (item.dropMode.dropMode === "explores" && !!settings.ironDepot) {
+    if (item.dropMode?.dropMode === "explores" && !!settings.ironDepot) {
       setDrops(ironDepotDrops)
-    } else if (item.dropMode.dropMode === "fishes" && (!!settings.manualFishing || item.manualFishingOnly)) {
+    } else if (item.dropMode?.dropMode === "fishes" && (!!settings.manualFishing || item.manualFishingOnly)) {
       setDrops(manualFishingDrops)
     }
-  }, [item.dropMode.dropMode, settings.ironDepot, settings.manualFishing])
+  }, [item.dropMode?.dropMode, settings.ironDepot, settings.manualFishing])
 
   return <Layout pageTitle={item.name}>
     <h1>
