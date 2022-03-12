@@ -13,6 +13,12 @@ interface SearchablesQuery {
       image: string
     }[]
   }
+  pets: {
+    nodes: {
+      name: string
+      image: string
+    }[]
+  }
 }
 
 interface Searchable {
@@ -28,7 +34,7 @@ const nodeToSearchable = (node: { name: string, image: string }) => {
 }
 
 export const useSearchables = () => {
-  const { locations, items }: SearchablesQuery = useStaticQuery(
+  const { locations, items, pets }: SearchablesQuery = useStaticQuery(
     graphql`
     query {
       locations: allLocationsJson {
@@ -43,6 +49,12 @@ export const useSearchables = () => {
           image
         }
       }
+      pets: allPetsJson {
+        nodes {
+          name
+          image
+        }
+      }
     }
     `
   )
@@ -51,6 +63,9 @@ export const useSearchables = () => {
     searchables.push(nodeToSearchable(node))
   }
   for (const node of items.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of pets.nodes) {
     searchables.push(nodeToSearchable(node))
   }
   return searchables

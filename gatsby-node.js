@@ -15,6 +15,13 @@ exports.createSchemaCustomization = ({ actions }) => {
     type ItemsJson implements Node {
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
     }
+
+    type PetsJson implements Node {
+      extra: PetExtraJson @link(from: "name", by: "name")
+      level1Items: [ItemsJson] @link(by: "name")
+      level3Items: [ItemsJson] @link(by: "name")
+      level6Items: [ItemsJson] @link(by: "name")
+    }
   `
   createTypes(typeDefs)
 }
@@ -37,6 +44,11 @@ exports.createPages = async function ({ actions, graphql }) {
               name: string
             }[]
           }
+          allPetsJson: {
+            nodes: {
+              name: string
+            }[]
+          }
         }
       }
     }
@@ -53,19 +65,31 @@ exports.createPages = async function ({ actions, graphql }) {
             name
           }
         }
+        allPetsJson {
+          nodes {
+            name
+          }
+        }
       }
     `)
   data.allLocationsJson.nodes.forEach(node => {
     actions.createPage({
-      path: node.name.toLowerCase().replace(/\s+/g, '-'),
+      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
       component: require.resolve(`./src/templates/location.tsx`),
       context: { name: node.name },
     })
   })
   data.allItemsJson.nodes.forEach(node => {
     actions.createPage({
-      path: node.name.toLowerCase().replace(/\s+/g, '-'),
+      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
       component: require.resolve(`./src/templates/item.tsx`),
+      context: { name: node.name },
+    })
+  })
+  data.allPetsJson.nodes.forEach(node => {
+    actions.createPage({
+      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
+      component: require.resolve(`./src/templates/pet.tsx`),
       context: { name: node.name },
     })
   })

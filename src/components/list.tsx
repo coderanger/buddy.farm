@@ -6,8 +6,8 @@ export interface ListItem {
   jsonId: string
   image: string
   lineOne: string
-  lineTwo: string
-  value: string
+  lineTwo?: string | false | null | undefined
+  value?: string | false | null | undefined
   href?: string | false | null | undefined
   hrefSlugify?: string | false | null | undefined
 }
