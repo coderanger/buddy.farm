@@ -30,7 +30,7 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, onSearchFocus, c
                     <Link className='navbar-brand' to="/">
                         Buddy's Almanac
                     </Link>
-                    <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }}>
+                    <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
                         <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
                             aria-label="Search" value={query || undefined}
                             onChange={evt => onSearch(evt.target.value)}
