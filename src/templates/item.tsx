@@ -45,11 +45,6 @@ interface ItemProps {
   }
 }
 
-const MODES: { [key: string]: string } = {
-  "harvests": "Plot harvests/drop",
-  "fishes": "Fishes/drop",
-}
-
 interface ItemListProps {
   item: Item
   drops: DropRates
@@ -90,32 +85,6 @@ const ItemList = ({ item, drops }: ItemListProps) => {
 }
 
 export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops } }: ItemProps) => {
-  // const items = useItems()
-  // const locations = useLocations()
-  // const normalDropsMap = Object.fromEntries(normalDrops.nodes.map(n => [n.location, n]))
-  // const ironDepotDropsMap = Object.fromEntries(ironDepotDrops.nodes.map(n => [n.location, n]))
-  // const manualFishingDropsMap = Object.fromEntries(manualFishingDrops.nodes.map(n => [n.location, n]))
-
-  // const allLocationKeys: { [key: string]: boolean } = {}
-  // for (const key in normalDropsMap) {
-  //   allLocationKeys[key] = true
-  // }
-  // for (const key in ironDepotDropsMap) {
-  //   allLocationKeys[key] = true
-  // }
-  // for (const key in manualFishingDropsMap) {
-  //   allLocationKeys[key] = true
-  // }
-
-  // const listItems = Object.keys(allLocationKeys).map(location => ({
-  //   image: normalDropsMap[location]?.mode === "harvests" ? items[location].image : locations[location]?.image,
-  //   hrefSlugify: normalDropsMap[location]?.mode !== "harvests" && location,
-  //   lineOne: location,
-  //   lineTwo: MODES[normalDropsMap[location]?.mode] || "Explores/drop",
-  //   value: normalDropsMap[location]?.rate.toFixed(2) || "?",
-  //   _sortValue: normalDropsMap[location]?.rate || 100000000,
-  // }))
-  // listItems.sort((a, b) => a._sortValue - b._sortValue)
   const settings = useSettings()[0]
   const [drops, setDrops] = useState(normalDrops)
 
