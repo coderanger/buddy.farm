@@ -1,4 +1,3 @@
-
 import { navigate } from "gatsby"
 import OverlayTrigger from "react-bootstrap/OverlayTrigger"
 import Tooltip from "react-bootstrap/Tooltip"
@@ -41,9 +40,17 @@ export default ({ items }: ListProps) => (
       const alert = item.alert && <OverlayTrigger overlay={
         <Tooltip>{item.alert}</Tooltip>
       }>
-        <span css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }}>{alertIcon(item.alertIcon)}</span>
+        <span className="bf-list-alert" css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }}>{alertIcon(item.alertIcon)}</span>
       </OverlayTrigger>
-      return <ListGroup.Item key={item.jsonId} className="d-flex w-100 justify-content-between" onClick={evt => { evt.preventDefault(); href && navigate(href) }}>
+      const onClick = (evt: React.MouseEvent) => {
+        evt.preventDefault()
+        // Typescript doesn't know about .closest().
+        // @ts-ignore
+        if (href && evt.target.closest(".bf-list-alert") === null) {
+          navigate(href)
+        }
+      }
+      return <ListGroup.Item key={item.jsonId} className="d-flex w-100 justify-content-between" onClick={onClick}>
         <div>
           <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
           <div className="d-inline-block align-text-top">
