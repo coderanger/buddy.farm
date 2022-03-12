@@ -22,7 +22,7 @@ interface DropRates {
     }
     rate: number
     mode: string
-    hits: number
+    drops: number
   }[]
 }
 
@@ -50,6 +50,10 @@ interface ItemListProps {
   drops: DropRates
 }
 
+interface SortableListItem extends ListItem {
+  _sortValue: number
+}
+
 const ItemList = ({ item, drops }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
@@ -70,7 +74,7 @@ const ItemList = ({ item, drops }: ItemListProps) => {
       console.error(`Unknown rate type`, rate)
       continue
     }
-    listItems.push({
+    const listItem: SortableListItem = {
       jsonId,
       image,
       lineOne,
@@ -78,7 +82,12 @@ const ItemList = ({ item, drops }: ItemListProps) => {
       hrefSlugify: lineOne,
       value: rate.rate.toFixed(2),
       _sortValue: rate.rate,
-    })
+    }
+    if (rate.drops < 50) {
+      listItem.alert = `Low data available (${rate.drops} drops)`
+      listItem.alertIcon = rate.drops < 10 ? "error" : "warning"
+    }
+    listItems.push(listItem)
   }
   listItems.sort((a, b) => a._sortValue - b._sortValue)
   return <List items={listItems} />
@@ -131,7 +140,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
     ironDepotDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"iron_depot"}}) {
@@ -149,7 +158,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
     manualFishingDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"manual_fishing"}}) {
@@ -167,7 +176,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
   }

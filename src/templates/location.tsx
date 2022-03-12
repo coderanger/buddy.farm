@@ -4,6 +4,7 @@ import Layout from '../components/layout'
 import List from "../components/list"
 import { useSettings } from '../hooks/settings'
 import { useEffect, useState } from "react"
+import { ListItem } from "../components/list"
 
 interface DropRates {
   nodes: {
@@ -15,7 +16,7 @@ interface DropRates {
     }
     rate: number
     mode: string
-    hits: number
+    drops: number
   }[]
 }
 
@@ -32,6 +33,10 @@ interface LocationListProps {
   drops: DropRates
 }
 
+interface SortableListItem extends ListItem {
+  _sortValue: number
+}
+
 const LocationList = ({ location, drops }: LocationListProps) => {
   const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.item.name, n]))
   const listItems = []
@@ -39,7 +44,7 @@ const LocationList = ({ location, drops }: LocationListProps) => {
     if (!dropsMap[item]) {
       continue
     }
-    listItems.push({
+    const listItem: SortableListItem = {
       jsonId: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
       hrefSlugify: item,
@@ -47,7 +52,12 @@ const LocationList = ({ location, drops }: LocationListProps) => {
       lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
       value: dropsMap[item].rate.toFixed(2),
       _sortValue: dropsMap[item].rate,
-    })
+    }
+    if (dropsMap[item].drops < 50) {
+      listItem.alert = `Low data available (${dropsMap[item].drops} drops)`
+      listItem.alertIcon = dropsMap[item].drops < 10 ? "error" : "warning"
+    }
+    listItems.push(listItem)
   }
   listItems.sort((a, b) => a._sortValue - b._sortValue)
   return <List items={listItems} />
@@ -102,7 +112,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
     ironDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"iron_depot"}}) {
@@ -115,7 +125,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
     manualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"manual_fishing"}}) {
@@ -128,7 +138,7 @@ export const pageQuery = graphql`
         }
         rate
         mode
-        hits
+        drops
       }
     }
   }
