@@ -2,7 +2,8 @@
 import { navigate } from "gatsby"
 import ListGroup from "react-bootstrap/ListGroup"
 
-interface ListItem {
+export interface ListItem {
+  jsonId: string
   image: string
   lineOne: string
   lineTwo: string
@@ -19,7 +20,7 @@ export default ({ items }: ListProps) => (
   <ListGroup variant="flush">
     {items.map((item: ListItem) => {
       const href = item.href || (item.hrefSlugify && `/${item.hrefSlugify.toLowerCase().replace(/\s+/g, '-')}/`)
-      return <ListGroup.Item className="d-flex w-100 justify-content-between" onClick={evt => { evt.preventDefault(); href && navigate(href) }}>
+      return <ListGroup.Item key={item.jsonId} className="d-flex w-100 justify-content-between" onClick={evt => { evt.preventDefault(); href && navigate(href) }}>
         <div>
           <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
           <div className="d-inline-block align-text-top">

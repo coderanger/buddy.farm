@@ -29,7 +29,7 @@ export default () => {
             id="manualFishing"
             name="manualFishing"
             label="Show manual fishing data"
-            checked={!!settings.manualFishing}
+            defaultChecked={!!settings.manualFishing}
           />
         </Form.Group>
       </fieldset>
@@ -41,7 +41,7 @@ export default () => {
             id="ironDepot"
             name="ironDepot"
             label="Iron Depot"
-            checked={!!settings.ironDepot}
+            defaultChecked={!!settings.ironDepot}
           />
         </Form.Group>
       </fieldset>

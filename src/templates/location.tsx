@@ -1,27 +1,61 @@
 
-import React from "react"
 import { graphql } from "gatsby"
 import Layout from '../components/layout'
 import List from "../components/list"
-import { useItems } from "../hooks/items"
+import { useSettings } from '../hooks/settings'
+import { useEffect, useState } from "react"
 
 interface DropRates {
   nodes: {
-    item: string
+    item: {
+      jsonId: string
+      name: string
+      image: string
+      manualFishingOnly: boolean
+    }
     rate: number
     mode: string
+    hits: number
   }[]
+}
+
+interface Location {
+  name: string
+  jsonId: string
+  image: string
+  type: string
+  items: string[]
+}
+
+interface LocationListProps {
+  location: Location
+  drops: DropRates
+}
+
+const LocationList = ({ location, drops }: LocationListProps) => {
+  const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.item.name, n]))
+  const listItems = []
+  for (const item of location.items) {
+    if (!dropsMap[item]) {
+      continue
+    }
+    listItems.push({
+      jsonId: dropsMap[item].item.jsonId,
+      image: dropsMap[item].item.image,
+      hrefSlugify: item,
+      lineOne: item,
+      lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
+      value: dropsMap[item].rate.toFixed(2),
+      _sortValue: dropsMap[item].rate,
+    })
+  }
+  listItems.sort((a, b) => a._sortValue - b._sortValue)
+  return <List items={listItems} />
 }
 
 interface LocationProps {
   data: {
-    location: {
-      name: string
-      jsonId: string
-      image: string
-      type: string
-      items: string[]
-    }
+    location: Location
     normalDrops: DropRates
     ironDepotDrops: DropRates
     manualFishingDrops: DropRates
@@ -29,27 +63,23 @@ interface LocationProps {
 }
 
 export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDrops } }: LocationProps) => {
-  const items = useItems()
-  const normalDropsMap = Object.fromEntries(normalDrops.nodes.map(n => [n.item, n.rate]))
-  const ironDepotDropsMap = Object.fromEntries(ironDepotDrops.nodes.map(n => [n.item, n.rate]))
-  const manualFishingDropsMap = Object.fromEntries(manualFishingDrops.nodes.map(n => [n.item, n.rate]))
+  const settings = useSettings()[0]
+  const [drops, setDrops] = useState(normalDrops)
 
-  const listItems = location.items.map(item => ({
-    image: items[item].image,
-    hrefSlugify: item,
-    lineOne: item,
-    lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
-    value: normalDropsMap[item]?.toFixed(2) || "?",
-    _sortValue: normalDropsMap[item] || 100000000
-  }))
-  listItems.sort((a, b) => a._sortValue - b._sortValue)
+  useEffect(() => {
+    if (location.type === "explore" && !!settings.ironDepot) {
+      setDrops(ironDepotDrops)
+    } else if (location.type === "fishing" && !!settings.manualFishing) {
+      setDrops(manualFishingDrops)
+    }
+  }, [location.type, settings.ironDepot, settings.manualFishing])
 
   return <Layout pageTitle={location.name}>
     <h1>
       <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {location.name}
     </h1>
-    <List items={listItems} />
+    <LocationList location={location} drops={drops} />
   </Layout>
 }
 
@@ -62,25 +92,43 @@ export const pageQuery = graphql`
       type
       items
     }
-    normalDrops: allDropRatesGqlJson(filter: {location: {eq: $name}, type:{eq:"normal"}}) {
+    normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {
       nodes {
-        item
+        item {
+          jsonId
+          name
+          image
+          manualFishingOnly
+        }
         rate
         mode
+        hits
       }
     }
-    ironDepotDrops: allDropRatesGqlJson(filter: {location: {eq: $name}, type:{eq:"iron_depot"}}) {
+    ironDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"iron_depot"}}) {
       nodes {
-        item
+        item {
+          jsonId
+          name
+          image
+          manualFishingOnly
+        }
         rate
         mode
+        hits
       }
     }
-    manualFishingDrops: allDropRatesGqlJson(filter: {location: {eq: $name}, type:{eq:"manual_fishing"}}) {
+    manualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"manual_fishing"}}) {
       nodes {
-        item
+        item {
+          jsonId
+          name
+          image
+          manualFishingOnly
+        }
         rate
         mode
+        hits
       }
     }
   }
