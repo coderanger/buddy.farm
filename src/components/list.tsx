@@ -3,6 +3,9 @@ import { navigate } from "gatsby"
 import OverlayTrigger from "react-bootstrap/OverlayTrigger"
 import Tooltip from "react-bootstrap/Tooltip"
 import ListGroup from "react-bootstrap/ListGroup"
+import { BsFillExclamationTriangleFill } from "@react-icons/all-files/bs/BsFillExclamationTriangleFill"
+import { BsFillExclamationCircleFill } from "@react-icons/all-files/bs/BsFillExclamationCircleFill"
+import { BsFillQuestionCircleFill } from "@react-icons/all-files/bs/BsFillQuestionCircleFill"
 
 export interface ListItem {
   jsonId: string
@@ -23,11 +26,11 @@ interface ListProps {
 const alertIcon = (alertIcon: string | undefined) => {
   switch (alertIcon) {
     case "warning":
-      return "W"
+      return <BsFillExclamationTriangleFill className="text-warning" />
     case "error":
-      return "!"
+      return <BsFillExclamationCircleFill className="text-danger" />
     default:
-      return "X"
+      return <BsFillQuestionCircleFill className="text-info" />
   }
 }
 
@@ -35,7 +38,11 @@ export default ({ items }: ListProps) => (
   <ListGroup variant="flush">
     {items.map((item: ListItem) => {
       const href = item.href || (item.hrefSlugify && `/${item.hrefSlugify.toLowerCase().replace(/\s+/g, '-')}/`)
-      const alert = item.alert && <OverlayTrigger overlay={<Tooltip>{item.alert}</Tooltip>}><span css={{ marginRight: 10 }}>{alertIcon(item.alertIcon)}</span></OverlayTrigger>
+      const alert = item.alert && <OverlayTrigger overlay={
+        <Tooltip>{item.alert}</Tooltip>
+      }>
+        <span css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }}>{alertIcon(item.alertIcon)}</span>
+      </OverlayTrigger>
       return <ListGroup.Item key={item.jsonId} className="d-flex w-100 justify-content-between" onClick={evt => { evt.preventDefault(); href && navigate(href) }}>
         <div>
           <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
