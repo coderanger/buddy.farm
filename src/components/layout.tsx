@@ -33,6 +33,7 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, onSearchFocus, c
                     <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
                         <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
                             aria-label="Search" value={query || undefined}
+                            autoFocus={true}
                             onChange={evt => onSearch(evt.target.value)}
                             onFocus={onSearchFocus && (() => onSearchFocus(true))}
                             onBlur={onSearchFocus && (() => onSearchFocus(false))} />

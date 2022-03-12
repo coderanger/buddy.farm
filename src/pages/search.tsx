@@ -59,14 +59,12 @@ export default () => {
       if (q !== null) {
         setQuery(q)
       }
-      // Side feature, focus the search input on load since the user is probably typing.
-      document.getElementById("nav-search")?.focus()
     }
   }, inBrowser ? [document.location.search] : [])
 
   const onSearch = (query: string) => {
     setQuery(query)
-    navigate(`?q=${encodeURIComponent(query)}`, { replace: true })
+    history.replaceState(null, "", `?q=${encodeURIComponent(query)}`)
   }
 
   const onSearchFocus = (focus: boolean) => {
