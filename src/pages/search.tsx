@@ -95,7 +95,7 @@ export default () => {
     setResults(scored)
   }, [query])
 
-  return <Layout pageTitle="Buddy's Almanac" query={query} onSearch={onSearch} onSearchFocus={onSearchFocus}>
+  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={true} onSearch={onSearch} onSearchFocus={onSearchFocus}>
     <div>Search results</div>
     <ListGroup variant="flush">
       {results.map(result => (

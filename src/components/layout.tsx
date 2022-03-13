@@ -11,6 +11,7 @@ import "bootstrap/dist/css/bootstrap.css"
 interface LayoutProps {
     pageTitle: string
     query?: string | null | undefined
+    searchAutoFocus?: boolean
     onSearch?: (query: string) => void
     onSearchFocus?: (focus: boolean) => void
     children: JSX.Element[] | JSX.Element
@@ -18,7 +19,7 @@ interface LayoutProps {
 
 const defaultOnSearch = (query: string) => navigate(`/search/?q=${encodeURIComponent(query)}`)
 
-const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, onSearchFocus, children }: LayoutProps) => {
+const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch, onSearchFocus, children }: LayoutProps) => {
     return (
         <div>
             <Helmet>
@@ -33,7 +34,7 @@ const Layout = ({ pageTitle, query, onSearch = defaultOnSearch, onSearchFocus, c
                     <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
                         <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
                             aria-label="Search" value={query || undefined}
-                            autoFocus={true}
+                            autoFocus={searchAutoFocus}
                             onChange={evt => onSearch(evt.target.value)}
                             onFocus={onSearchFocus && (() => onSearchFocus(true))}
                             onBlur={onSearchFocus && (() => onSearchFocus(false))} />
