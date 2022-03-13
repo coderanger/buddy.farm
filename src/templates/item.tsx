@@ -26,11 +26,21 @@ interface DropRates {
   }[]
 }
 
+interface Pets {
+  nodes: {
+    id: string
+    name: string
+    image: string
+  }[]
+}
+
 interface Item {
   name: string
   jsonId: string
   image: string
   manualFishingOnly: boolean
+  buyPrice: number | null
+  fleaMarket: number | null
   dropMode: {
     dropMode: string
   }
@@ -42,19 +52,27 @@ interface ItemProps {
     normalDrops: DropRates
     ironDepotDrops: DropRates
     manualFishingDrops: DropRates
+    level1Pets: Pets
+    level3Pets: Pets
+    level6Pets: Pets
   }
 }
 
 interface ItemListProps {
   item: Item
   drops: DropRates
+  level1Pets: Pets
+  level3Pets: Pets
+  level6Pets: Pets
 }
 
 interface SortableListItem extends ListItem {
   _sortValue: number
 }
 
-const ItemList = ({ item, drops }: ItemListProps) => {
+
+
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
@@ -90,10 +108,59 @@ const ItemList = ({ item, drops }: ItemListProps) => {
     listItems.push(listItem)
   }
   listItems.sort((a, b) => a._sortValue - b._sortValue)
+
+  // Items from pets.
+  listItems.push(...level1Pets.nodes.map(pet => ({
+    jsonId: pet.id,
+    image: pet.image,
+    lineOne: pet.name,
+    lineTwo: "Pet",
+    value: "Level 1",
+    hrefSlugify: pet.name,
+  })))
+  listItems.push(...level3Pets.nodes.map(pet => ({
+    jsonId: pet.id,
+    image: pet.image,
+    lineOne: pet.name,
+    lineTwo: "Pet",
+    value: "Level 3",
+    hrefSlugify: pet.name,
+  })))
+  listItems.push(...level6Pets.nodes.map(pet => ({
+    jsonId: pet.id,
+    image: pet.image,
+    lineOne: pet.name,
+    lineTwo: "Pet",
+    value: "Level 6",
+    hrefSlugify: pet.name,
+  })))
+
+  // Shop sources.
+  if (item.buyPrice) {
+    listItems.push({
+      jsonId: "countryStore",
+      image: "/img/items/store.png",
+      lineOne: "Country Store",
+      lineTwo: "Silver",
+      value: item.buyPrice.toLocaleString(),
+    })
+  }
+  if (item.fleaMarket) {
+    listItems.push({
+      jsonId: "fleaMarket",
+      image: "/img/items/streetmarket.png",
+      lineOne: "Flea Market",
+      lineTwo: "Gold",
+      value: item.fleaMarket.toLocaleString(),
+      alert: "Probably don't use the Flea Market",
+      alertIcon: "error",
+    })
+  }
+
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets } }: ItemProps) => {
   const settings = useSettings()[0]
   const [drops, setDrops] = useState(normalDrops)
 
@@ -110,7 +177,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops 
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {item.name}
     </h1>
-    <ItemList item={item} drops={drops} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} />
   </Layout>
 }
 
@@ -121,6 +188,8 @@ export const pageQuery = graphql`
       jsonId
       image
       manualFishingOnly
+      buyPrice
+      fleaMarket
       dropMode {
         dropMode
       }
@@ -179,5 +248,29 @@ export const pageQuery = graphql`
         drops
       }
     }
+
+    # Check each level of pet items, since Gatsby appears to lack an "or" query mode.
+    level1Pets: allPetsJson(filter: {level1Items: {elemMatch: {name: {eq: $name}}}}) {
+      nodes {
+        id
+        name
+        image
+      }
+    }
+    level3Pets: allPetsJson(filter: {level3Items: {elemMatch: {name: {eq: $name}}}}) {
+      nodes {
+        id
+        name
+        image
+      }
+    }
+    level6Pets: allPetsJson(filter: {level6Items: {elemMatch: {name: {eq: $name}}}}) {
+      nodes {
+        id
+        name
+        image
+      }
+    }
+
   }
 `
