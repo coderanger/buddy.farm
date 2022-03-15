@@ -46,5 +46,14 @@ module.exports = {
         hostname: "buddy.farm"
       },
     },
+    {
+      resolve: "gatsby-plugin-manifest",
+      options: {
+        name: "Buddy's Almanac",
+        short_name: "buddy.farm",
+        description: "Unofficial reference data for FarmRPG.",
+        icon: "src/images/icon.svg",
+      },
+    },
   ]
 }
