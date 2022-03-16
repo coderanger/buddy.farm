@@ -21,22 +21,26 @@ interface SearchablesQuery {
   quests: {
     nodes: Node[]
   }
+  questlines: {
+    nodes: Node[]
+  }
 }
 
 interface Searchable {
   name: string
   image: string
   href: string
+  type: string | null
   searchText: string
 }
 
-const nodeToSearchable = (node: Node) => {
+const nodeToSearchable = (node: Node, type: string | null = null) => {
   const searchName = node.name.toLowerCase()
-  return { name: node.name, image: node.image, searchText: searchName, href: node.fields.path }
+  return { name: node.name, image: node.image, searchText: searchName, href: node.fields.path, type }
 }
 
 export const useSearchables = () => {
-  const { locations, items, pets, quests }: SearchablesQuery = useStaticQuery(
+  const { locations, items, pets, quests, questlines }: SearchablesQuery = useStaticQuery(
     graphql`
     query {
       locations: allLocationsJson {
@@ -75,6 +79,15 @@ export const useSearchables = () => {
           }
         }
       }
+      questlines: allQuestlinesJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
     }
     `
   )
@@ -90,6 +103,9 @@ export const useSearchables = () => {
   }
   for (const node of quests.nodes) {
     searchables.push(nodeToSearchable(node))
+  }
+  for (const node of questlines.nodes) {
+    searchables.push(nodeToSearchable(node, "Questline"))
   }
   return searchables
 }

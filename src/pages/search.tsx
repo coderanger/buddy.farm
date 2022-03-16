@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react'
 import ListGroup from 'react-bootstrap/ListGroup'
 
 import Layout from '../components/layout'
+import List from '../components/list'
 import { useSearchables } from '../hooks/searchables'
 
 interface ScoredResult {
   name: string
   image: string
+  type: string | null
   href: string
   score: number
 }
@@ -94,10 +96,10 @@ export default ({ location }: SearchProps) => {
 
     // Transform to a scored list.
     const scored: ScoredResult[] = []
-    for (const { name, image, searchText, href } of searchables) {
+    for (const { name, image, searchText, type, href } of searchables) {
       const score = scoreSearchable(searchText, queryLower, queryRegexp)
       if (score <= 500) {
-        scored.push({ name, image, href, score })
+        scored.push({ name, image, href, type, score })
       }
     }
     scored.sort((a, b) => a.score - b.score)
@@ -106,13 +108,14 @@ export default ({ location }: SearchProps) => {
 
   return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch} onSearchFocus={onSearchFocus}>
     <div>Search results</div>
-    <ListGroup variant="flush">
+    <List items={results.map(r => ({ image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} />
+    {/* <ListGroup variant="flush">
       {results.map(result => (
         <ListGroup.Item className="d-flex w-100 justify-flex-start" onClick={evt => { evt.preventDefault(); navigate(result.href) }}>
           <img src={"https://farmrpg.com" + result.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
           <span css={{ fontSize: 32 }}>{result.name}</span>
         </ListGroup.Item>
       ))}
-    </ListGroup>
+    </ListGroup> */}
   </Layout>
 }

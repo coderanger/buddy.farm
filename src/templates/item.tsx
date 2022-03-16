@@ -110,7 +110,7 @@ const QuestList = ({ label, item, quests }: QuestListProps) => {
     href: q.fields.path,
     value: q.items.find(it => it.item.name === item)?.quantity.toLocaleString(),
   }))
-  return <List label={label} items={listItems} />
+  return <List label={label} items={listItems} bigLine={true} />
 }
 
 const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListProps) => {

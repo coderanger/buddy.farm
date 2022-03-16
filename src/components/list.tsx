@@ -21,11 +21,13 @@ export interface ListItem {
 
 interface ListItemProps {
   item: ListItem
+  bigLine: boolean | undefined
 }
 
 interface ListProps {
   label?: string
   items: ListItem[]
+  bigLine?: boolean
 }
 
 const alertIcon = (alertIcon: string | undefined) => {
@@ -39,7 +41,7 @@ const alertIcon = (alertIcon: string | undefined) => {
   }
 }
 
-const ListItem = ({ item }: ListItemProps) => {
+const ListItem = ({ item, bigLine }: ListItemProps) => {
   const href = item.href || (item.hrefSlugify && `/${item.hrefSlugify.toLowerCase().replace(/\s+/g, '-')}/`)
   const alert = item.alert && <OverlayTrigger overlay={
     <Tooltip>{item.alert}</Tooltip>
@@ -50,7 +52,7 @@ const ListItem = ({ item }: ListItemProps) => {
     <div>
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       <div className="d-inline-block align-text-top">
-        <div css={{ fontWeight: "bold" }}>{item.lineOne}</div>
+        <div css={bigLine && !item.lineTwo ? { fontSize: 32 } : { fontWeight: "bold" }}>{item.lineOne}</div>
         <div>{item.lineTwo}</div>
       </div>
     </div>
@@ -65,11 +67,11 @@ const ListItem = ({ item }: ListItemProps) => {
   return <ListGroup.Item key={item.key || item.lineOne} className="d-flex w-100 justify-content-between">{elm}</ListGroup.Item>
 }
 
-export default ({ label, items }: ListProps) => (
+export default ({ label, items, bigLine }: ListProps) => (
   <>
     {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}</h3>}
     <ListGroup variant="flush">
-      {items.map((item: ListItem) => <ListItem item={item} />)}
+      {items.map((item: ListItem) => <ListItem item={item} bigLine={bigLine} />)}
     </ListGroup>
   </>
 )

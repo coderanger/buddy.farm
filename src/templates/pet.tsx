@@ -21,7 +21,7 @@ const PetItemsList = ({ label, items }: PetItemsListProps) => {
     lineOne: it.name,
     href: it.fields.path,
   }))
-  return <List label={label} items={listItems} />
+  return <List label={label} items={listItems} bigLine={true} />
 }
 
 interface PetProps {
