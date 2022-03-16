@@ -109,13 +109,5 @@ export default ({ location }: SearchProps) => {
   return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch} onSearchFocus={onSearchFocus}>
     <div>Search results</div>
     <List items={results.map(r => ({ image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} />
-    {/* <ListGroup variant="flush">
-      {results.map(result => (
-        <ListGroup.Item className="d-flex w-100 justify-flex-start" onClick={evt => { evt.preventDefault(); navigate(result.href) }}>
-          <img src={"https://farmrpg.com" + result.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-          <span css={{ fontSize: 32 }}>{result.name}</span>
-        </ListGroup.Item>
-      ))}
-    </ListGroup> */}
   </Layout>
 }
