@@ -1,23 +1,25 @@
 import { useStaticQuery, graphql } from "gatsby"
 
+interface Node {
+  name: string
+  image: string
+  fields: {
+    path: string
+  }
+}
+
 interface SearchablesQuery {
   locations: {
-    nodes: {
-      name: string
-      image: string
-    }[]
+    nodes: Node[]
   }
   items: {
-    nodes: {
-      name: string
-      image: string
-    }[]
+    nodes: Node[]
   }
   pets: {
-    nodes: {
-      name: string
-      image: string
-    }[]
+    nodes: Node[]
+  }
+  quests: {
+    nodes: Node[]
   }
 }
 
@@ -28,31 +30,49 @@ interface Searchable {
   searchText: string
 }
 
-const nodeToSearchable = (node: { name: string, image: string }) => {
+const nodeToSearchable = (node: Node) => {
   const searchName = node.name.toLowerCase()
-  return { name: node.name, image: node.image, searchText: searchName, href: `/${searchName.replace(/\s+/g, '-')}/` }
+  return { name: node.name, image: node.image, searchText: searchName, href: node.fields.path }
 }
 
 export const useSearchables = () => {
-  const { locations, items, pets }: SearchablesQuery = useStaticQuery(
+  const { locations, items, pets, quests }: SearchablesQuery = useStaticQuery(
     graphql`
     query {
       locations: allLocationsJson {
         nodes {
           name
           image
+          fields {
+            path
+          }
         }
       }
       items: allItemsJson {
         nodes {
           name
           image
+          fields {
+            path
+          }
         }
       }
       pets: allPetsJson {
         nodes {
           name
           image
+          fields {
+            path
+          }
+        }
+      }
+      quests: allQuestsJson {
+        nodes {
+          name
+          image: fromImage
+          fields {
+            path
+          }
         }
       }
     }
@@ -66,6 +86,9 @@ export const useSearchables = () => {
     searchables.push(nodeToSearchable(node))
   }
   for (const node of pets.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of quests.nodes) {
     searchables.push(nodeToSearchable(node))
   }
   return searchables

@@ -1,3 +1,4 @@
+import * as React from "react"
 import { graphql } from "gatsby"
 import Layout from '../components/layout'
 import List from "../components/list"
@@ -34,6 +35,21 @@ interface Pets {
   }[]
 }
 
+interface Quest {
+  jsonId: string
+  name: string
+  fromImage: string
+  fields: {
+    path: string
+  }
+  items: {
+    quantity: number
+    item: {
+      name: string
+    }
+  }[]
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -55,6 +71,8 @@ interface ItemProps {
     level1Pets: Pets
     level3Pets: Pets
     level6Pets: Pets
+    questRequests: { nodes: Quest[] }
+    questRewards: { nodes: Quest[] }
   }
 }
 
@@ -70,7 +88,21 @@ interface SortableListItem extends ListItem {
   _sortValue: number
 }
 
+interface QuestListProps {
+  label: string
+  item: string
+  quests: Quest[]
+}
 
+const QuestList = ({ label, item, quests }: QuestListProps) => {
+  const listItems = quests.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(q => ({
+    image: q.fromImage,
+    lineOne: q.name,
+    href: q.fields.path,
+    value: q.items.find(it => it.item.name === item)?.quantity.toLocaleString(),
+  }))
+  return <List label={label} items={listItems} />
+}
 
 const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
@@ -93,7 +125,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
       continue
     }
     const listItem: SortableListItem = {
-      jsonId,
+      key: jsonId,
       image,
       lineOne,
       lineTwo,
@@ -160,7 +192,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards } }: ItemProps) => {
   const settings = useSettings()[0]
   const [drops, setDrops] = useState(normalDrops)
 
@@ -178,6 +210,8 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       {item.name}
     </h1>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} />
+    <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />
+    <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} />
   </Layout>
 }
 
@@ -269,6 +303,40 @@ export const pageQuery = graphql`
         id
         name
         image
+      }
+    }
+
+    # Quest requests and rewards. Separate again because no OR.
+    questRequests: allQuestsJson(filter: {itemRequests: {elemMatch: {item: {name: {eq: $name}}}}}) {
+      nodes {
+        jsonId
+        name
+        fromImage
+        fields {
+          path
+        }
+        items: itemRequests {
+          quantity
+          item {
+            name
+          }
+        }
+      }
+    }
+    questRewards: allQuestsJson(filter: {itemRewards: {elemMatch: {item: {name: {eq: $name}}}}}) {
+      nodes {
+        jsonId
+        name
+        fromImage
+        fields {
+          path
+        }
+        items: itemRewards {
+          quantity
+          item {
+            name
+          }
+        }
       }
     }
 

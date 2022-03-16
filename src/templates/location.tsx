@@ -45,7 +45,7 @@ const LocationList = ({ location, drops }: LocationListProps) => {
       continue
     }
     const listItem: SortableListItem = {
-      jsonId: dropsMap[item].item.jsonId,
+      key: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
       hrefSlugify: item,
       lineOne: item,

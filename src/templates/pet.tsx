@@ -1,4 +1,3 @@
-import * as React from "react"
 import { graphql } from "gatsby"
 import Layout from '../components/layout'
 import List from "../components/list"
@@ -6,6 +5,9 @@ import List from "../components/list"
 interface PetItem {
   name: string
   image: string
+  fields: {
+    path: string
+  }
 }
 
 interface PetItemsListProps {
@@ -15,15 +17,11 @@ interface PetItemsListProps {
 
 const PetItemsList = ({ label, items }: PetItemsListProps) => {
   const listItems = items.map(it => ({
-    jsonId: it.name,
     image: it.image,
     lineOne: it.name,
-    hrefSlugify: it.name,
+    href: it.fields.path,
   }))
-  return <>
-    <h3 css={{ marginTop: 20 }}>{label}</h3>
-    <List items={listItems} />
-  </>
+  return <List label={label} items={listItems} />
 }
 
 interface PetProps {
@@ -48,14 +46,14 @@ interface PetProps {
 export default ({ data: { pet } }: PetProps) => {
   const petData = []
   petData.push({
-    jsonId: "cost",
+    key: "cost",
     image: "/img/items/silver.png",
     lineOne: "Cost",
     value: pet.extra.cost.toLocaleString(),
   })
   if (pet.extra.farmingLevel) {
     petData.push({
-      jsonId: "farmingLevel",
+      key: "farmingLevel",
       image: "/img/items/6137.png?1",
       lineOne: "Farming Level",
       value: pet.extra.farmingLevel.toString(),
@@ -63,7 +61,7 @@ export default ({ data: { pet } }: PetProps) => {
   }
   if (pet.extra.fishingLevel) {
     petData.push({
-      jsonId: "fishingLevel",
+      key: "fishingLevel",
       image: "/img/items/7783.png",
       lineOne: "Fishing Level",
       value: pet.extra.fishingLevel.toString(),
@@ -71,7 +69,7 @@ export default ({ data: { pet } }: PetProps) => {
   }
   if (pet.extra.craftingLevel) {
     petData.push({
-      jsonId: "craftingLevel",
+      key: "craftingLevel",
       image: "/img/items/5868.png",
       lineOne: "Crafting Level",
       value: pet.extra.craftingLevel.toString(),
@@ -79,7 +77,7 @@ export default ({ data: { pet } }: PetProps) => {
   }
   if (pet.extra.exploringLevel) {
     petData.push({
-      jsonId: "exploringLevel",
+      key: "exploringLevel",
       image: "/img/items/6075.png",
       lineOne: "Exploring Level",
       value: pet.extra.exploringLevel.toString(),
@@ -106,14 +104,23 @@ export const pageQuery = graphql`
       level1Items {
         name
         image
+        fields {
+          path
+        }
       }
       level3Items {
         name
         image
+        fields {
+          path
+        }
       }
       level6Items {
         name
         image
+        fields {
+          path
+        }
       }
       extra {
         cost

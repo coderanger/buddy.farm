@@ -22,14 +22,59 @@ exports.createSchemaCustomization = ({ actions }) => {
       level3Items: [ItemsJson] @link(by: "name")
       level6Items: [ItemsJson] @link(by: "name")
     }
+
+    type QuestReward {
+      id: String!
+      quantity: Int!
+      item: ItemsJson! @link(from: "id", by: "jsonId")
+    }
+
+    type QuestsJson implements Node {
+      extra: QuestExtraJson @link(from: "jsonId", by: "jsonId")
+      itemRequests: [QuestReward!]!
+      itemRewards: [QuestReward!]!
+    }
+
+    type QuestlinesJson implements Node {
+      quests: [QuestsJson!]! @link(by: "jsonId")
+    }
+
+    type QuestExtraJson implements Node {
+      prev: QuestsJson @link(by: "jsonId")
+      next: QuestsJson @link(by: "jsonId")
+    }
   `
   createTypes(typeDefs)
+}
+
+const pathPrefixes = {
+  "ItemsJson": { short: "i", long: "items" },
+  "LocationsJson": { short: "l", long: "locations" },
+  "PetsJson": { short: "p", long: "pets" },
+  "QuestlinesJson": { short: "ql", long: "questlines" },
+  "QuestsJson": { short: "q", long: "quests" },
+}
+
+/**
+ * @type {import('gatsby').GatsbyNode['onCreateNode']}
+ */
+exports.onCreateNode = ({ node, actions }) => {
+  const { createNodeField } = actions
+  const pathPrefix = pathPrefixes[node.internal.type]
+  /** @type {string | any} */
+  const name = node.name
+  if (pathPrefix && typeof name === "string") {
+    const slug = name.toLowerCase().replace(/\W+/g, '-')
+    createNodeField({ node, name: "path", value: `/${pathPrefix.short}/${slug}/` })
+    createNodeField({ node, name: "longPath", value: `/${pathPrefix.long}/${slug}/` })
+    createNodeField({ node, name: "unprefixedPath", value: `/${slug}/` })
+  }
 }
 
 /**
  * @type {import('gatsby').GatsbyNode['createPages']}
  */
-exports.createPages = async function ({ actions, graphql }) {
+exports.createPages = async ({ actions, graphql }) => {
   /**
    * @type {
       {
@@ -37,16 +82,51 @@ exports.createPages = async function ({ actions, graphql }) {
           allLocationsJson: {
             nodes: {
              name: string
+             fields: {
+               path: string
+               longPath: string
+               unprefixedPath: string
+             }
             }[]
           }
           allItemsJson: {
             nodes: {
               name: string
+             fields: {
+               path: string
+               longPath: string
+               unprefixedPath: string
+             }
             }[]
           }
           allPetsJson: {
             nodes: {
               name: string
+             fields: {
+               path: string
+               longPath: string
+               unprefixedPath: string
+             }
+            }[]
+          }
+          allQuestsJson: {
+            nodes: {
+              name: string
+             fields: {
+               path: string
+               longPath: string
+               unprefixedPath: string
+             }
+            }[]
+          }
+          allQuestlinesJson: {
+            nodes: {
+              name: string
+             fields: {
+               path: string
+               longPath: string
+               unprefixedPath: string
+             }
             }[]
           }
         }
@@ -58,39 +138,72 @@ exports.createPages = async function ({ actions, graphql }) {
         allLocationsJson {
           nodes {
             name
+            fields {
+              path
+              longPath
+              unprefixedPath
+            }
           }
         }
         allItemsJson {
           nodes {
             name
+            fields {
+              path
+              longPath
+              unprefixedPath
+            }
           }
         }
         allPetsJson {
           nodes {
             name
+            fields {
+              path
+              longPath
+              unprefixedPath
+            }
+          }
+        }
+        allQuestsJson {
+          nodes {
+            name
+            fields {
+              path
+              longPath
+              unprefixedPath
+            }
+          }
+        }
+        allQuestlinesJson {
+          nodes {
+            name
+            fields {
+              path
+              longPath
+              unprefixedPath
+            }
           }
         }
       }
     `)
-  data.allItemsJson.nodes.forEach(node => {
-    actions.createPage({
-      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
-      component: require.resolve(`./src/templates/item.tsx`),
-      context: { name: node.name },
-    })
-  })
-  data.allLocationsJson.nodes.forEach(node => {
-    actions.createPage({
-      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
-      component: require.resolve(`./src/templates/location.tsx`),
-      context: { name: node.name },
-    })
-  })
-  data.allPetsJson.nodes.forEach(node => {
-    actions.createPage({
-      path: `/${node.name.toLowerCase().replace(/\s+/g, '-')}/`,
-      component: require.resolve(`./src/templates/pet.tsx`),
-      context: { name: node.name },
+  /** @type {[{nodes: {name: string, fields: {path: string, longPath: string, unprefixedPath: string}}[]}, string][]} */
+  const types = [
+    [data.allItemsJson, "item"],
+    [data.allLocationsJson, "location"],
+    [data.allPetsJson, "pet"],
+    [data.allQuestsJson, "quest"],
+    [data.allQuestlinesJson, "questline"],
+  ]
+  types.forEach(([typeData, template]) => {
+    typeData.nodes.forEach(node => {
+      [node.fields.path, node.fields.longPath, node.fields.unprefixedPath].forEach(path => {
+        actions.createPage({
+          path: path,
+          component: require.resolve(`./src/templates/${template}.tsx`),
+          context: { name: node.name },
+        })
+      })
     })
   })
 }
