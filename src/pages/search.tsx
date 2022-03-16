@@ -44,16 +44,25 @@ const scoreSearchable = (name: string, query: string, queryRegex: RegExp) => {
   return total
 }
 
-export default () => {
+interface SearchProps {
+  location?: {
+    state?: {
+      typing: boolean
+      query: string
+    }
+  }
+}
+
+export default ({ location }: SearchProps) => {
   const searchables = useSearchables()
   const [inputFocus, setInputFocus] = useState(false)
-  const [query, setQuery] = useState<string | undefined>(undefined)
+  const [query, setQuery] = useState<string | undefined>(location?.state?.query)
   const inBrowser = typeof document !== 'undefined'
 
   // Get the search query from the URL.
   // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
   useEffect(() => {
-    if (inBrowser && !inputFocus) {
+    if (inBrowser && !inputFocus && !location?.state?.typing) {
       const params = new URLSearchParams(document.location.search)
       const q = params.get("q")
       if (q !== null) {
@@ -95,7 +104,7 @@ export default () => {
     setResults(scored)
   }, [query])
 
-  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={true} onSearch={onSearch} onSearchFocus={onSearchFocus}>
+  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch} onSearchFocus={onSearchFocus}>
     <div>Search results</div>
     <ListGroup variant="flush">
       {results.map(result => (

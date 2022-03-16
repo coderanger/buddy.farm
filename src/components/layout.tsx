@@ -17,11 +17,14 @@ interface LayoutProps {
     children: JSX.Element[] | JSX.Element
 }
 
-const defaultOnSearch = (query: string) => navigate(`/search/?q=${encodeURIComponent(query)}`)
+const defaultOnSearch = (query: string) => {
+    navigate(`/search/?q=${encodeURIComponent(query)}`, { state: { typing: true, query } })
+    return true
+}
 
 const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch, onSearchFocus, children }: LayoutProps) => {
     return (
-        <div>
+        <>
             <Helmet>
                 <meta charSet="utf-8" />
                 <title>{pageTitle}</title>
@@ -33,7 +36,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch,
                     </Link>
                     <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
                         <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
-                            aria-label="Search" value={query || undefined}
+                            aria-label="Search" defaultValue={query || undefined}
                             autoFocus={searchAutoFocus}
                             onChange={evt => onSearch(evt.target.value)}
                             onFocus={onSearchFocus && (() => onSearchFocus(true))}
@@ -47,7 +50,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch,
                     {children}
                 </Container>
             </main>
-        </div>
+        </>
     )
 }
 export default Layout
