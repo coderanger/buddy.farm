@@ -15,11 +15,17 @@ interface DropRates {
       name: string
       image: string
       type: string
+      fields: {
+        path: string
+      }
     }
     locationItem: {
       jsonId: string
       name: string
       image: string
+      fields: {
+        path: string
+      }
     }
     rate: number
     mode: string
@@ -32,6 +38,9 @@ interface Pets {
     id: string
     name: string
     image: string
+    fields: {
+      path: string
+    }
   }[]
 }
 
@@ -108,18 +117,20 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
-    let jsonId: string, image: string, lineOne: string, lineTwo: string
+    let jsonId: string, image: string, lineOne: string, lineTwo: string, href: string
     if (rate.location) {
       // A drop from a normal location.
       jsonId = "l" + rate.location.jsonId
       image = rate.location.image
       lineOne = rate.location.name
       lineTwo = rate.location.type === "fishing" ? "Fishes/drop" : "Explores/drop"
+      href = rate.location.fields.path
     } else if (rate.locationItem) {
       jsonId = "h" + rate.locationItem.jsonId
       image = rate.locationItem.image
       lineOne = rate.locationItem.name
       lineTwo = "Plot harvests/drop"
+      href = rate.locationItem.fields.path
     } else {
       console.error(`Unknown rate type`, rate)
       continue
@@ -129,7 +140,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
       image,
       lineOne,
       lineTwo,
-      hrefSlugify: lineOne,
+      href,
       value: rate.rate.toFixed(2),
       _sortValue: rate.rate,
     }
@@ -148,7 +159,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
     lineOne: pet.name,
     lineTwo: "Pet",
     value: "Level 1",
-    hrefSlugify: pet.name,
+    href: pet.fields.path,
   })))
   listItems.push(...level3Pets.nodes.map(pet => ({
     jsonId: pet.id,
@@ -156,7 +167,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
     lineOne: pet.name,
     lineTwo: "Pet",
     value: "Level 3",
-    hrefSlugify: pet.name,
+    href: pet.fields.path,
   })))
   listItems.push(...level6Pets.nodes.map(pet => ({
     jsonId: pet.id,
@@ -164,7 +175,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
     lineOne: pet.name,
     lineTwo: "Pet",
     value: "Level 6",
-    hrefSlugify: pet.name,
+    href: pet.fields.path,
   })))
 
   // Shop sources.
@@ -235,11 +246,17 @@ export const pageQuery = graphql`
           name
           image
           type
+          fields {
+            path
+          }
         }
         locationItem {
           jsonId
           name
           image
+          fields {
+            path
+          }
         }
         rate
         mode
@@ -253,11 +270,17 @@ export const pageQuery = graphql`
           name
           image
           type
+          fields {
+            path
+          }
         }
         locationItem {
           jsonId
           name
           image
+          fields {
+            path
+          }
         }
         rate
         mode
@@ -271,11 +294,17 @@ export const pageQuery = graphql`
           name
           image
           type
+          fields {
+            path
+          }
         }
         locationItem {
           jsonId
           name
           image
+          fields {
+            path
+          }
         }
         rate
         mode
@@ -289,6 +318,9 @@ export const pageQuery = graphql`
         id
         name
         image
+        fields {
+          path
+        }
       }
     }
     level3Pets: allPetsJson(filter: {level3Items: {elemMatch: {name: {eq: $name}}}}) {
@@ -296,6 +328,9 @@ export const pageQuery = graphql`
         id
         name
         image
+        fields {
+          path
+        }
       }
     }
     level6Pets: allPetsJson(filter: {level6Items: {elemMatch: {name: {eq: $name}}}}) {
@@ -303,6 +338,9 @@ export const pageQuery = graphql`
         id
         name
         image
+        fields {
+          path
+        }
       }
     }
 

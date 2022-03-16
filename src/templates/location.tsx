@@ -13,6 +13,9 @@ interface DropRates {
       name: string
       image: string
       manualFishingOnly: boolean
+      fields: {
+        path: string
+      }
     }
     rate: number
     mode: string
@@ -47,7 +50,7 @@ const LocationList = ({ location, drops }: LocationListProps) => {
     const listItem: SortableListItem = {
       key: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
-      hrefSlugify: item,
+      href: dropsMap[item].item.fields.path,
       lineOne: item,
       lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
       value: dropsMap[item].rate.toFixed(2),
@@ -109,6 +112,9 @@ export const pageQuery = graphql`
           name
           image
           manualFishingOnly
+          fields {
+            path
+          }
         }
         rate
         mode
@@ -122,6 +128,9 @@ export const pageQuery = graphql`
           name
           image
           manualFishingOnly
+          fields {
+            path
+          }
         }
         rate
         mode
@@ -135,6 +144,9 @@ export const pageQuery = graphql`
           name
           image
           manualFishingOnly
+          fields {
+            path
+          }
         }
         rate
         mode
