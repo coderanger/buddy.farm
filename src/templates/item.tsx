@@ -183,12 +183,19 @@ const LocksmithList = ({ label, box }: LocksmithListProps) => {
   if (box === null) {
     return null
   }
-  const listItems = box.items.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(it => ({
+  const listItems: ListItem[] = box.items.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(it => ({
     image: it.item.image,
     lineOne: it.item.name,
     href: it.item.fields.path,
     value: formatLocksmithQuantity(it),
   }))
+  if (box.gold) {
+    listItems.unshift({
+      image: "/img/items/gold.png",
+      lineOne: "Gold",
+      value: box.gold.toLocaleString(),
+    })
+  }
   return <List label={label} items={listItems} bigLine={true} />
 }
 
