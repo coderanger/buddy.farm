@@ -59,6 +59,48 @@ interface Quest {
   }[]
 }
 
+interface WishingWell {
+  chance: string
+  item: {
+    jsonId: string
+    name: string
+    image: string
+    fields: {
+      path: string
+    }
+  }
+}
+
+interface LocksmithBox {
+  gold: number | null
+  mode: string
+  items: {
+    quantityLow: number
+    quantityHigh: number | null
+    item: {
+      jsonId: string
+      name: string
+      image: string
+      fields: {
+        path: string
+      }
+    }
+  }[]
+}
+
+interface LocksmithItems {
+  quantityLow: number
+  quantityHigh: number | null
+  boxItem: {
+    jsonId: string
+    name: string
+    image: string
+    fields: {
+      path: string
+    }
+  }
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -82,15 +124,11 @@ interface ItemProps {
     level6Pets: Pets
     questRequests: { nodes: Quest[] }
     questRewards: { nodes: Quest[] }
+    wellInput: { nodes: WishingWell[] }
+    wellOutput: { nodes: WishingWell[] }
+    locksmithBox: LocksmithBox | null
+    locksmithItems: { nodes: LocksmithItems[] }
   }
-}
-
-interface ItemListProps {
-  item: Item
-  drops: DropRates
-  level1Pets: Pets
-  level3Pets: Pets
-  level6Pets: Pets
 }
 
 interface SortableListItem extends ListItem {
@@ -113,20 +151,71 @@ const QuestList = ({ label, item, quests }: QuestListProps) => {
   return <List label={label} items={listItems} bigLine={true} />
 }
 
-const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListProps) => {
+interface WellListProps {
+  label: string
+  items: WishingWell[]
+}
+
+const WellList = ({ label, items }: WellListProps) => {
+  const listItems = items.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(it => ({
+    image: it.item.image,
+    lineOne: it.item.name,
+    href: it.item.fields.path,
+    value: it.chance,
+  }))
+  return <List label={label} items={listItems} bigLine={true} />
+}
+
+const formatLocksmithQuantity = ({ quantityLow, quantityHigh }: { quantityLow: number, quantityHigh: number | null }) => {
+  if (quantityLow === quantityHigh) {
+    return quantityLow.toLocaleString()
+  } else {
+    return `${quantityLow.toLocaleString()}-${quantityHigh?.toLocaleString() || "?"}`
+  }
+}
+
+interface LocksmithListProps {
+  label: string
+  box: LocksmithBox | null
+}
+
+const LocksmithList = ({ label, box }: LocksmithListProps) => {
+  if (box === null) {
+    return null
+  }
+  const listItems = box.items.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(it => ({
+    image: it.item.image,
+    lineOne: it.item.name,
+    href: it.item.fields.path,
+    value: formatLocksmithQuantity(it),
+  }))
+  return <List label={label} items={listItems} bigLine={true} />
+}
+
+interface ItemListProps {
+  item: Item
+  drops: DropRates
+  level1Pets: Pets
+  level3Pets: Pets
+  level6Pets: Pets
+  locksmithItems: LocksmithItems[]
+  wishingWell: WishingWell[]
+}
+
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
-    let jsonId: string, image: string, lineOne: string, lineTwo: string, href: string
+    let key: string, image: string, lineOne: string, lineTwo: string, href: string
     if (rate.location) {
       // A drop from a normal location.
-      jsonId = "l" + rate.location.jsonId
+      key = "l" + rate.location.jsonId
       image = rate.location.image
       lineOne = rate.location.name
       lineTwo = rate.location.type === "fishing" ? "Fishes/drop" : "Explores/drop"
       href = rate.location.fields.path
     } else if (rate.locationItem) {
-      jsonId = "h" + rate.locationItem.jsonId
+      key = "h" + rate.locationItem.jsonId
       image = rate.locationItem.image
       lineOne = rate.locationItem.name
       lineTwo = "Plot harvests/drop"
@@ -136,7 +225,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
       continue
     }
     const listItem: SortableListItem = {
-      key: jsonId,
+      key: key,
       image,
       lineOne,
       lineTwo,
@@ -154,7 +243,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
 
   // Items from pets.
   listItems.push(...level1Pets.nodes.map(pet => ({
-    jsonId: pet.id,
+    key: "p" + pet.id,
     image: pet.image,
     lineOne: pet.name,
     lineTwo: "Pet",
@@ -162,7 +251,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
     href: pet.fields.path,
   })))
   listItems.push(...level3Pets.nodes.map(pet => ({
-    jsonId: pet.id,
+    key: "p" + pet.id,
     image: pet.image,
     lineOne: pet.name,
     lineTwo: "Pet",
@@ -170,12 +259,32 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
     href: pet.fields.path,
   })))
   listItems.push(...level6Pets.nodes.map(pet => ({
-    jsonId: pet.id,
+    key: "p" + pet.id,
     image: pet.image,
     lineOne: pet.name,
     lineTwo: "Pet",
     value: "Level 6",
     href: pet.fields.path,
+  })))
+
+  // Locksmith sources.
+  listItems.push(...locksmithItems.sort((a, b) => parseInt(a.boxItem.jsonId, 10) - parseInt(b.boxItem.jsonId, 10)).map(li => ({
+    key: "s" + li.boxItem.jsonId,
+    image: li.boxItem.image,
+    lineOne: li.boxItem.name,
+    lineTwo: "Locksmith",
+    value: formatLocksmithQuantity(li),
+    href: li.boxItem.fields.path,
+  })))
+
+  // Wishing well sources.
+  listItems.push(...wishingWell.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(ww => ({
+    key: "w" + ww.item.jsonId,
+    image: ww.item.image,
+    lineOne: ww.item.name,
+    lineTwo: "Wishing Well",
+    value: ww.chance,
+    href: ww.item.fields.path,
   })))
 
   // Shop sources.
@@ -203,7 +312,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets }: ItemListP
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems } }: ItemProps) => {
   const settings = useSettings()[0]
   const [drops, setDrops] = useState(normalDrops)
 
@@ -220,7 +329,9 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {item.name}
     </h1>
-    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} />
+    <LocksmithList label="Open At Locksmith For" box={locksmithBox} />
+    <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />
     <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} />
   </Layout>
@@ -373,6 +484,66 @@ export const pageQuery = graphql`
           quantity
           item {
             name
+          }
+        }
+      }
+    }
+
+    # Wishing well, both sides.
+    wellInput: allWishingWellJson(filter: {input: {name: {eq: $name}}}) {
+      nodes {
+        chance
+        item: output {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+    }
+    wellOutput: allWishingWellJson(filter: {output: {name: {eq: $name}}}) {
+      nodes {
+        chance
+        item: input {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+    }
+
+    # Locksmith, again input and output sides.
+    locksmithBox: locksmithBoxesJson(box: {name: {eq: $name}}) {
+      gold
+      mode
+      items {
+        quantityLow
+        quantityHigh
+        item {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+    }
+    locksmithItems: allLocksmithItemsJson(filter: {item: {name: {eq: $name}}}) {
+      nodes {
+        quantityLow
+        quantityHigh
+        boxItem {
+          jsonId
+          name
+          image
+          fields {
+            path
           }
         }
       }

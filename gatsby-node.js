@@ -43,6 +43,22 @@ exports.createSchemaCustomization = ({ actions }) => {
       prev: QuestsJson @link(by: "jsonId")
       next: QuestsJson @link(by: "jsonId")
     }
+
+    type WishingWellJson implements Node {
+      input: ItemsJson! @link(by: "jsonId")
+      output: ItemsJson! @link(by: "jsonId")
+    }
+
+    type LocksmithItemsJson implements Node {
+      box: LocksmithBoxesJson! @link(by: "box")
+      boxItem: ItemsJson! @link(by: "jsonId", from: "box")
+      item: ItemsJson! @link(by: "jsonId")
+    }
+
+    type LocksmithBoxesJson implements Node {
+      box: ItemsJson! @link(by: "jsonId")
+      items: [LocksmithItemsJson!] @link(by: "boxItem.jsonId", from: "box")
+    }
   `
   createTypes(typeDefs)
 }
