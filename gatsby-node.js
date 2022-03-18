@@ -59,6 +59,10 @@ exports.createSchemaCustomization = ({ actions }) => {
       box: ItemsJson! @link(by: "jsonId")
       items: [LocksmithItemsJson!] @link(by: "boxItem.jsonId", from: "box")
     }
+
+    type BuildingProductionJson implements Node {
+      item: ItemsJson! @link(by: "jsonId")
+    }
   `
   createTypes(typeDefs)
 }

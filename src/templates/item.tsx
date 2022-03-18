@@ -102,6 +102,13 @@ interface LocksmithItems {
   }
 }
 
+interface Building {
+  building: string
+  image: string
+  frequency: string
+  sort: number
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -129,6 +136,7 @@ interface ItemProps {
     wellOutput: { nodes: WishingWell[] }
     locksmithBox: LocksmithBox | null
     locksmithItems: { nodes: LocksmithItems[] }
+    buildings: { nodes: Building[] }
   }
 }
 
@@ -208,10 +216,11 @@ interface ItemListProps {
   level6Pets: Pets
   locksmithItems: LocksmithItems[]
   wishingWell: WishingWell[]
+  buildings: Building[]
   settings: Settings
 }
 
-const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, settings }: ItemListProps) => {
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, buildings, settings }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
@@ -297,6 +306,15 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: ww.item.fields.path,
   })))
 
+  // Building sources.
+  listItems.push(...buildings.sort((a, b) => a.sort - b.sort).map(b => ({
+    key: "b" + b.building,
+    image: b.image,
+    lineOne: b.building,
+    lineTwo: "Building",
+    value: b.frequency,
+  })))
+
   // Shop sources.
   if (item.buyPrice) {
     listItems.push({
@@ -322,7 +340,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings } }: ItemProps) => {
   const settings = useSettings()[0]
   const [drops, setDrops] = useState(normalDrops)
 
@@ -339,7 +357,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {item.name}
     </h1>
-    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} settings={settings} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} settings={settings} />
     <LocksmithList label="Open At Locksmith For" box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />
@@ -556,6 +574,16 @@ export const pageQuery = graphql`
             path
           }
         }
+      }
+    }
+
+    # Production from buildings.
+    buildings: allBuildingProductionJson(filter: {item: {name: {eq: $name}}}) {
+      nodes {
+        building
+        image
+        frequency
+        sort
       }
     }
 
