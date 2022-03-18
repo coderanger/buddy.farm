@@ -4,7 +4,7 @@ develop: clean
 clean:
 	npm run clean
 
-build:
+build: clean
 	npm run build
 
 deploy: build
