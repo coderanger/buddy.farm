@@ -358,7 +358,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       {item.name}
     </h1>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} settings={settings} />
-    <LocksmithList label="Open At Locksmith For" box={locksmithBox} />
+    <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />
     <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} />
