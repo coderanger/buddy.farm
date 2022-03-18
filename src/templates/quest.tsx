@@ -50,7 +50,7 @@ const QuestItemList = ({ label, silver, gold, items }: QuestItemListProps) => {
     value: it.quantity.toLocaleString(),
     href: it.item.fields.path,
   })))
-  return <List label={label} items={listItems} />
+  return <List label={label} items={listItems} bigLine={true} />
 }
 
 interface QuestProps {
@@ -135,7 +135,7 @@ export default ({ data: { quest } }: QuestProps) => {
       <img src={"https://farmrpg.com" + quest.fromImage} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {quest.name}
     </h1>
-    <List items={questData} />
+    <List items={questData} bigLine={true} />
     <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} />
     <QuestItemList label="Reward" silver={quest.silverReward} gold={quest.goldReward} items={quest.itemRewards} />
   </Layout>
