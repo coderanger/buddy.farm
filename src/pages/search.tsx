@@ -71,7 +71,7 @@ export default ({ location }: SearchProps) => {
         setQuery(q)
       }
     }
-  }, inBrowser ? [document.location.search] : [])
+  })
 
   const onSearch = (query: string) => {
     setQuery(query)
