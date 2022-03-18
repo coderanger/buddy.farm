@@ -5,8 +5,9 @@ import List from "../components/list"
 import { ListItem } from "../components/list"
 import { useItems } from "../hooks/items"
 import { useLocations } from "../hooks/locations"
-import { useSettings } from '../hooks/settings'
+import { useSettings, Settings } from '../hooks/settings'
 import { useEffect, useState } from "react"
+import { formatDropRate } from '../utils/format'
 
 interface DropRates {
   nodes: {
@@ -207,37 +208,39 @@ interface ItemListProps {
   level6Pets: Pets
   locksmithItems: LocksmithItems[]
   wishingWell: WishingWell[]
+  settings: Settings
 }
 
-const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell }: ItemListProps) => {
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, settings }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
-    let key: string, image: string, lineOne: string, lineTwo: string, href: string
+    let key: string, image: string, lineOne: string, href: string, locationType: string
     if (rate.location) {
       // A drop from a normal location.
       key = "l" + rate.location.jsonId
       image = rate.location.image
       lineOne = rate.location.name
-      lineTwo = rate.location.type === "fishing" ? "Fishes/drop" : "Explores/drop"
+      locationType = rate.location.type
       href = rate.location.fields.path
     } else if (rate.locationItem) {
       key = "h" + rate.locationItem.jsonId
       image = rate.locationItem.image
       lineOne = rate.locationItem.name
-      lineTwo = "Plot harvests/drop"
+      locationType = "farming"
       href = rate.locationItem.fields.path
     } else {
       console.error(`Unknown rate type`, rate)
       continue
     }
+    const [dropRate, lineTwo] = formatDropRate(settings, locationType, rate.rate, item.manualFishingOnly)
     const listItem: SortableListItem = {
       key: key,
       image,
       lineOne,
       lineTwo,
       href,
-      value: rate.rate.toFixed(2),
+      value: dropRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       _sortValue: rate.rate,
     }
     if (rate.drops < 50) {
@@ -336,7 +339,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {item.name}
     </h1>
-    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} settings={settings} />
     <LocksmithList label="Open At Locksmith For" box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />

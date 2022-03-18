@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 const LOCAL_STORAGE_KEY = "buddyFarmSettings"
 
-type Settings = { [key: string]: string }
+export type Settings = { [key: string]: string }
 
 export const useSettings = (): [Settings, (value: Settings) => void] => {
   const inBrowser = typeof document !== 'undefined'

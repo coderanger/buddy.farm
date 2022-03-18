@@ -2,9 +2,10 @@
 import { graphql } from "gatsby"
 import Layout from '../components/layout'
 import List from "../components/list"
-import { useSettings } from '../hooks/settings'
+import { useSettings, Settings } from '../hooks/settings'
 import { useEffect, useState } from "react"
 import { ListItem } from "../components/list"
+import { formatDropRate } from "../utils/format"
 
 interface DropRates {
   nodes: {
@@ -34,26 +35,28 @@ interface Location {
 interface LocationListProps {
   location: Location
   drops: DropRates
+  settings: Settings
 }
 
 interface SortableListItem extends ListItem {
   _sortValue: number
 }
 
-const LocationList = ({ location, drops }: LocationListProps) => {
+const LocationList = ({ location, drops, settings }: LocationListProps) => {
   const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.item.name, n]))
   const listItems = []
   for (const item of location.items) {
     if (!dropsMap[item]) {
       continue
     }
+    const [dropRate, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly)
     const listItem: SortableListItem = {
       key: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
       href: dropsMap[item].item.fields.path,
       lineOne: item,
-      lineTwo: location.type === "fishing" ? "Fishes/drop" : "Explores/drop",
-      value: dropsMap[item].rate.toFixed(2),
+      lineTwo,
+      value: dropRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       _sortValue: dropsMap[item].rate,
     }
     if (dropsMap[item].drops < 50) {
@@ -92,7 +95,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
       <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {location.name}
     </h1>
-    <LocationList location={location} drops={drops} />
+    <LocationList location={location} drops={drops} settings={settings} />
   </Layout>
 }
 
