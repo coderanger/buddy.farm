@@ -233,14 +233,14 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
       console.error(`Unknown rate type`, rate)
       continue
     }
-    const [dropRate, lineTwo] = formatDropRate(settings, locationType, rate.rate, item.manualFishingOnly)
+    const [value, lineTwo] = formatDropRate(settings, locationType, rate.rate, item.manualFishingOnly)
     const listItem: SortableListItem = {
       key: key,
       image,
       lineOne,
       lineTwo,
       href,
-      value: dropRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      value,
       _sortValue: rate.rate,
     }
     if (rate.drops < 50) {

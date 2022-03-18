@@ -49,14 +49,14 @@ const LocationList = ({ location, drops, settings }: LocationListProps) => {
     if (!dropsMap[item]) {
       continue
     }
-    const [dropRate, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly)
+    const [value, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly)
     const listItem: SortableListItem = {
       key: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
       href: dropsMap[item].item.fields.path,
       lineOne: item,
       lineTwo,
-      value: dropRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      value,
       _sortValue: dropsMap[item].rate,
     }
     if (dropsMap[item].drops < 50) {
