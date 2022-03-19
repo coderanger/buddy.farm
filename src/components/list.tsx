@@ -41,6 +41,15 @@ const alertIcon = (alertIcon: string | undefined) => {
   }
 }
 
+const bigLineStyle = {
+  fontSize: 32,
+  lineHeight: "48px",
+  "@media (max-width: 576px)": {
+    fontSize: 16,
+    fontWeight: "bold",
+  }
+}
+
 const ListItem = ({ item, bigLine }: ListItemProps) => {
   const href = item.href || (item.hrefSlugify && `/${item.hrefSlugify.toLowerCase().replace(/\s+/g, '-')}/`)
   const alert = item.alert && <OverlayTrigger overlay={
@@ -52,13 +61,13 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
     <div>
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       <div className="d-inline-block align-text-top">
-        <div css={bigLine && !item.lineTwo ? { fontSize: 32 } : { fontWeight: "bold" }}>{item.lineOne}</div>
+        <div css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
         <div>{item.lineTwo}</div>
       </div>
     </div>
     <div>
       {alert}
-      <span css={{ fontSize: 32 }}>{item.value}</span>
+      <span css={bigLineStyle}>{item.value}</span>
     </div>
   </>
   if (href) {
