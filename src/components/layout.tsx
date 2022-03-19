@@ -5,6 +5,7 @@ import Nav from "react-bootstrap/Nav"
 import NavDropdown from "react-bootstrap/NavDropdown"
 import Navbar from "react-bootstrap/Navbar"
 import { Helmet } from "react-helmet"
+import { BsFillGearFill } from "@react-icons/all-files/bs/BsFillGearFill"
 import "bootstrap/dist/css/bootstrap.css"
 
 
@@ -46,7 +47,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch,
             </Helmet>
             <Navbar bg="light" expand="lg">
                 <Container>
-                    <Link className='navbar-brand' to="/">
+                    <Link className='navbar-brand d-none d-sm-inline' to="/">
                         Buddy's Almanac
                     </Link>
                     <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
@@ -57,7 +58,10 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch = defaultOnSearch,
                             onFocus={onSearchFocus && (() => onSearchFocus(true))}
                             onBlur={onSearchFocus && (() => onSearchFocus(false))} />
                     </form>
-                    <Link className="btn btn-primary" to="/settings/">Settings</Link>
+                    <Link className="btn btn-primary" to="/settings/">
+                        <span className="d-none d-sm-inline">Settings</span>
+                        <BsFillGearFill className="d-sm-none" css={{ marginTop: -3 }} />
+                    </Link>
                 </Container>
             </Navbar>
             <main>
