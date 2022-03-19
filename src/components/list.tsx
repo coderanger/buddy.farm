@@ -58,7 +58,7 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
     <span className="bf-list-alert" css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }} onClick={evt => evt.preventDefault()}>{alertIcon(item.alertIcon)}</span>
   </OverlayTrigger>
   let elm = <>
-    <div>
+    <div css={{ flexShrink: 0 }}>
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       <div className="d-inline-block align-text-top">
         <div css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
@@ -71,9 +71,9 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
     </div>
   </>
   if (href) {
-    elm = <Link className="d-flex w-100 justify-content-between" css={{ color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit" } }} to={href}>{elm}</Link>
+    elm = <Link className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap", color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit" } }} to={href}>{elm}</Link>
   }
-  return <ListGroup.Item key={item.key || item.lineOne} className="d-flex w-100 justify-content-between">{elm}</ListGroup.Item>
+  return <ListGroup.Item key={item.key || item.lineOne} className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap" }}>{elm}</ListGroup.Item>
 }
 
 export default ({ label, items, bigLine }: ListProps) => (
