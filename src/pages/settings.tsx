@@ -105,6 +105,7 @@ export default () => {
           <option value="">Explores</option>
           <option value="stamina">Stamina</option>
           <option value="oj">Orange Juice</option>
+          <option value="lemonade">Lemonade</option>
         </SelectSetting>
         <SelectSetting id="unitFishing" label="Fishing" settings={settings}>
           <option value="">Fishes</option>

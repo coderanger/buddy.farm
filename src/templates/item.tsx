@@ -19,6 +19,9 @@ interface DropRates {
       fields: {
         path: string
       }
+      extra: {
+        baseDropRate: number | null
+      }
     }
     locationItem: {
       jsonId: string
@@ -224,7 +227,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
-    let key: string, image: string, lineOne: string, href: string, locationType: string
+    let key: string, image: string, lineOne: string, href: string, locationType: string, baseDropRate: number | null
     if (rate.location) {
       // A drop from a normal location.
       key = "l" + rate.location.jsonId
@@ -232,17 +235,19 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
       lineOne = rate.location.name
       locationType = rate.location.type
       href = rate.location.fields.path
+      baseDropRate = rate.location.extra.baseDropRate
     } else if (rate.locationItem) {
       key = "h" + rate.locationItem.jsonId
       image = rate.locationItem.image
       lineOne = rate.locationItem.name
       locationType = "farming"
       href = rate.locationItem.fields.path
+      baseDropRate = null
     } else {
       console.error(`Unknown rate type`, rate)
       continue
     }
-    const [value, lineTwo] = formatDropRate(settings, locationType, rate.rate, item.manualFishingOnly)
+    const [value, lineTwo] = formatDropRate(settings, locationType, rate.rate, item.manualFishingOnly, baseDropRate)
     const listItem: SortableListItem = {
       key: key,
       image,
@@ -388,6 +393,9 @@ export const pageQuery = graphql`
           fields {
             path
           }
+          extra {
+            baseDropRate
+          }
         }
         locationItem {
           jsonId
@@ -412,6 +420,9 @@ export const pageQuery = graphql`
           fields {
             path
           }
+          extra {
+            baseDropRate
+          }
         }
         locationItem {
           jsonId
@@ -435,6 +446,9 @@ export const pageQuery = graphql`
           type
           fields {
             path
+          }
+          extra {
+            baseDropRate
           }
         }
         locationItem {

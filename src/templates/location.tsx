@@ -30,6 +30,9 @@ interface Location {
   image: string
   type: string
   items: string[]
+  extra: {
+    baseDropRate: number | null
+  }
 }
 
 interface LocationListProps {
@@ -49,7 +52,7 @@ const LocationList = ({ location, drops, settings }: LocationListProps) => {
     if (!dropsMap[item]) {
       continue
     }
-    const [value, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly)
+    const [value, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly, location.extra.baseDropRate)
     const listItem: SortableListItem = {
       key: dropsMap[item].item.jsonId,
       image: dropsMap[item].item.image,
@@ -107,6 +110,9 @@ export const pageQuery = graphql`
       image
       type
       items
+      extra {
+        baseDropRate
+      }
     }
     normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {
       nodes {

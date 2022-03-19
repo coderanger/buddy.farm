@@ -10,7 +10,7 @@ const formatDropRateUnit = (rate: number, unit: string, reciprocalUnit: string):
   }
 }
 
-export const formatDropRate = (settings: Settings, locationType: string, rate: number, manualFishingOnly: boolean = false): [string, string] => {
+export const formatDropRate = (settings: Settings, locationType: string, rate: number, manualFishingOnly: boolean, baseDropRate: number | null): [string, string] => {
   switch (locationType) {
     case "fishing":
       if (manualFishingOnly) {
@@ -37,6 +37,13 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
           } else {
             return formatDropRateUnit(rate * staminaPerExplore, "Stamina/drop", "Drops/stamina")
           }
+        case "lemonade":
+          if (baseDropRate !== null) {
+            const itemsPerLem = !!settings.lemonSqueezer ? 20 : 10
+            const lemExplores = (1 / baseDropRate) * itemsPerLem
+            return formatDropRateUnit(rate / lemExplores, "Lemonades/drop", "Drops/lemonade")
+          }
+        // If there was no base drop rate, fall through to the default.
         default:
           return formatDropRateUnit(rate, "Explores/drop", "Drops/explore")
       }

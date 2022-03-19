@@ -63,6 +63,10 @@ exports.createSchemaCustomization = ({ actions }) => {
     type BuildingProductionJson implements Node {
       item: ItemsJson! @link(by: "jsonId")
     }
+
+    type LocationsJson implements Node {
+      extra: LocationExtraJson! @link(from: "name", by: "name")
+    }
   `
   createTypes(typeDefs)
 }
