@@ -72,7 +72,7 @@ const LevelInput = ({ setXp, xpMap }: LevelInputProps) => {
 
   return <>
     <Input id="current" label="Current">
-      <InputGroup className="mb-3">
+      <InputGroup>
         <Button variant={isXp ? "outline-secondary" : "primary"} onClick={evt => setIsXp(false)}>Level</Button>
         <Button variant={isXp ? "primary" : "outline-secondary"} onClick={evt => setIsXp(true)}>XP</Button>
         <Form.Control
