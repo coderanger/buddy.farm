@@ -33,7 +33,7 @@ Input.Switch = ({ id, label, defaultChecked, onChange }: SwitchInputProps) => (
       type="switch"
       name={id}
       defaultChecked={defaultChecked}
-      onChange={evt => onChange && onChange(evt.target.value === "on")}
+      onChange={evt => onChange && onChange(evt.target.checked)}
     />
   </Input>
 )
