@@ -91,7 +91,15 @@ export const useSearchables = () => {
     }
     `
   )
-  const searchables: Searchable[] = []
+  const searchables: Searchable[] = [
+    {
+      name: "XP Calculator",
+      image: "/img/items/7210.png",
+      searchText: "xp calculator",
+      type: null,
+      href: "/xpcalc/",
+    }
+  ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))
   }

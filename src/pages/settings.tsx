@@ -6,20 +6,7 @@ import Col from 'react-bootstrap/Col'
 
 import Layout from '../components/layout'
 import { useSettings, Settings } from '../hooks/settings'
-interface SettingProps {
-  id: string
-  label: string
-  children: JSX.Element[] | JSX.Element
-}
-
-const Setting = ({ id, label, children }: SettingProps) => (
-  <Form.Group as={Row} className="mb-3" controlId={id}>
-    <Form.Label column sm={2}>{label}</Form.Label>
-    <Col sm={10}>
-      {children}
-    </Col>
-  </Form.Group>
-)
+import { Input } from "../components/input"
 
 interface SwitchSettingProps {
   id: string
@@ -28,14 +15,7 @@ interface SwitchSettingProps {
 }
 
 const SwitchSetting = ({ id, label, settings }: SwitchSettingProps) => (
-  <Setting id={id} label={label}>
-    <Form.Check
-      css={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", "& input": { marginTop: 0 } }}
-      type="switch"
-      name={id}
-      defaultChecked={!!settings[id]}
-    />
-  </Setting>
+  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} />
 )
 
 interface TextSettingProps {
@@ -47,16 +27,7 @@ interface TextSettingProps {
 }
 
 const TextSetting = ({ id, label, placeholder, after, settings }: TextSettingProps) => (
-  <Setting id={id} label={label}>
-    <InputGroup>
-      <Form.Control
-        name={id}
-        placeholder={placeholder}
-        defaultValue={settings[id]}
-      />
-      {after && <InputGroup.Text>{after}</InputGroup.Text>}
-    </InputGroup>
-  </Setting>
+  <Input.Text id={id} label={label} placeholder={placeholder} after={after} defaultValue={settings[id]} />
 )
 
 interface SelectSettingProps {
@@ -67,16 +38,10 @@ interface SelectSettingProps {
 }
 
 const SelectSetting = ({ id, label, settings, children }: SelectSettingProps) => (
-  <Setting id={id} label={label}>
-    <Form.Select
-      name={id}
-      defaultValue={settings[id]}
-    >
-      {children}
-    </Form.Select>
-  </Setting>
+  <Input.Select id={id} label={label} defaultValue={settings[id]}>
+    {children}
+  </Input.Select>
 )
-
 
 export default () => {
   const [settings, setSettings] = useSettings()
@@ -94,7 +59,7 @@ export default () => {
     setSettings(data)
   }
   return <Layout pageTitle="Settings">
-    <Form ref={formRef} onChange={onChange}>
+    <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
         <legend>Settings</legend>
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
@@ -124,6 +89,10 @@ export default () => {
         <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" settings={settings} />
         <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
         <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
+        <TextSetting id="primerFarming" label="Bonus Farming XP" placeholder='0' after="%" settings={settings} />
+        <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' after="%" settings={settings} />
+        <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' after="%" settings={settings} />
+        <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' after="%" settings={settings} />
       </fieldset>
     </Form>
   </Layout>
