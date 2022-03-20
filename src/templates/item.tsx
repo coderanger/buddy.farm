@@ -8,6 +8,7 @@ import { useLocations } from "../hooks/locations"
 import { useSettings, Settings } from '../hooks/settings'
 import { useEffect, useState } from "react"
 import { formatDropRate } from '../utils/format'
+import { DateTime } from "luxon"
 
 interface DropRates {
   nodes: {
@@ -61,6 +62,9 @@ interface Quest {
       name: string
     }
   }[]
+  extra: {
+    availableTo: number | null
+  }
 }
 
 interface WishingWell {
@@ -151,14 +155,21 @@ interface QuestListProps {
   label: string
   item: string
   quests: Quest[]
+  oldQuests: boolean
 }
 
-const QuestList = ({ label, item, quests }: QuestListProps) => {
+const QuestList = ({ label, item, quests, oldQuests }: QuestListProps) => {
+  const now = Date.now()
+  if (!oldQuests) {
+    // Filter anything we don't need.
+    quests = quests.filter(q => !(q.extra.availableTo && q.extra.availableTo < now))
+  }
   const listItems = quests.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(q => ({
     image: q.fromImage,
     lineOne: q.name,
     href: q.fields.path,
     value: q.items.find(it => it.item.name === item)?.quantity.toLocaleString(),
+    alert: (q.extra.availableTo && q.extra.availableTo < now) ? "Quest no longer available" : null,
   }))
   return <List label={label} items={listItems} bigLine={true} />
 }
@@ -365,8 +376,8 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} settings={settings} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
-    <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} />
-    <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} />
+    <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
+    <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} oldQuests={!!settings.oldQuests} />
   </Layout>
 }
 
@@ -512,6 +523,9 @@ export const pageQuery = graphql`
             name
           }
         }
+        extra {
+          availableTo
+        }
       }
     }
     questRewards: allQuestsJson(filter: {itemRewards: {elemMatch: {item: {name: {eq: $name}}}}}) {
@@ -527,6 +541,9 @@ export const pageQuery = graphql`
           item {
             name
           }
+        }
+        extra {
+          availableTo
         }
       }
     }

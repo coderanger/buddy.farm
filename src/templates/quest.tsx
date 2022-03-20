@@ -1,6 +1,7 @@
 import { graphql } from "gatsby"
 import Layout from '../components/layout'
 import List from "../components/list"
+import { DateTime } from "luxon"
 
 interface ItemQuantity {
   quantity: number
@@ -59,8 +60,6 @@ interface QuestProps {
       name: string
       from: string
       fromImage: string
-      availableFrom: string | null
-      availableTo: string | null
       requiresFarming: number | null
       requiresFishing: number | null
       requiresCrafting: number | null
@@ -73,6 +72,8 @@ interface QuestProps {
       extra: {
         prev: QuestLink | null
         next: QuestLink | null
+        availableFrom: number | null
+        availableTo: number | null
       } | null
     }
   }
@@ -80,8 +81,6 @@ interface QuestProps {
 
 export default ({ data: { quest } }: QuestProps) => {
   const questData = []
-  // TODO Handle rendering availableFrom/To in some way.
-
   // Levels.
   if (quest.requiresFarming) {
     questData.push({
@@ -109,6 +108,24 @@ export default ({ data: { quest } }: QuestProps) => {
       image: "/img/items/6075.png",
       lineOne: "Exploring Level",
       value: quest.requiresExploring.toLocaleString(),
+    })
+  }
+
+  // Temporary quest stuff.
+  if (quest.extra?.availableFrom) {
+    const availableFrom = DateTime.fromMillis(quest.extra.availableFrom, { zone: "America/Chicago" })
+    questData.push({
+      image: "/img/items/4887.png",
+      lineOne: "Available From",
+      value: availableFrom.toLocaleString(DateTime.DATE_FULL),
+    })
+  }
+  if (quest.extra?.availableTo) {
+    const availableTo = DateTime.fromMillis(quest.extra.availableTo, { zone: "America/Chicago" })
+    questData.push({
+      image: "/img/items/4887.png",
+      lineOne: "Available To",
+      value: availableTo.toLocaleString(DateTime.DATE_FULL),
     })
   }
 
@@ -147,8 +164,6 @@ export const pageQuery = graphql`
       name
       from
       fromImage
-      availableFrom
-      availableTo
       requiresFarming
       requiresFishing
       requiresCrafting
@@ -191,6 +206,8 @@ export const pageQuery = graphql`
 						path
           }
         }
+        availableFrom
+        availableTo
       }
     }
   }

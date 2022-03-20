@@ -63,6 +63,7 @@ export default () => {
       <fieldset>
         <legend>Settings</legend>
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
+        <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
       </fieldset>
       <fieldset>
         <legend>Units</legend>

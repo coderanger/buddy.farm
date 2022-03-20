@@ -15,8 +15,8 @@ export interface ListItem {
   value?: string | false | null | undefined
   href?: string | false | null | undefined
   hrefSlugify?: string | false | null | undefined
-  alert?: string
-  alertIcon?: string
+  alert?: string | null
+  alertIcon?: string | null
 }
 
 interface ListItemProps {
