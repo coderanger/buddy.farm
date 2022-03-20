@@ -35,7 +35,7 @@ const FishingXpCalc = ({ locations, settings, xp }: FishingXpCalcProps) => {
   const [bait, setBait] = useState(1)
   const [event, setEvent] = useState(false)
   const [streak, setStreak] = useState<number | null>(null)
-  const selectedLocation = locations.find(loc => loc.jsonId === location)
+  const selectedLocation = locations.find(loc => loc.type === "fishing" && loc.jsonId === location)
   const xpPerHit = selectedLocation?.extra.xpPerHit
   const xpBonus = 1 + (parseInt(settings.primerFishing || "0", 10) / 100)
   const xpPerHitNet = ((75 + (xpPerHit || 0)) * xpBonus * (event ? 1.2 : 1))
@@ -76,7 +76,7 @@ interface ExploringXpCalcProps {
 const ExploringXpCalc = ({ locations, settings, xp }: ExploringXpCalcProps) => {
   const [location, setLocation] = useState("10") // Default is WC.
   const [event, setEvent] = useState(false)
-  const selectedLocation = locations.find(loc => loc.jsonId === location)
+  const selectedLocation = locations.find(loc => loc.type === "explore" && loc.jsonId === location)
   const xpPerHit = !!settings.ironDepot ? selectedLocation?.extra.xpPerHitIronDepot : selectedLocation?.extra.xpPerHit
   const xpBonus = 1 + (parseInt(settings.primerExploring || "0", 10) / 100)
   const xpPerHitTrue = ((125 + (xpPerHit || 0)) * xpBonus * (event ? 1.2 : 1))
