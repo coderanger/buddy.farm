@@ -46,10 +46,11 @@ interface TextInputProps {
   value?: string
   defaultValue?: string
   disabled?: boolean
+  pattern?: string
   onChange?: (value: string) => void
 }
 
-Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, onChange }: TextInputProps) => (
+Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, pattern, onChange }: TextInputProps) => (
   <Input id={id} label={label}>
     <InputGroup>
       <Form.Control
@@ -59,6 +60,7 @@ Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, on
         defaultValue={defaultValue}
         onChange={evt => onChange && onChange(evt.target.value)}
         disabled={disabled}
+        pattern={pattern}
       />
       {after && <InputGroup.Text>{after}</InputGroup.Text>}
     </InputGroup>

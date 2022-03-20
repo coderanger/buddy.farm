@@ -73,17 +73,25 @@ const LevelInput = ({ setXp, xpMap }: LevelInputProps) => {
   return <>
     <Input id="current" label="Current">
       <InputGroup>
-        <Button variant={isXp ? "outline-secondary" : "primary"} onClick={evt => setIsXp(false)}>Level</Button>
-        <Button variant={isXp ? "primary" : "outline-secondary"} onClick={evt => setIsXp(true)}>XP</Button>
+        <Button variant={isXp ? "outline-secondary" : "primary"} onClick={() => setIsXp(false)}>Level</Button>
+        <Button variant={isXp ? "primary" : "outline-secondary"} onClick={() => setIsXp(true)}>XP</Button>
         <Form.Control
           placeholder={isXp ? "0" : "1"}
           defaultValue={current ? current.toString() : ""}
-          onChange={evt => setCurrent(evt.target.value === "" ? null : parseInt(evt.target.value, 10))}
+          onChange={evt => setCurrent(evt.target.value === "" ? null : parseInt(evt.target.value.replace(/,/g, ""), 10))}
+          pattern={isXp ? "^[0-9,]+$" : "^\\d{1,2}$"}
           aria-label="Current level or XP"
         />
       </InputGroup>
     </Input>
-    <Input.Text id="target" label="Target Level" placeholder="99" defaultValue={target ? target.toString() : ""} onChange={val => setTarget(val === "" ? null : parseInt(val, 10))} />
+    <Input.Text
+      id="target"
+      label="Target Level"
+      placeholder="99"
+      defaultValue={target ? target.toString() : ""}
+      onChange={val => setTarget(val === "" ? null : parseInt(val, 10))}
+      pattern="^\d{1,2}$"
+    />
   </>
 }
 
@@ -132,9 +140,34 @@ export default () => {
 
   const skillCalc = skill === "exploring" ? <ExploringXpCalc locations={locations.nodes} xp={xp} settings={settings} /> : <div>Coming soon</div>
 
+  // Validation stuff.
+  const [validated, setValidated] = useState(false);
+
+  const onChange = (evt: React.FormEvent<HTMLFormElement>) => {
+    const form = evt.currentTarget
+    if (form.checkValidity() === false) {
+      evt.preventDefault()
+      evt.stopPropagation()
+    }
+    setValidated(true)
+  }
+
   return <Layout pageTitle="XP Calculator">
     <h1>XP Calculator</h1>
-    <Form onSubmit={evt => evt.preventDefault()}>
+    <Form
+      onSubmit={evt => evt.preventDefault()}
+      onChange={onChange}
+      noValidate validated={validated}
+      css={{
+        "&.was-validated *:valid": {
+          borderColor: "#ced4da !important",
+          backgroundImage: "none !important",
+          "&:focus": {
+            boxShadow: "0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important",
+          },
+        }
+      }}
+    >
       <LevelInput setXp={setXp} xpMap={xpMap} />
       <Input.Select id="skill" label="Skill" defaultValue={skill} onChange={val => setSkill(val)}>
         <option value="exploring">Exploring</option>
