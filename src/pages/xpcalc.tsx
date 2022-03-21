@@ -81,7 +81,7 @@ const ExploringXpCalc = ({ locations, settings, xp }: ExploringXpCalcProps) => {
   const xpBonus = 1 + (parseInt(settings.primerExploring || "0", 10) / 100)
   const xpPerHitTrue = ((125 + (xpPerHit || 0)) * xpBonus * (event ? 1.2 : 1))
   const explores = xp / xpPerHitTrue
-  const wanderer = parseInt(settings.wanderer, 10) / 100
+  const wanderer = parseInt(settings.wanderer || "0", 10) / 100
   const staminaPerExplore = 1 - wanderer
   const stamina = explores * staminaPerExplore
   const itemsPerLem = !!settings.lemonSqueezer ? 20 : 10
