@@ -84,6 +84,11 @@ const ExploringXpCalc = ({ locations, settings, xp }: ExploringXpCalcProps) => {
   const wanderer = parseInt(settings.wanderer, 10) / 100
   const staminaPerExplore = 1 - wanderer
   const stamina = explores * staminaPerExplore
+  const itemsPerLem = !!settings.lemonSqueezer ? 20 : 10
+  // TODO: Check if the event bonus actually works on lemonade.
+  const xpPerLemonade = (5000 + (itemsPerLem * (xpPerHit || 0))) * (event ? 1.2 : 1)
+  const lemonade = xp / xpPerLemonade
+
 
   return <>
     <Input.Select id="location" label="Location" defaultValue={location} onChange={val => setLocation(val)}>
@@ -97,6 +102,7 @@ const ExploringXpCalc = ({ locations, settings, xp }: ExploringXpCalcProps) => {
     <Input.Text id="explores" label="Explores" disabled={true} value={Math.ceil(explores).toLocaleString()} />
     <Input.Text id="stamina" label="Stamina" disabled={true} value={Math.ceil(stamina).toLocaleString()} />
     <Input.Text id="oj" label="OJ" disabled={true} value={Math.ceil(stamina / 100).toLocaleString()} />
+    <Input.Text id="lem" label="Lemonade" disabled={true} value={Math.ceil(lemonade).toLocaleString()} />
   </>
 }
 
