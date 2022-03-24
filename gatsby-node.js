@@ -221,7 +221,7 @@ exports.createPages = async ({ actions, graphql }) => {
   ]
   types.forEach(([typeData, template]) => {
     typeData.nodes.forEach(node => {
-      [node.fields.path, node.fields.longPath, node.fields.unprefixedPath].forEach(path => {
+      [node.fields.path, node.fields.unprefixedPath].forEach(path => {
         actions.createPage({
           path: path,
           component: require.resolve(`./src/templates/${template}.tsx`),
