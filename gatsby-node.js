@@ -1,4 +1,5 @@
 // @ts-check
+const fs = require("fs")
 
 /**
  * @type {import('gatsby').GatsbyNode['createSchemaCustomization']}
@@ -230,4 +231,115 @@ exports.createPages = async ({ actions, graphql }) => {
       })
     })
   })
+
+  // Write out the search index.
+  /**
+   * @typedef {{name: string, image: string, fields: {path: string}}} SearchNode
+   * @typedef {{nodes: SearchNode[]}} SearchType
+   * @typedef {{name: string, image: string, href: string, type: string | null, searchText: string}} Searchable
+   */
+
+  /**
+   * @type {{
+   *  data?: {
+   *    locations: SearchType,
+   *    items: SearchType,
+   *    pets: SearchType,
+   *    quests: SearchType,
+   *    questlines: SearchType,
+   * }}}
+   */
+  const { data: searchData } = await graphql(`
+    query {
+      locations: allLocationsJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+      items: allItemsJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+      pets: allPetsJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+      quests: allQuestsJson {
+        nodes {
+          name
+          image: fromImage
+          fields {
+            path
+          }
+        }
+      }
+      questlines: allQuestlinesJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+    }
+    `)
+  /**
+   * @param {SearchNode} node
+   * @param {string | null} type
+   * @returns {Searchable}
+   */
+  const nodeToSearchable = (node, type = null) => {
+    const searchName = node.name.toLowerCase()
+    return { name: node.name, image: node.image, searchText: searchName, href: node.fields.path, type }
+  }
+  /**
+   * @type {Searchable[]}
+   */
+  const searchables = [
+    {
+      name: "XP Calculator",
+      image: "/img/items/7210.png",
+      searchText: "xp calculator",
+      type: null,
+      href: "/xpcalc/",
+    }
+  ]
+  for (const node of searchData.locations.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of searchData.items.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of searchData.pets.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of searchData.quests.nodes) {
+    searchables.push(nodeToSearchable(node))
+  }
+  for (const node of searchData.questlines.nodes) {
+    searchables.push(nodeToSearchable(node, "Questline"))
+  }
+  // Write the index to a file.
+  try {
+    await fs.promises.access("public")
+  } catch (error) {
+    // Not really sure how this could happen but just in case.
+    await fs.promises.mkdir("public")
+  }
+  await fs.promises.writeFile("public/search.json", JSON.stringify(searchables))
 }

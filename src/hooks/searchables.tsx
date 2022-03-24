@@ -26,7 +26,7 @@ interface SearchablesQuery {
   }
 }
 
-interface Searchable {
+export interface Searchable {
   name: string
   image: string
   href: string
