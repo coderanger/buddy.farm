@@ -171,7 +171,8 @@ const QuestList = ({ label, item, quests, oldQuests }: QuestListProps) => {
     value: q.items.find(it => it.item.name === item)?.quantity.toLocaleString(),
     alert: (q.extra.availableTo && q.extra.availableTo < now) ? "Quest no longer available" : null,
   }))
-  return <List label={label} items={listItems} bigLine={true} />
+  const itemTotal = quests.reduce((total, q) => (q.items.find(it => it.item.name === item)?.quantity || 0) + total, 0)
+  return <List label={`${label} (${itemTotal} total)`} items={listItems} bigLine={true} />
 }
 
 interface WellListProps {
