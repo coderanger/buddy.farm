@@ -375,7 +375,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
         className="d-inline-block align-text-top clipboard"
         width="48" height="48"
         css={{ marginRight: 10, boxSizing: "border-box" }}
-        data-clipboard-text={`((${item.name}))`}
+        data-clipboard-text={item.name.endsWith(")") ? `((${item.name}))` : `((${item.name}))`}
       />
       {item.name}
       <CopyButton text={settings.staffMode ? `buddy.farm${item.fields.path} https://buddy.farm${item.fields.path}` : `buddy.farm${item.fields.path}`} />

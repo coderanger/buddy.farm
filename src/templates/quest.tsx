@@ -63,7 +63,9 @@ const questToChatText = (name: string, silver: number | null, items: ItemQuantit
   if (silver) {
     chatText = chatText.concat(` 🪙x${silver.toLocaleString()}`)
   }
-  chatText = chatText.concat(...items.map(i => ` ((${i.item.name}))x${i.quantity.toLocaleString()}`))
+  chatText = chatText.concat(...items.map(i =>
+    ` ((${i.item.name}${i.item.name.endsWith(")") && " "}))x${i.quantity.toLocaleString()}`
+  ))
   return chatText
 }
 
