@@ -1,14 +1,11 @@
-import * as React from "react"
-import { graphql } from "gatsby"
+import { graphql } from 'gatsby'
+import React, { useEffect, useState } from 'react'
+
 import Layout from '../components/layout'
-import List from "../components/list"
-import { ListItem } from "../components/list"
-import { useItems } from "../hooks/items"
-import { useLocations } from "../hooks/locations"
-import { useSettings, Settings } from '../hooks/settings'
-import { useEffect, useState } from "react"
+import List, { ListItem } from '../components/list'
+import { Settings, useSettings } from '../hooks/settings'
 import { formatDropRate } from '../utils/format'
-import { DateTime } from "luxon"
+import { CopyButton } from '../components/clipboard'
 
 interface DropRates {
   nodes: {
@@ -125,6 +122,9 @@ interface Item {
   fleaMarket: number | null
   dropMode: {
     dropMode: string
+  }
+  fields: {
+    path: string
   }
 }
 
@@ -370,15 +370,22 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
 
   return <Layout pageTitle={item.name}>
     <h1>
-      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
+      <img
+        src={"https://farmrpg.com" + item.image}
+        className="d-inline-block align-text-top clipboard"
+        width="48" height="48"
+        css={{ marginRight: 10, boxSizing: "border-box" }}
+        data-clipboard-text={`((${item.name}))`}
+      />
       {item.name}
+      <CopyButton text={settings.staffMode ? `buddy.farm${item.fields.path} https://buddy.farm${item.fields.path}` : `buddy.farm${item.fields.path}`} />
     </h1>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} settings={settings} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
     <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} oldQuests={!!settings.oldQuests} />
-  </Layout>
+  </Layout >
 }
 
 export const pageQuery = graphql`
@@ -392,6 +399,9 @@ export const pageQuery = graphql`
       fleaMarket
       dropMode {
         dropMode
+      }
+      fields {
+        path
       }
     }
     normalDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {

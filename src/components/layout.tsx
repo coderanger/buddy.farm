@@ -1,12 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.css'
 
 import { Link, navigate } from 'gatsby'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Helmet } from 'react-helmet'
+import ClipboardJS from "clipboard"
 
 import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
 
@@ -42,6 +43,12 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, onSearchFocus, ch
       ctx.setQuery(query)
     }
   }
+
+  useEffect(() => {
+    const clipboard = new ClipboardJS(".clipboard")
+    return () => clipboard.destroy()
+  })
+
   return (<>
     <Helmet>
       <meta charSet="utf-8" />

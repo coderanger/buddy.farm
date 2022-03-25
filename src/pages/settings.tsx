@@ -1,8 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Form from 'react-bootstrap/Form'
-import InputGroup from 'react-bootstrap/InputGroup'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
 
 import Layout from '../components/layout'
 import { useSettings, Settings } from '../hooks/settings'
@@ -45,6 +42,7 @@ const SelectSetting = ({ id, label, settings, children }: SelectSettingProps) =>
 
 export default () => {
   const [settings, setSettings] = useSettings()
+  const [secretKnock, setSecretKnock] = useState(0)
   const formRef = React.createRef<HTMLFormElement>()
   const onChange = () => {
     if (formRef.current === null) {
@@ -61,9 +59,10 @@ export default () => {
   return <Layout pageTitle="Settings">
     <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
-        <legend>Settings</legend>
+        <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
         <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
+        {secretKnock >= 3 && <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />}
       </fieldset>
       <fieldset>
         <legend>Units</legend>

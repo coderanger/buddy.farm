@@ -1,11 +1,12 @@
 
-import { graphql } from "gatsby"
+import { graphql } from 'gatsby'
+import { useEffect, useState } from 'react'
+
+import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
-import List from "../components/list"
-import { useSettings, Settings } from '../hooks/settings'
-import { useEffect, useState } from "react"
-import { ListItem } from "../components/list"
-import { formatDropRate } from "../utils/format"
+import List, { ListItem } from '../components/list'
+import { Settings, useSettings } from '../hooks/settings'
+import { formatDropRate } from '../utils/format'
 
 interface DropRates {
   nodes: {
@@ -32,6 +33,9 @@ interface Location {
   items: string[]
   extra: {
     baseDropRate: number | null
+  }
+  fields: {
+    path: string
   }
 }
 
@@ -97,6 +101,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     <h1>
       <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {location.name}
+      <CopyButton text={settings.staffMode ? `buddy.farm${location.fields.path} https://buddy.farm${location.fields.path}` : `buddy.farm${location.fields.path}`} />
     </h1>
     <LocationList location={location} drops={drops} settings={settings} />
   </Layout>
@@ -112,6 +117,9 @@ export const pageQuery = graphql`
       items
       extra {
         baseDropRate
+      }
+      fields {
+        path
       }
     }
     normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {

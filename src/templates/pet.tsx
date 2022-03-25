@@ -1,6 +1,9 @@
-import { graphql } from "gatsby"
+import { graphql } from 'gatsby'
+
+import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
-import List from "../components/list"
+import List from '../components/list'
+import { useSettings } from '../hooks/settings'
 
 interface PetItem {
   name: string
@@ -39,11 +42,15 @@ interface PetProps {
         fishingLevel: number | null,
         craftingLevel: number | null,
       }
+      fields: {
+        path: string
+      }
     }
   }
 }
 
 export default ({ data: { pet } }: PetProps) => {
+  const settings = useSettings()[0]
   const petData = []
   petData.push({
     key: "cost",
@@ -88,6 +95,7 @@ export default ({ data: { pet } }: PetProps) => {
     <h1>
       <img src={"https://farmrpg.com" + pet.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {pet.name}
+      <CopyButton text={settings.staffMode ? `buddy.farm${pet.fields.path} https://buddy.farm${pet.fields.path}` : `buddy.farm${pet.fields.path}`} />
     </h1>
     <List items={petData} />
     <PetItemsList label="Level 1" items={pet.level1Items} />
@@ -128,6 +136,9 @@ export const pageQuery = graphql`
         farmingLevel
         fishingLevel
         craftingLevel
+      }
+      fields {
+        path
       }
     }
   }

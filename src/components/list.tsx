@@ -1,11 +1,16 @@
-import * as React from "react"
-import { Link } from "gatsby"
-import OverlayTrigger from "react-bootstrap/OverlayTrigger"
-import Tooltip from "react-bootstrap/Tooltip"
-import ListGroup from "react-bootstrap/ListGroup"
-import { BsFillExclamationTriangleFill } from "@react-icons/all-files/bs/BsFillExclamationTriangleFill"
-import { BsFillExclamationCircleFill } from "@react-icons/all-files/bs/BsFillExclamationCircleFill"
-import { BsFillQuestionCircleFill } from "@react-icons/all-files/bs/BsFillQuestionCircleFill"
+import { Link } from 'gatsby'
+import * as React from 'react'
+import ListGroup from 'react-bootstrap/ListGroup'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Tooltip from 'react-bootstrap/Tooltip'
+
+import { BsFillExclamationCircleFill } from '@react-icons/all-files/bs/BsFillExclamationCircleFill'
+import {
+  BsFillExclamationTriangleFill
+} from '@react-icons/all-files/bs/BsFillExclamationTriangleFill'
+import { BsFillQuestionCircleFill } from '@react-icons/all-files/bs/BsFillQuestionCircleFill'
+
+import { CopyButton } from '../components/clipboard'
 
 export interface ListItem {
   key?: string
@@ -28,6 +33,7 @@ interface ListProps {
   label?: string
   items: ListItem[]
   bigLine?: boolean
+  copyText?: string
 }
 
 const alertIcon = (alertIcon: string | null | undefined) => {
@@ -76,9 +82,9 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
   return <ListGroup.Item key={item.key || item.lineOne} className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap" }}>{elm}</ListGroup.Item>
 }
 
-export default ({ label, items, bigLine }: ListProps) => (
+export default ({ label, items, bigLine, copyText }: ListProps) => (
   <>
-    {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}</h3>}
+    {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}{copyText && <CopyButton text={copyText} />}</h3>}
     <ListGroup variant="flush">
       {items.map((item: ListItem) => <ListItem item={item} bigLine={bigLine} />)}
     </ListGroup>

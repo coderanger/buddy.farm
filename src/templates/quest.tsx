@@ -1,7 +1,10 @@
-import { graphql } from "gatsby"
+import { graphql } from 'gatsby'
+import { DateTime } from 'luxon'
+
+import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
-import List from "../components/list"
-import { DateTime } from "luxon"
+import List from '../components/list'
+import { useSettings } from '../hooks/settings'
 
 interface ItemQuantity {
   quantity: number
@@ -27,9 +30,10 @@ interface QuestItemListProps {
   silver: number | null
   gold?: number | null
   items: ItemQuantity[]
+  copyText?: string
 }
 
-const QuestItemList = ({ label, silver, gold, items }: QuestItemListProps) => {
+const QuestItemList = ({ label, silver, gold, items, copyText }: QuestItemListProps) => {
   const listItems = []
   if (silver) {
     listItems.push({
@@ -51,7 +55,16 @@ const QuestItemList = ({ label, silver, gold, items }: QuestItemListProps) => {
     value: it.quantity.toLocaleString(),
     href: it.item.fields.path,
   })))
-  return <List label={label} items={listItems} bigLine={true} />
+  return <List label={label} items={listItems} bigLine={true} copyText={copyText} />
+}
+
+const questToChatText = (name: string, silver: number | null, items: ItemQuantity[]) => {
+  let chatText = name
+  if (silver) {
+    chatText = chatText.concat(` 🪙x${silver.toLocaleString()}`)
+  }
+  chatText = chatText.concat(...items.map(i => ` ((${i.item.name}))x${i.quantity.toLocaleString()}`))
+  return chatText
 }
 
 interface QuestProps {
@@ -75,11 +88,15 @@ interface QuestProps {
         availableFrom: number | null
         availableTo: number | null
       } | null
+      fields: {
+        path: string
+      }
     }
   }
 }
 
 export default ({ data: { quest } }: QuestProps) => {
+  const settings = useSettings()[0]
   const questData = []
   // Levels.
   if (quest.requiresFarming) {
@@ -151,9 +168,10 @@ export default ({ data: { quest } }: QuestProps) => {
     <h1>
       <img src={"https://farmrpg.com" + quest.fromImage} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {quest.name}
+      <CopyButton text={settings.staffMode ? `buddy.farm${quest.fields.path} https://buddy.farm${quest.fields.path}` : `buddy.farm${quest.fields.path}`} />
     </h1>
     <List items={questData} bigLine={true} />
-    <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} />
+    <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} copyText={questToChatText(quest.name, quest.silverRequest, quest.itemRequests)} />
     <QuestItemList label="Reward" silver={quest.silverReward} gold={quest.goldReward} items={quest.itemRewards} />
   </Layout>
 }
@@ -208,6 +226,9 @@ export const pageQuery = graphql`
         }
         availableFrom
         availableTo
+      }
+      fields {
+        path
       }
     }
   }
