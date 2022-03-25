@@ -104,7 +104,7 @@ export default ({ location }: SearchProps) => {
     }
   }, [])
 
-  const slowSetQuery = debounce(setQuery, 200)
+  const slowSetQuery = debounce(setQuery, 150)
 
   const onSearch = (query: string) => {
     console.debug("search onSearch firing", query)

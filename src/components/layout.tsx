@@ -19,7 +19,7 @@ const navigateToSearch = debounce((query: string, setSearchFired: (arg0: boolean
   // query = query.substring(0, query.length - 3)
   navigate(`/search/?q=${encodeURIComponent(query)}`, { state: { typing: true, query } })
   setSearchFired(true)
-}, 500)
+}, 250)
 
 interface LayoutProps {
   pageTitle: string
