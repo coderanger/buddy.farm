@@ -1,13 +1,13 @@
-import { navigate } from 'gatsby'
-import { useEffect, useState } from 'react'
-import ListGroup from 'react-bootstrap/ListGroup'
-import { keyframes } from '@emotion/react'
-import { CgSpinner } from "@react-icons/all-files/cg/CgSpinner"
+import { useEffect, useState, useContext } from 'react'
 
+import { keyframes } from '@emotion/react'
+import { CgSpinner } from '@react-icons/all-files/cg/CgSpinner'
 
 import Layout from '../components/layout'
 import List from '../components/list'
-import { useSearchables, Searchable } from '../hooks/searchables'
+import { Searchable } from '../hooks/searchables'
+import { GlobalContext } from '../utils/context'
+import { debounce } from '../utils/debounce'
 
 declare global {
   interface Window { _farmSearchables?: Searchable[] | undefined }
@@ -68,9 +68,10 @@ interface SearchProps {
 }
 
 export default ({ location }: SearchProps) => {
-  const [searchables, setSearchables] = useState<Searchable[] | null>(null)
-  const [inputFocus, setInputFocus] = useState(false)
-  const [query, setQuery] = useState<string | undefined>(location?.state?.query)
+  const ctx = useContext(GlobalContext)
+  // const [searchables, setSearchables] = useState<Searchable[] | null>(null)
+  // const [inputFocus, setInputFocus] = useState(false)
+  const [query, setQuery] = useState<string | undefined>(ctx.query || undefined)
   const [results, setResults] = useState<ScoredResult[] | null>(null)
   const inBrowser = typeof document !== 'undefined'
 
@@ -78,39 +79,45 @@ export default ({ location }: SearchProps) => {
   // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
   useEffect(() => {
     if (inBrowser) {
-      if (!inputFocus && !location?.state?.typing) {
+      console.debug("search value", document.getElementById("nav-search"), document.getElementById("nav-search")?.value, ctx.query)
+      if (location?.state?.typing && ctx.query !== null) {
+        // Automatic navigation, assume we're taking over a query from another page.
+        // In case the navigate got a little confused, update things.
+        history.replaceState(null, "", `?q=${encodeURIComponent(ctx.query)}`)
+        // Transfer the global query into local state and clear it for the next page.
+        ctx.setQuery(null)
+        setQuery(ctx.query || undefined)
+      } else {
+        // Natural navigation, load the query from the URL.
         const params = new URLSearchParams(document.location.search)
         const q = params.get("q")
         if (q !== null) {
           setQuery(q)
         }
       }
-      if (searchables === null) {
-        // Check if we have the index loaded.
-        if (window._farmSearchables) {
-          setSearchables(window._farmSearchables)
-        } else {
-          // Start loading the searchables.
-          fetch("/search.json").then(resp => resp.json()).then(data => {
-            window._farmSearchables = data
-            setSearchables(data)
-          })
-        }
+      if (ctx.searchables === null) {
+        // Start loading the searchables.
+        fetch("/search.json").then(resp => resp.json()).then(data => {
+          ctx.setSearchables(data)
+        })
       }
     }
   }, [])
 
+  const slowSetQuery = debounce(setQuery, 200)
+
   const onSearch = (query: string) => {
-    setQuery(query)
+    console.debug("search onSearch firing", query)
+    slowSetQuery(query)
     history.replaceState(null, "", `?q=${encodeURIComponent(query)}`)
   }
 
-  const onSearchFocus = (focus: boolean) => {
-    setInputFocus(focus)
-  }
+  // const onSearchFocus = (focus: boolean) => {
+  //   setInputFocus(focus)
+  // }
 
   useEffect(() => {
-    if (searchables !== null) {
+    if (ctx.searchables !== null) {
       // Filter and sort the results.
       if (!query) {
         setResults([])
@@ -123,7 +130,7 @@ export default ({ location }: SearchProps) => {
 
       // Transform to a scored list.
       const scored: ScoredResult[] = []
-      for (const { name, image, searchText, type, href } of searchables) {
+      for (const { name, image, searchText, type, href } of ctx.searchables) {
         const score = scoreSearchable(searchText, queryLower, queryRegexp)
         if (score <= 500) {
           scored.push({ name, image, href, type, score })
@@ -132,9 +139,9 @@ export default ({ location }: SearchProps) => {
       scored.sort((a, b) => a.score - b.score)
       setResults(scored)
     }
-  }, [query, searchables])
+  }, [query, ctx.searchables])
 
-  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch} onSearchFocus={onSearchFocus}>
+  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch}>
     <div>Search results</div>
     {results !== null ?
       <List items={results.map(r => ({ image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} /> :
@@ -146,7 +153,9 @@ export default ({ location }: SearchProps) => {
             height: 100,
           }}
           title="Loading"
-          aria-description="Search results are loading" />
+          role="img"
+          aria-label="Search results are loading"
+        />
       </div>}
   </Layout>
 }

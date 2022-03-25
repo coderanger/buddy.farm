@@ -30,7 +30,7 @@ interface ListProps {
   bigLine?: boolean
 }
 
-const alertIcon = (alertIcon: string | undefined) => {
+const alertIcon = (alertIcon: string | null | undefined) => {
   switch (alertIcon) {
     case "warning":
       return <BsFillExclamationTriangleFill className="text-warning" />
