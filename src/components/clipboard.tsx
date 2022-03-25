@@ -22,3 +22,5 @@ export const CopyButton = ({ text }: CopyButtonProps) => (
     <BsClipboard css={{ fontSize: 12, verticalAlign: "text-top" }} />
   </Button>
 )
+
+// TODO Tooltip-y feedback when a copy succeeds.
