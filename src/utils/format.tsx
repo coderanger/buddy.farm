@@ -30,7 +30,7 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
       switch (settings.unitExploring) {
         case "stamina":
         case "oj":
-          const wanderer = parseInt(settings.wanderer, 10) / 100
+          const wanderer = parseInt(settings.wanderer || "0", 10) / 100
           const staminaPerExplore = 1 - wanderer
           if (settings.unitExploring === "oj") {
             return formatDropRateUnit((rate * staminaPerExplore) / 100, "OJ/drop", "Drops/OJ")
@@ -50,7 +50,7 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
     case "farming":
       switch (settings.unitFarming) {
         case "harvestAll":
-          const cropRows = parseInt(settings.cropRows, 10) || 2
+          const cropRows = parseInt(settings.cropRows || "3", 10) || 2
           return formatDropRateUnit(rate / (4 * cropRows), "Harvest alls/crop", "Crops/harvest all")
         default:
           return formatDropRateUnit(rate, "Plot harvests/drop", "Drops/plot harvest")
