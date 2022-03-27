@@ -56,13 +56,16 @@ export default () => {
     }
     setSettings(data)
   }
+  const secretKnockEnabled = secretKnock >= 3
   return <Layout pageTitle="Settings">
     <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
         <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
         <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
-        {secretKnock >= 3 && <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />}
+        <div className={secretKnockEnabled ? "" : "d-none"}>
+          <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
+        </div>
       </fieldset>
       <fieldset>
         <legend>Units</legend>
