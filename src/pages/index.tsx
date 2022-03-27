@@ -1,7 +1,19 @@
+import React from 'react'
 import Layout from '../components/layout'
-import { Link } from 'gatsby'
+import { Link, useStaticQuery, graphql } from 'gatsby';
 import { DateTime } from "luxon"
 import SunCalc from "suncalc"
+import Row from "react-bootstrap/Row"
+import Col from "react-bootstrap/Col"
+import ListGroup from 'react-bootstrap/ListGroup'
+
+interface ListItem {
+  name: string
+  image: string
+  fields: {
+    path: string
+  }
+}
 
 // These are close but not quite to (x+0.5)/8 thresholds.
 // The game must have a very slightly different moon phase computation
@@ -22,34 +34,129 @@ const marketLevel = (date: DateTime) => {
   const moon = SunCalc.getMoonIllumination(date.toJSDate())
   for (const market of marketLevelThresholds) {
     if (moon.phase < market.threshold) {
-      return market
+      return { level: market.level, delta: market.delta, phase: moon.phase }
     }
   }
-  // This should be impossible.
-  return marketLevelThresholds[0]
+  throw `Unable to find market level for ${date}`
+}
+
+const SteakMarketForecastDay = ({ days }: { days: number }) => {
+  const date = DateTime.now().setZone("America/Chicago").startOf("day").plus({ days })
+  const market = marketLevel(date)
+
+  return <div className="d-inline-block me-2">
+    <div className="d-flex justify-content-center">{date.toLocaleString({ month: 'short', day: 'numeric' })}</div>
+    <div className="d-flex justify-content-center fw-bolder">{market.level}</div>
+    <div className="small">{(50000 - market.delta).toLocaleString()}-{(50000 + market.delta).toLocaleString()}</div>
+  </div>
+}
+
+const SteakMarketForecast = () => (
+  <>
+    <h5 className="mb-1">Steak Market Forecast</h5>
+    <div>
+      <SteakMarketForecastDay days={0} />
+      <SteakMarketForecastDay days={1} />
+      <SteakMarketForecastDay days={2} />
+    </div>
+  </>
+)
+
+interface MiniListProps {
+  label: string
+  items: ListItem[]
+}
+
+const MiniList = ({ label, items }: MiniListProps) => (
+  <>
+    <h5 className="mb-1">{label}</h5>
+    <ListGroup variant="flush">
+      {items.map(it => (
+        <ListGroup.Item className="px-0">
+          <Link to={it.fields.path} css={{ color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit", textDecoration: "underline" } }}>
+            <img src={"https://farmrpg.com" + it.image} className="d-inline-block align-text-top" width="20" height="20" css={{ marginRight: 10, boxSizing: "border-box" }} />
+            {it.name}
+          </Link>
+        </ListGroup.Item>
+      ))}
+    </ListGroup>
+  </>
+)
+
+
+
+interface IndexQuery {
+  quests: {
+    nodes: ListItem[]
+  }
+  items: {
+    nodes: ListItem[]
+  }
 }
 
 export default () => {
-  window.phase = (year: number, month: number, day: number) => SunCalc.getMoonIllumination(new Date(year, month - 1, day)).phase
+  const { quests, items }: IndexQuery = useStaticQuery(graphql`
+    query {
+      quests: allQuestsJson(sort: {fields: firstSeen, order: DESC}, limit: 5) {
+        nodes {
+          name
+          image: fromImage
+          fields {
+            path
+          }
+        }
+      }
+      items: allItemsJson(
+        sort: {fields: firstSeen, order: DESC}
+        limit: 5
+        filter: {firstSeen: {ne: null}}
+      ) {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+    }
+  `)
+
   return <Layout pageTitle="Buddy's Almanac">
     <h1>Welcome to Buddy's Almanac</h1>
     <div>
       <p>This is a repository of game information for <a href="https://farmrpg.com/">FarmRPG</a>.</p>
       <p>
-        We're still getting set up so please be patient as new features are added. For now you can look up drop rates for
-        items and locations.
+        Use the search box above to look up items, locations, pets, quests, or more!
       </p>
       <p>
         Check out the <Link to="/settings/">settings</Link> to configure your perks and other settings.
       </p>
+    </div>
+    <Row>
+      <Col sm>
+        <div className="mb-2">
+          <SteakMarketForecast />
+        </div>
+        <div>
+          <MiniList label="Useful Links" items={[
+            { name: "Exploring", image: "/img/items/6075.png", fields: { path: "/exploring/" } },
+            { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
+            { name: "XP Calculator", image: "/img/items/7210.png", fields: { path: "/xpcalc/" } },
+          ]} />
+        </div>
+      </Col>
+      <Col sm>
+        <MiniList label="New Quests" items={quests.nodes} />
+      </Col>
+      <Col sm>
+        <MiniList label="New Items" items={items.nodes} />
+      </Col>
+    </Row>
+    <div className="mt-5">
       <p>
         Please contact Coderanger in-game or on Discord with any questions or feedback.
       </p>
-      <table>{Array.from({ length: 300 }, (x, i) => i).map(i => {
-        const date = DateTime.now().setZone("America/Chicago").startOf("day").plus({ minutes: 1 }).minus({ days: i + 1 })
-        const moon = SunCalc.getMoonIllumination(date.toJSDate())
-        return <tr key={date.toISO()}><td>{date.toISO()}</td><td>{moon.phase}</td><td>{marketLevel(date).level}</td></tr>
-      })}</table>
     </div>
-  </Layout >
+  </Layout>
 }
