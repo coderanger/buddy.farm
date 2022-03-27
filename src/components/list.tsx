@@ -64,9 +64,9 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
     <span className="bf-list-alert" css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }} onClick={evt => evt.preventDefault()}>{alertIcon(item.alertIcon)}</span>
   </OverlayTrigger>
   let elm = <>
-    <div css={{ flexShrink: 0 }}>
+    <div className="mw-100 flex-shrink-0 d-flex">
       <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-      <div className="d-inline-block align-text-top">
+      <div className="d-inline-block align-text-top flex-shrink-1">
         <div css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
         <div>{item.lineTwo}</div>
       </div>
