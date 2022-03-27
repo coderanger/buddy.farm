@@ -65,7 +65,7 @@ interface Quest {
 }
 
 interface WishingWell {
-  chance: string
+  chance: number
   item: {
     jsonId: string
     name: string
@@ -185,7 +185,7 @@ const WellList = ({ label, items }: WellListProps) => {
     image: it.item.image,
     lineOne: it.item.name,
     href: it.item.fields.path,
-    value: it.chance,
+    value: (it.chance * 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + "%",
   }))
   return <List label={label} items={listItems} bigLine={true} />
 }
@@ -319,7 +319,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     image: ww.item.image,
     lineOne: ww.item.name,
     lineTwo: "Wishing Well",
-    value: ww.chance,
+    value: (ww.chance * 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) + "%",
     href: ww.item.fields.path,
   })))
 
