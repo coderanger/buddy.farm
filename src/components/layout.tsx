@@ -49,18 +49,6 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
     return () => clipboard.destroy()
   })
 
-  const settingsButtonInner = <>
-    <span className="d-none d-sm-inline">Settings</span>
-    <BsFillGearFill className="d-sm-none" css={{ marginTop: -3 }} />
-  </>
-  const settingsButton = settingsBack ?
-    <a href="#" className="btn btn-primary" onClick={evt => { evt.preventDefault(); navigate(-1) }}>
-      {settingsButtonInner}
-    </a> :
-    <Link className="btn btn-primary" to="/settings/">
-      {settingsButtonInner}
-    </Link>
-
   return (<>
     <Helmet>
       <meta charSet="utf-8" />
@@ -78,7 +66,10 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
             onChange={evt => onSearch(evt.target.value)}
           />
         </form>
-        {settingsButton}
+        <Link className="btn btn-primary" to="/settings/" onClick={settingsBack ? (evt => { evt.preventDefault(); navigate(-1) }) : undefined}>
+          <span className="d-none d-sm-inline">Settings</span>
+          <BsFillGearFill className="d-sm-none" css={{ marginTop: -3 }} />
+        </Link>
       </Container>
     </Navbar>
     <main>
