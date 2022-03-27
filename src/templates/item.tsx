@@ -314,7 +314,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   })))
 
   // Wishing well sources.
-  listItems.push(...wishingWell.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).map(ww => ({
+  listItems.push(...wishingWell.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10)).sort((a, b) => b.chance - a.chance).map(ww => ({
     key: "w" + ww.item.jsonId,
     image: ww.item.image,
     lineOne: ww.item.name,
