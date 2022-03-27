@@ -57,7 +57,7 @@ export default () => {
     setSettings(data)
   }
   const secretKnockEnabled = secretKnock >= 3
-  return <Layout pageTitle="Settings">
+  return <Layout pageTitle="Settings" settingsBack={true}>
     <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
         <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>

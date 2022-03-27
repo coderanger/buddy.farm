@@ -26,11 +26,11 @@ interface LayoutProps {
   query?: string | null | undefined
   searchAutoFocus?: boolean | undefined
   onSearch?: (query: string) => void
-  onSearchFocus?: (focus: boolean) => void
+  settingsBack?: boolean
   children: JSX.Element[] | JSX.Element
 }
 
-const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, onSearchFocus, children }: LayoutProps) => {
+const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
   const [searchFired, setSearchFired] = useState(false)
   if (!onSearch) {
@@ -49,6 +49,18 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, onSearchFocus, ch
     return () => clipboard.destroy()
   })
 
+  const settingsButtonInner = <>
+    <span className="d-none d-sm-inline">Settings</span>
+    <BsFillGearFill className="d-sm-none" css={{ marginTop: -3 }} />
+  </>
+  const settingsButton = settingsBack ?
+    <a href="#" className="btn btn-primary" onClick={evt => { evt.preventDefault(); navigate(-1) }}>
+      {settingsButtonInner}
+    </a> :
+    <Link className="btn btn-primary" to="/settings/">
+      {settingsButtonInner}
+    </Link>
+
   return (<>
     <Helmet>
       <meta charSet="utf-8" />
@@ -64,14 +76,9 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, onSearchFocus, ch
             aria-label="Search" defaultValue={ctx.query || query || undefined}
             autoFocus={searchAutoFocus}
             onChange={evt => onSearch(evt.target.value)}
-          // onFocus={onSearchFocus && (() => onSearchFocus(true))}
-          // onBlur={onSearchFocus && (() => onSearchFocus(false))}
           />
         </form>
-        <Link className="btn btn-primary" to="/settings/">
-          <span className="d-none d-sm-inline">Settings</span>
-          <BsFillGearFill className="d-sm-none" css={{ marginTop: -3 }} />
-        </Link>
+        {settingsButton}
       </Container>
     </Navbar>
     <main>
