@@ -1,12 +1,12 @@
 import React from 'react'
 import { graphql, useStaticQuery } from 'gatsby'
 import { useSettings, Settings } from '../hooks/settings'
-import Layout from '../components/layout'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import Button from 'react-bootstrap/Button'
 import { useState, useEffect } from 'react';
 import { Input } from "../components/input"
+import { Calculator } from '../components/calculator';
 
 interface Location {
   name: string
@@ -193,48 +193,12 @@ export default () => {
     <ExploringXpCalc locations={locations.nodes} xp={xp} settings={settings} /> :
     <FishingXpCalc locations={locations.nodes} xp={xp} settings={settings} />
 
-  // Validation stuff.
-  const [validated, setValidated] = useState(false);
-
-  const onChange = (evt: React.FormEvent<HTMLFormElement>) => {
-    const form = evt.currentTarget
-    if (form.checkValidity() === false) {
-      evt.preventDefault()
-      evt.stopPropagation()
-    }
-    setValidated(true)
-  }
-
-  return <Layout pageTitle="XP Calculator">
-    <h1>XP Calculator</h1>
-    <Form
-      onSubmit={evt => evt.preventDefault()}
-      onChange={onChange}
-      noValidate validated={validated}
-      css={{
-        "&.was-validated *:valid": {
-          borderColor: "#ced4da !important",
-          backgroundImage: "none !important",
-          "&:focus": {
-            boxShadow: "0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important",
-          },
-        },
-        "&.was-validated .form-check-input:valid": {
-          borderColor: "rgba(0, 0, 0, 0.25) !important",
-          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e") !important`,
-          "&:checked": {
-            backgroundColor: "#0d6efd !important",
-            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e") !important`,
-          },
-        },
-      }}
-    >
-      <LevelInput setXp={setXp} xpMap={xpMap} />
-      <Input.Select id="skill" label="Skill" defaultValue={skill} onChange={val => setSkill(val)}>
-        <option value="exploring">Exploring</option>
-        <option value="fishing">Fishing</option>
-      </Input.Select>
-      {skillCalc}
-    </Form>
-  </Layout>
+  return <Calculator pageTitle="XP Calculator">
+    <LevelInput setXp={setXp} xpMap={xpMap} />
+    <Input.Select id="skill" label="Skill" defaultValue={skill} onChange={val => setSkill(val)}>
+      <option value="exploring">Exploring</option>
+      <option value="fishing">Fishing</option>
+    </Input.Select>
+    {skillCalc}
+  </Calculator>
 }
