@@ -8,19 +8,53 @@ import Layout from '../components/layout'
 import List from '../components/list'
 import { useSettings } from '../hooks/settings'
 
+interface Quest {
+  name: string
+  fromImage: string
+  requiresFarming: number | null
+  requiresFishing: number | null
+  requiresCrafting: number | null
+  requiresExploring: number | null
+  text: string
+  fields: {
+    path: string
+  }
+}
+
+
+const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
+  if (!showText && !showLevels) {
+    return undefined
+  }
+  let text = []
+  if (showLevels) {
+    const levelsText: JSX.Element[] = []
+    if (q.requiresFarming) {
+      levelsText.push(<span className="me-2"><b className="me-1">Farming:</b>{q.requiresFarming}</span>)
+    }
+    if (q.requiresFishing) {
+      levelsText.push(<span className="me-2"><b className="me-1">Fishing:</b>{q.requiresFishing}</span>)
+    }
+    if (q.requiresCrafting) {
+      levelsText.push(<span className="me-2"><b className="me-1">Crafting:</b>{q.requiresCrafting}</span>)
+    }
+    if (q.requiresExploring) {
+      levelsText.push(<span className="me-2"><b className="me-1">Exploring:</b>{q.requiresExploring}</span>)
+    }
+    text.push(<div>{levelsText}</div>)
+  }
+  if (showText) {
+    text.push(<div>{q.text}</div>)
+  }
+  return text
+}
+
 interface QuestlinesProps {
   data: {
     questline: {
       name: string
       image: string
-      quests: {
-        name: string
-        fromImage: string
-        text: string
-        fields: {
-          path: string
-        }
-      }[]
+      quests: Quest[]
       fields: {
         path: string
       }
@@ -28,9 +62,12 @@ interface QuestlinesProps {
   }
 }
 
+
+
 export default ({ data: { questline } }: QuestlinesProps) => {
   const settings = useSettings()[0]
   const [showText, setShowText] = useState(false)
+  const [showLevels, setshowLevels] = useState(false)
   return <Layout pageTitle={questline.name}>
     <h1>
       <img src={"https://farmrpg.com" + questline.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
@@ -39,8 +76,9 @@ export default ({ data: { questline } }: QuestlinesProps) => {
     </h1>
     <p>
       <Input.Switch id="showText" label="Show Quest Text" defaultChecked={showText} onChange={setShowText} />
+      <Input.Switch id="showLevels" label="Show Quest Levels" defaultChecked={showLevels} onChange={setshowLevels} />
     </p>
-    <List items={questline.quests.map(q => ({ image: q.fromImage, lineOne: q.name, lineTwo: showText ? q.text : undefined, href: q.fields.path }))} bigLine={true} />
+    <List items={questline.quests.map(q => ({ image: q.fromImage, lineOne: q.name, lineTwo: questText(q, showText, showLevels), href: q.fields.path }))} bigLine={true} />
   </Layout>
 }
 
@@ -52,6 +90,10 @@ export const pageQuery = graphql`
       quests {
         name
         fromImage
+        requiresFarming
+        requiresFishing
+        requiresCrafting
+        requiresExploring
         text
         fields {
           path

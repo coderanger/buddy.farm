@@ -16,7 +16,7 @@ export interface ListItem {
   key?: string
   image: string
   lineOne: string
-  lineTwo?: string | false | null | undefined
+  lineTwo?: string | JSX.Element | false | null | undefined
   value?: string | false | null | undefined
   href?: string | false | null | undefined
   hrefSlugify?: string | false | null | undefined

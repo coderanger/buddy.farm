@@ -1,6 +1,6 @@
-import { graphql, useStaticQuery } from 'gatsby';
-import Layout from '../components/layout';
-import List from '../components/list';
+import { graphql, useStaticQuery } from 'gatsby'
+import Layout from '../components/layout'
+import List from '../components/list'
 
 interface ExploringQuery {
   locations: {
