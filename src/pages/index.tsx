@@ -130,7 +130,7 @@ export default () => {
         Use the search box above to look up items, locations, pets, quests, or more!
       </p>
       <p>
-        Check out the <Link to="/settings/">settings</Link> to configure your perks and other settings. <b>Yes there is a dark mode now.</b>
+        Check out the <Link to="/settings/">settings</Link> to configure your perks and other preferences. <b>Yes there is a dark mode now.</b>
       </p>
     </div>
     <Row>
