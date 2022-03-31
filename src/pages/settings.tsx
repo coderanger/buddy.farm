@@ -9,10 +9,11 @@ interface SwitchSettingProps {
   id: string
   label: string
   settings: Settings
+  onChange?: (val: boolean) => void
 }
 
-const SwitchSetting = ({ id, label, settings }: SwitchSettingProps) => (
-  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} />
+const SwitchSetting = ({ id, label, settings, onChange }: SwitchSettingProps) => (
+  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} onChange={onChange} />
 )
 
 interface TextSettingProps {
@@ -56,11 +57,19 @@ export default () => {
     }
     setSettings(data)
   }
+
+  // Slight duplication of logic from layout.tsx but this seems a lot simpler and unlikely to change much.
+  const setDarkMode = (val: boolean) => {
+    const root = document.getElementsByTagName("html")[0]
+    root.classList[val ? "add" : "remove"]("dark")
+  }
+
   const secretKnockEnabled = secretKnock >= 3
   return <Layout pageTitle="Settings" settingsBack={true}>
     <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
         <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
+        <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} onChange={setDarkMode} />
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
         <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
         <div className={secretKnockEnabled ? "" : "d-none"}>

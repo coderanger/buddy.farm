@@ -1,4 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-dark-5/dist/css/bootstrap-nightshade.css'
 
 import { Link, navigate } from 'gatsby'
 import React, { useContext, useState, useEffect } from 'react'
@@ -13,6 +14,7 @@ import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
 
 import { GlobalContext } from '../utils/context'
 import { debounce } from '../utils/debounce'
+import { useSettings } from '../hooks/settings'
 
 const navigateToSearch = debounce((query: string, setSearchFired: (arg0: boolean) => void) => {
   console.debug("defaultOnSearch actually navigating", query)
@@ -33,6 +35,7 @@ interface LayoutProps {
 const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
   const [searchFired, setSearchFired] = useState(false)
+  const settings = useSettings()[0]
   if (!onSearch) {
     onSearch = (query: string): void => {
       console.debug("defaultOnSearch firing", query)
@@ -49,6 +52,16 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
     return () => clipboard.destroy()
   })
 
+  useEffect(() => {
+    if (typeof document !== undefined) {
+      const root = document.getElementsByTagName("html")[0]
+      root.classList[settings.darkMode ? "add" : "remove"]("dark")
+    }
+  }, [settings.darkMode])
+
+  // Typescript otherwise complains that onSearch could be undefined even though it can't be.
+  const onSearchTypescriptSigh = onSearch
+
   return (<>
     <Helmet>
       <meta charSet="utf-8" />
@@ -63,7 +76,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
           <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
             aria-label="Search" defaultValue={ctx.query || query || undefined}
             autoFocus={searchAutoFocus}
-            onChange={evt => onSearch(evt.target.value)}
+            onChange={evt => onSearchTypescriptSigh(evt.target.value)}
           />
         </form>
         <Link className="btn btn-primary" to="/settings/" onClick={settingsBack ? (evt => { evt.preventDefault(); navigate(-1) }) : undefined}>

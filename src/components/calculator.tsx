@@ -36,6 +36,9 @@ export const Calculator = ({ pageTitle, children }: CalculatorProps) => {
           "&:focus": {
             boxShadow: "0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important",
           },
+          "html.dark &": {
+            borderColor: "#515151 !important",
+          },
         },
         "&.was-validated .form-check-input:valid": {
           borderColor: "rgba(0, 0, 0, 0.25) !important",
