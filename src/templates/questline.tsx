@@ -1,12 +1,12 @@
 
 import { graphql } from 'gatsby'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { CopyButton } from '../components/clipboard'
 import { Input } from '../components/input'
 import Layout from '../components/layout'
 import List from '../components/list'
-import { useSettings } from '../hooks/settings'
+import { GlobalContext } from '../utils/context'
 
 interface Quest {
   name: string
@@ -65,7 +65,8 @@ interface QuestlinesProps {
 
 
 export default ({ data: { questline } }: QuestlinesProps) => {
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const [showText, setShowText] = useState(false)
   const [showLevels, setshowLevels] = useState(false)
   return <Layout pageTitle={questline.name}>
@@ -78,7 +79,12 @@ export default ({ data: { questline } }: QuestlinesProps) => {
       <Input.Switch id="showText" label="Show Quest Text" defaultChecked={showText} onChange={setShowText} />
       <Input.Switch id="showLevels" label="Show Quest Levels" defaultChecked={showLevels} onChange={setshowLevels} />
     </p>
-    <List items={questline.quests.map(q => ({ image: q.fromImage, lineOne: q.name, lineTwo: questText(q, showText, showLevels), href: q.fields.path }))} bigLine={true} />
+    <List items={questline.quests.map(q => ({
+      image: q.fromImage,
+      lineOne: q.name,
+      lineTwo: questText(q, showText, showLevels),
+      href: q.fields.path
+    }))} bigLine={true} />
   </Layout>
 }
 

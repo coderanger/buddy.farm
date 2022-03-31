@@ -14,7 +14,6 @@ import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
 
 import { GlobalContext } from '../utils/context'
 import { debounce } from '../utils/debounce'
-import { useSettings } from '../hooks/settings'
 
 const navigateToSearch = debounce((query: string, setSearchFired: (arg0: boolean) => void) => {
   console.debug("defaultOnSearch actually navigating", query)
@@ -35,7 +34,6 @@ interface LayoutProps {
 const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
   const [searchFired, setSearchFired] = useState(false)
-  const settings = useSettings()[0]
   if (!onSearch) {
     onSearch = (query: string): void => {
       console.debug("defaultOnSearch firing", query)
@@ -51,13 +49,6 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
     const clipboard = new ClipboardJS(".clipboard")
     return () => clipboard.destroy()
   })
-
-  useEffect(() => {
-    if (typeof document !== undefined) {
-      const root = document.getElementsByTagName("html")[0]
-      root.classList[settings.darkMode ? "add" : "remove"]("dark")
-    }
-  }, [settings.darkMode])
 
   // Typescript otherwise complains that onSearch could be undefined even though it can't be.
   const onSearchTypescriptSigh = onSearch

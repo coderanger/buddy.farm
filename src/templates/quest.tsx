@@ -1,10 +1,11 @@
 import { graphql } from 'gatsby'
 import { DateTime } from 'luxon'
+import { useContext } from 'react'
 
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
 import List from '../components/list'
-import { useSettings } from '../hooks/settings'
+import { GlobalContext } from '../utils/context'
 
 interface ItemQuantity {
   quantity: number
@@ -98,7 +99,8 @@ interface QuestProps {
 }
 
 export default ({ data: { quest } }: QuestProps) => {
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const questData = []
   // Levels.
   if (quest.requiresFarming) {

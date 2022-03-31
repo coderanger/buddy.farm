@@ -1,11 +1,12 @@
 import { graphql } from 'gatsby'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 
 import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
-import { Settings, useSettings } from '../hooks/settings'
+import { Settings } from '../hooks/settings'
 import { formatDropRate } from '../utils/format'
 import { CopyButton } from '../components/clipboard'
+import { GlobalContext } from '../utils/context'
 
 interface DropRates {
   nodes: {
@@ -358,7 +359,8 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
 }
 
 export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings } }: ItemProps) => {
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
 
   useEffect(() => {

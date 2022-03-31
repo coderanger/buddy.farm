@@ -1,9 +1,10 @@
 import { graphql } from 'gatsby'
+import { useContext } from 'react'
 
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
 import List from '../components/list'
-import { useSettings } from '../hooks/settings'
+import { GlobalContext } from '../utils/context'
 
 interface PetItem {
   name: string
@@ -50,7 +51,8 @@ interface PetProps {
 }
 
 export default ({ data: { pet } }: PetProps) => {
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const petData = []
   petData.push({
     key: "cost",

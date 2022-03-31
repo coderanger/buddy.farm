@@ -1,11 +1,12 @@
 
 import { graphql } from 'gatsby'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
-import { Settings, useSettings } from '../hooks/settings'
+import { Settings } from '../hooks/settings'
+import { GlobalContext } from '../utils/context'
 import { formatDropRate } from '../utils/format'
 
 interface DropRates {
@@ -86,7 +87,8 @@ interface LocationProps {
 }
 
 export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDrops } }: LocationProps) => {
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
 
   useEffect(() => {

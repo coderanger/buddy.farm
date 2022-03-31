@@ -1,12 +1,13 @@
-import React from 'react'
 import { graphql, useStaticQuery } from 'gatsby'
-import { useSettings, Settings } from '../hooks/settings'
+import React, { useContext, useEffect, useState } from 'react'
+import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
-import Button from 'react-bootstrap/Button'
-import { useState, useEffect } from 'react';
-import { Input } from "../components/input"
-import { Calculator } from '../components/calculator';
+
+import { Calculator } from '../components/calculator'
+import { Input } from '../components/input'
+import { Settings } from '../hooks/settings'
+import { GlobalContext } from '../utils/context'
 
 interface Location {
   name: string
@@ -180,7 +181,7 @@ export default () => {
     }
   `)
 
-  const settings = useSettings()[0]
+  const ctx = useContext(GlobalContext)
   const [xp, setXp] = useState(0)
   const [skill, setSkill] = useState("exploring")
 
@@ -190,8 +191,8 @@ export default () => {
   }
 
   const skillCalc = skill === "exploring" ?
-    <ExploringXpCalc locations={locations.nodes} xp={xp} settings={settings} /> :
-    <FishingXpCalc locations={locations.nodes} xp={xp} settings={settings} />
+    <ExploringXpCalc locations={locations.nodes} xp={xp} settings={ctx.settings} /> :
+    <FishingXpCalc locations={locations.nodes} xp={xp} settings={ctx.settings} />
 
   return <Calculator pageTitle="XP Calculator">
     <LevelInput setXp={setXp} xpMap={xpMap} />

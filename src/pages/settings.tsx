@@ -1,19 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Form from 'react-bootstrap/Form'
 
 import Layout from '../components/layout'
-import { useSettings, Settings } from '../hooks/settings'
+import { Settings } from '../hooks/settings'
 import { Input } from "../components/input"
+import { GlobalContext } from '../utils/context'
 
 interface SwitchSettingProps {
   id: string
   label: string
   settings: Settings
-  onChange?: (val: boolean) => void
 }
 
-const SwitchSetting = ({ id, label, settings, onChange }: SwitchSettingProps) => (
-  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} onChange={onChange} />
+const SwitchSetting = ({ id, label, settings }: SwitchSettingProps) => (
+  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} />
 )
 
 interface TextSettingProps {
@@ -42,7 +42,8 @@ const SelectSetting = ({ id, label, settings, children }: SelectSettingProps) =>
 )
 
 export default () => {
-  const [settings, setSettings] = useSettings()
+  const ctx = useContext(GlobalContext)
+  const settings = ctx.settings
   const [secretKnock, setSecretKnock] = useState(0)
   const formRef = React.createRef<HTMLFormElement>()
   const onChange = () => {
@@ -55,13 +56,7 @@ export default () => {
     for (const [key, value] of new URLSearchParams(new FormData(formRef.current))) {
       data[key] = value
     }
-    setSettings(data)
-  }
-
-  // Slight duplication of logic from layout.tsx but this seems a lot simpler and unlikely to change much.
-  const setDarkMode = (val: boolean) => {
-    const root = document.getElementsByTagName("html")[0]
-    root.classList[val ? "add" : "remove"]("dark")
+    ctx.setSettings(data)
   }
 
   const secretKnockEnabled = secretKnock >= 3
@@ -69,7 +64,7 @@ export default () => {
     <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
       <fieldset>
         <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
-        <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} onChange={setDarkMode} />
+        <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} />
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
         <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
         <div className={secretKnockEnabled ? "" : "d-none"}>
