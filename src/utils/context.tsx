@@ -32,10 +32,9 @@ const Provider = ({ children }: ProviderProps) => {
 
   useEffect(() => {
     if (typeof document !== undefined) {
-      const root = document.getElementsByTagName("html")[0]
-      root.classList[settings.darkMode ? "add" : "remove"]("dark")
+      document.documentElement.classList[settings.darkMode ? "add" : "remove"]("dark")
       // @ts-ignore
-      typeof window !== "undefined" && window.gtag && window.gtag("set", { "darkMode": settings.darkMode ? "true" : "false" })
+      typeof window !== "undefined" && window.gtag && window.gtag("set", "user_properties", { dark_mode: settings.darkMode ? "true" : "false" })
     }
   }, [settings.darkMode])
 
