@@ -95,16 +95,6 @@ interface FormInputProps<T> extends FormProps {
 }
 
 Input.Form = <T,>({ valueSetter, ...props }: FormInputProps<T>) => {
-  // const onChange = (evt: React.FormEvent<HTMLFormElement>) => {
-  //   const data = { } as FormDataBase
-  //   // Typescript is wrong about the inputs to URLSearchParams.
-  //   // @ts-ignore
-  //   for (const [key, value] of new URLSearchParams(new FormData(evt.currentTarget))) {
-  //     data[key] = value
-  //   }
-  //   setter(data as T)
-  // }
-
   const onChangeOriginal = props.onChange
   props.onChange = (evt: React.FormEvent<HTMLFormElement>) => {
     // Call the provided one if needed.

@@ -118,7 +118,25 @@ export default () => {
       pattern="^\d{3,100}$"
       type="number"
     />
-    {/* <Input id="perksCollapse" label="Perks" children={[]} onClick={() => console.log("asdf")} /> */}
+    <Input.Select
+      id="location"
+      label="Location"
+      defaultValue={data.location}
+    >
+      {Object.values(locations).sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(l => (
+        <option key={l.name} value={l.name}>{l.name}</option>
+      ))}
+    </Input.Select>
+    <Input.Switch
+      id="makeCiders"
+      label="Make Ciders"
+      defaultChecked={data.makeCiders}
+    />
+    <Input.Switch
+      id="makePalmers"
+      label="Make Arnold Palmers"
+      defaultChecked={data.makePalmers}
+    />
     <Accordion className="mb-3">
       <Accordion.Item eventKey="0">
         <Accordion.Header>Perks</Accordion.Header>
@@ -158,25 +176,6 @@ export default () => {
         </Accordion.Body>
       </Accordion.Item>
     </Accordion>
-    <Input.Select
-      id="location"
-      label="Location"
-      defaultValue={data.location}
-    >
-      {Object.values(locations).sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(l => (
-        <option key={l.name} value={l.name}>{l.name}</option>
-      ))}
-    </Input.Select>
-    <Input.Switch
-      id="makeCiders"
-      label="Make Ciders"
-      defaultChecked={data.makeCiders}
-    />
-    <Input.Switch
-      id="makePalmers"
-      label="Make Arnold Palmers"
-      defaultChecked={data.makePalmers}
-    />
     <Input.Text id="apples" label="Apples" disabled={true} value={apples.toLocaleString()} />
     <Input.Text id="oj" label="OJ" disabled={true} value={oj.toLocaleString()} />
     <Input.Text id="lemOrPalmers" label={data.makePalmers ? "Arnold Palmers" : "Lemonade"} disabled={true} value={(data.makePalmers ? palmers : lemonade).toLocaleString()} />
