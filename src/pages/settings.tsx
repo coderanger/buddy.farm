@@ -100,6 +100,7 @@ export default () => {
         <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' after="%" settings={settings} />
         <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' after="%" settings={settings} />
         <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' after="%" settings={settings} />
+        <TextSetting id="resourceSaver" label="Resource Saver" placeholder='20' after="%" settings={settings} />
       </fieldset>
     </Form>
   </Layout>

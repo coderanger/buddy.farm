@@ -4,7 +4,7 @@ const LOCAL_STORAGE_KEY = "buddyFarmSettings"
 
 export type Settings = { [key: string]: string }
 
-export const useSettings = (): [Settings, (value: Settings) => void] => {
+export const useSettings = (): [Settings, React.Dispatch<React.SetStateAction<Settings>>] => {
   const inBrowser = typeof document !== 'undefined'
   const [settings, setSettings] = useState((): Settings => {
     if (!inBrowser) {
@@ -26,3 +26,15 @@ export const useSettings = (): [Settings, (value: Settings) => void] => {
 
   return [settings, setSettings]
 }
+
+export const mergeSettings = (key: string, value: any) => (
+  (state: Settings) => {
+    if (value === undefined) {
+      const newState = { ...state }
+      delete newState[key]
+      return newState
+    } else {
+      return { ...state, [key]: value.toString() }
+    }
+  }
+)

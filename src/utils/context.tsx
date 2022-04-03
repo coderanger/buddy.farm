@@ -5,11 +5,11 @@ import { Settings, useSettings } from '../hooks/settings'
 
 interface ContextProps {
   searchables: Searchable[] | null
-  setSearchables: (arg0: Searchable[] | null) => void
+  setSearchables: React.Dispatch<React.SetStateAction<Searchable[] | null>>
   query: string | null
-  setQuery: (arg0: string | null) => void
+  setQuery: React.Dispatch<React.SetStateAction<string | null>>
   settings: Settings
-  setSettings: (settings: Settings) => void
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>
 }
 
 export const GlobalContext = React.createContext<ContextProps>({

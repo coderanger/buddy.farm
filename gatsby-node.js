@@ -317,7 +317,14 @@ exports.createPages = async ({ actions, graphql }) => {
       searchText: "xp calculator",
       type: null,
       href: "/xpcalc/",
-    }
+    },
+    {
+      name: "Orchard Calculator",
+      image: "/img/items/7210.png",
+      searchText: "orchard calculator",
+      type: null,
+      href: "/orchardcalc/",
+    },
   ]
   for (const node of searchData.locations.nodes) {
     searchables.push(nodeToSearchable(node))

@@ -1,28 +1,45 @@
 import { useStaticQuery, graphql } from "gatsby"
 
 interface LocationsQuery {
-  allLocationsJson: {
+  locations: {
     nodes: {
       jsonId: string
       name: string
       image: string
+      type: string
+      extra: {
+        baseDropRate: number
+      }
+      fields: {
+        path: string
+      }
     }[]
   }
 }
 
-export const useLocations = () => {
-  const { allLocationsJson }: LocationsQuery = useStaticQuery(
+export const useLocations = (type: string | undefined) => {
+  const { locations }: LocationsQuery = useStaticQuery(
     graphql`
     query {
-      allLocationsJson {
+      locations: allLocationsJson {
         nodes {
           jsonId
           image
           name
+          type
+          extra {
+            baseDropRate
+          }
+          fields {
+            path
+          }
         }
       }
     }
     `
   )
-  return Object.fromEntries(allLocationsJson.nodes.map(n => [n.name, n]))
+  if (type !== undefined) {
+    locations.nodes = locations.nodes.filter(l => l.type === type)
+  }
+  return Object.fromEntries(locations.nodes.map(n => [n.name, n]))
 }

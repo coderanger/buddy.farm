@@ -3,12 +3,15 @@ import Form from 'react-bootstrap/Form'
 import { Link } from 'gatsby'
 import React, { useState } from 'react'
 
-interface CalculatorProps {
+import { Input } from '../components/input'
+
+interface CalculatorProps<T> {
   pageTitle: string
+  valueSetter?: React.Dispatch<React.SetStateAction<T>>
   children: JSX.Element[] | JSX.Element
 }
 
-export const Calculator = ({ pageTitle, children }: CalculatorProps) => {
+export const Calculator = <T,>({ pageTitle, valueSetter, children }: CalculatorProps<T>) => {
   const [validated, setValidated] = useState(false);
 
   const onChange = (evt: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +28,8 @@ export const Calculator = ({ pageTitle, children }: CalculatorProps) => {
     <p>
       Ensure your perks are set correctly in <Link to="/settings/">Settings</Link> for maximum accuracy.
     </p>
-    <Form
+    <Input.Form
+      valueSetter={valueSetter}
       onSubmit={evt => evt.preventDefault()}
       onChange={onChange}
       noValidate validated={validated}
@@ -51,6 +55,6 @@ export const Calculator = ({ pageTitle, children }: CalculatorProps) => {
       }}
     >
       {children}
-    </Form>
+    </Input.Form>
   </Layout>
 }
