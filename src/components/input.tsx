@@ -1,8 +1,14 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Form, { FormProps } from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+
+interface InputContextValues {
+  id: string
+}
+
+const InputContext = React.createContext({ id: "" } as InputContextValues)
 
 interface InputProps extends React.HTMLAttributes<HTMLElement> {
   id: string
@@ -11,12 +17,14 @@ interface InputProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export const Input = ({ id, label, children, ...props }: InputProps) => (
-  <Form.Group as={Row} className="mb-3" controlId={id} {...props}>
-    <Form.Label column sm={2}>{label}</Form.Label>
-    <Col sm={10}>
-      {children}
-    </Col>
-  </Form.Group>
+  <InputContext.Provider value={{ id }}>
+    <Form.Group as={Row} className="mb-3" controlId={id} {...props}>
+      <Form.Label column sm={2}>{label}</Form.Label>
+      <Col sm={10}>
+        {children}
+      </Col>
+    </Form.Group>
+  </InputContext.Provider>
 )
 
 interface SwitchInputProps {
@@ -42,7 +50,7 @@ interface TextInputProps {
   id: string
   label: string
   placeholder?: string
-  after?: string
+  after?: string | JSX.Element
   value?: string
   defaultValue?: string
   disabled?: boolean
@@ -64,7 +72,7 @@ Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, pa
         pattern={pattern}
         data-input-type={type}
       />
-      {after && <InputGroup.Text>{after}</InputGroup.Text>}
+      {typeof after === "string" ? <InputGroup.Text>{after}</InputGroup.Text> : after}
     </InputGroup>
   </Input>
 )
@@ -89,6 +97,20 @@ Input.Select = ({ id, label, defaultValue, onChange, children }: SelectInputProp
   </Input>
 )
 
+
+interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  value: string
+  data: string
+  label: string
+}
+
+Input.RadioButton = ({ label, data, value, ...props }: RadioButtonProps) => {
+  const ctx = useContext(InputContext)
+  return <>
+    <input type="radio" className="btn-check" name={ctx.id} id={`${ctx.id}-${value}`} autoComplete="off" value={value} defaultChecked={data === value} {...props} />
+    <label className="btn btn-outline-primary" htmlFor={`${ctx.id}-${value}`}>{label}</label>
+  </>
+}
 
 interface FormInputProps<T> extends FormProps {
   valueSetter?: React.Dispatch<React.SetStateAction<T>>

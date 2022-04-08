@@ -1,14 +1,15 @@
-import Layout from '../components/layout'
-import Form from 'react-bootstrap/Form'
 import { Link } from 'gatsby'
 import React, { useState } from 'react'
+import Accordion from 'react-bootstrap/Accordion'
+import Form from 'react-bootstrap/Form'
 
 import { Input } from '../components/input'
+import Layout from '../components/layout'
 
 interface CalculatorProps<T> {
   pageTitle: string
   valueSetter?: React.Dispatch<React.SetStateAction<T>>
-  children: JSX.Element[] | JSX.Element
+  children: React.ReactNode
 }
 
 export const Calculator = <T,>({ pageTitle, valueSetter, children }: CalculatorProps<T>) => {
@@ -57,4 +58,19 @@ export const Calculator = <T,>({ pageTitle, valueSetter, children }: CalculatorP
       {children}
     </Input.Form>
   </Layout>
+}
+
+interface CalculatorPerksProps {
+  children: JSX.Element | JSX.Element[]
+}
+
+Calculator.Perks = ({ children }: CalculatorPerksProps) => {
+  return <Accordion className="mb-3">
+    <Accordion.Item eventKey="0">
+      <Accordion.Header>Perks</Accordion.Header>
+      <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>
+        {children}
+      </Accordion.Body>
+    </Accordion.Item>
+  </Accordion>
 }

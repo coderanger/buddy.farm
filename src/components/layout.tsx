@@ -28,7 +28,7 @@ interface LayoutProps {
   searchAutoFocus?: boolean | undefined
   onSearch?: (query: string) => void
   settingsBack?: boolean
-  children: JSX.Element[] | JSX.Element
+  children: React.ReactNode
 }
 
 const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {

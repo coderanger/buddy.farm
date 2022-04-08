@@ -68,6 +68,10 @@ exports.createSchemaCustomization = ({ actions }) => {
     type LocationsJson implements Node {
       extra: LocationExtraJson! @link(from: "name", by: "name")
     }
+
+    type TowerJson implements Node {
+      item: ItemsJson @link(from: "itemName", by: "name")
+    }
   `
   createTypes(typeDefs)
 }
@@ -312,6 +316,13 @@ exports.createPages = async ({ actions, graphql }) => {
    */
   const searchables = [
     {
+      name: "The Tower",
+      image: "/img/items/tower.png",
+      searchText: "the tower",
+      type: null,
+      href: "/tower/",
+    },
+    {
       name: "XP Calculator",
       image: "/img/items/7210.png",
       searchText: "xp calculator",
@@ -324,6 +335,13 @@ exports.createPages = async ({ actions, graphql }) => {
       searchText: "orchard calculator",
       type: null,
       href: "/orchardcalc/",
+    },
+    {
+      name: "Tower Calculator",
+      image: "/img/items/7210.png",
+      searchText: "Tower calculator",
+      type: null,
+      href: "/towercalc/",
     },
   ]
   for (const node of searchData.locations.nodes) {

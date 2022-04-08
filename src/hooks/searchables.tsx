@@ -93,6 +93,13 @@ export const useSearchables = () => {
   )
   const searchables: Searchable[] = [
     {
+      name: "The Tower",
+      image: "/img/items/tower.png",
+      searchText: "the tower",
+      type: null,
+      href: "/tower/",
+    },
+    {
       name: "XP Calculator",
       image: "/img/items/7210.png",
       searchText: "xp calculator",
@@ -105,6 +112,13 @@ export const useSearchables = () => {
       searchText: "orchard calculator",
       type: null,
       href: "/orchardcalc/",
+    },
+    {
+      name: "Tower Calculator",
+      image: "/img/items/7210.png",
+      searchText: "Tower calculator",
+      type: null,
+      href: "/towercalc/",
     },
   ]
   for (const node of locations.nodes) {

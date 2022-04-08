@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react'
-import Accordion from "react-bootstrap/Accordion"
 
 import { Calculator } from '../components/calculator'
 import { Input } from '../components/input'
@@ -137,45 +136,41 @@ export default () => {
       label="Make Arnold Palmers"
       defaultChecked={data.makePalmers}
     />
-    <Accordion className="mb-3">
-      <Accordion.Item eventKey="0">
-        <Accordion.Header>Perks</Accordion.Header>
-        <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>
-          <Input.Text
-            id="forester"
-            label="Forester"
-            placeholder="30"
-            after="%"
-            defaultValue={values.forester?.toString()}
-            pattern="^\d{1,2}$"
-            type="number"
-          />
-          <Input.Text
-            id="resourceSaver"
-            label="Resource Saver"
-            placeholder='20'
-            after="%"
-            defaultValue={values.resourceSaver?.toString()}
-            pattern="^\d{1,2}$"
-            type="number"
-          />
-          <Input.Text
-            id="wanderer"
-            label="Wanderer"
-            placeholder='33'
-            after="%"
-            defaultValue={values.wanderer?.toString()}
-            pattern="^\d{1,2}$"
-            type="number"
-          />
-          <Input.Switch
-            id="lemonSqueezer"
-            label="Lemon Squeezer"
-            defaultChecked={data.lemonSqueezer}
-          />
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+
+    <Calculator.Perks>
+      <Input.Text
+        id="forester"
+        label="Forester"
+        placeholder="30"
+        after="%"
+        defaultValue={values.forester?.toString()}
+        pattern="^\d{1,2}$"
+        type="number"
+      />
+      <Input.Text
+        id="resourceSaver"
+        label="Resource Saver"
+        placeholder='20'
+        after="%"
+        defaultValue={values.resourceSaver?.toString()}
+        pattern="^\d{1,2}$"
+        type="number"
+      />
+      <Input.Text
+        id="wanderer"
+        label="Wanderer"
+        placeholder='33'
+        after="%"
+        defaultValue={values.wanderer?.toString()}
+        pattern="^\d{1,2}$"
+        type="number"
+      />
+      <Input.Switch
+        id="lemonSqueezer"
+        label="Lemon Squeezer"
+        defaultChecked={data.lemonSqueezer}
+      />
+    </Calculator.Perks>
     <Input.Text id="apples" label="Apples" disabled={true} value={apples.toLocaleString()} />
     <Input.Text id="oj" label="OJ" disabled={true} value={oj.toLocaleString()} />
     <Input.Text id="lemOrPalmers" label={data.makePalmers ? "Arnold Palmers" : "Lemonade"} disabled={true} value={(data.makePalmers ? palmers : lemonade).toLocaleString()} />

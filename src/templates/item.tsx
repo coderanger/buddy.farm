@@ -114,6 +114,12 @@ interface Building {
   sort: number
 }
 
+interface Tower {
+  level: number
+  order: number
+  quantity: number
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -145,6 +151,7 @@ interface ItemProps {
     locksmithBox: LocksmithBox | null
     locksmithItems: { nodes: LocksmithItems[] }
     buildings: { nodes: Building[] }
+    tower: { nodes: Tower[] }
   }
 }
 
@@ -233,10 +240,11 @@ interface ItemListProps {
   locksmithItems: LocksmithItems[]
   wishingWell: WishingWell[]
   buildings: Building[]
+  tower: Tower[]
   settings: Settings
 }
 
-const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, buildings, settings }: ItemListProps) => {
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, buildings, tower, settings }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
@@ -333,6 +341,16 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     value: b.frequency,
   })))
 
+  // Tower sources.
+  listItems.push(...tower.sort((a, b) => a.level === b.level ? a.order - b.order : a.level - b.level).map(t => ({
+    key: `t${t.level}${t.order}`,
+    image: "/img/items/tower.png",
+    lineOne: "Tower",
+    lineTwo: `x${t.quantity.toLocaleString()}`,
+    value: `Level ${t.level}`,
+    href: `/tower/#level${t.level}`,
+  })))
+
   // Shop sources.
   if (item.buyPrice) {
     listItems.push({
@@ -358,7 +376,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings, tower } }: ItemProps) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
@@ -383,7 +401,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       {item.name}
       <CopyButton text={settings.staffMode ? `buddy.farm${item.fields.path} https://buddy.farm${item.fields.path}` : `buddy.farm${item.fields.path}`} />
     </h1>
-    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} settings={settings} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} settings={settings} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
@@ -628,6 +646,15 @@ export const pageQuery = graphql`
         image
         frequency
         sort
+      }
+    }
+
+    # The Tower.
+    tower: allTowerJson(filter: {item: {name: {eq: $name}}}) {
+      nodes {
+        level
+        order
+        quantity
       }
     }
 
