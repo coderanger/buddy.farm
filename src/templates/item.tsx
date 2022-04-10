@@ -125,6 +125,7 @@ interface Item {
   jsonId: string
   image: string
   manualFishingOnly: boolean
+  givable: boolean
   buyPrice: number | null
   fleaMarket: number | null
   dropMode: {
@@ -351,6 +352,17 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: `/tower/#level${t.level}`,
   })))
 
+  // Trading.
+  if (item.givable) {
+    listItems.push({
+      jsonId: "trading",
+      image: "/img/items/2392.png",
+      lineOne: "Trading",
+      lineTwo: "Ask in Trade or Giveaways chat",
+      value: "Mailable"
+    })
+  }
+
   // Shop sources.
   if (item.buyPrice) {
     listItems.push({
@@ -416,6 +428,7 @@ export const pageQuery = graphql`
       jsonId
       image
       manualFishingOnly
+      givable
       buyPrice
       fleaMarket
       dropMode {
