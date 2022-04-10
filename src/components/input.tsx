@@ -4,6 +4,8 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
+type InputTypes = undefined | "number"
+
 interface InputContextValues {
   id: string
 }
@@ -31,16 +33,18 @@ export interface SwitchInputProps {
   id: string
   label: string
   defaultChecked: boolean
+  disabled?: boolean
   onChange?: (value: boolean) => void
 }
 
-Input.Switch = ({ id, label, defaultChecked, onChange }: SwitchInputProps) => (
+Input.Switch = ({ id, label, defaultChecked, disabled, onChange }: SwitchInputProps) => (
   <Input id={id} label={label}>
     <Form.Check
       css={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", "& input": { marginTop: 0 } }}
       type="switch"
       name={id}
       defaultChecked={defaultChecked}
+      disabled={disabled}
       onChange={evt => onChange && onChange(evt.target.checked)}
     />
   </Input>
@@ -55,7 +59,7 @@ export interface TextInputProps {
   defaultValue?: string
   disabled?: boolean
   pattern?: string
-  type?: string
+  type?: InputTypes
   onChange?: (value: string) => void
 }
 
@@ -81,15 +85,17 @@ export interface SelectInputProps {
   id: string
   label: string
   defaultValue: string
+  type?: InputTypes
   onChange?: (value: string) => void
   children: JSX.Element[] | JSX.Element
 }
 
-Input.Select = ({ id, label, defaultValue, onChange, children }: SelectInputProps) => (
+Input.Select = ({ id, label, defaultValue, type, onChange, children }: SelectInputProps) => (
   <Input id={id} label={label}>
     <Form.Select
       name={id}
       defaultValue={defaultValue}
+      data-input-type={type}
       onChange={evt => onChange && onChange(evt.target.value)}
     >
       {children}
