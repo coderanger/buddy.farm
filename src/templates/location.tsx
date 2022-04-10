@@ -103,7 +103,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     <h1>
       <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {location.name}
-      <CopyButton text={settings.staffMode ? `buddy.farm${location.fields.path} https://buddy.farm${location.fields.path}` : `buddy.farm${location.fields.path}`} />
+      <CopyButton path={location.fields.path} />
     </h1>
     <LocationList location={location} drops={drops} settings={settings} />
   </Layout>

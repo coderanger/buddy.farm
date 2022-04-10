@@ -97,7 +97,7 @@ export default ({ data: { pet } }: PetProps) => {
     <h1>
       <img src={"https://farmrpg.com" + pet.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {pet.name}
-      <CopyButton text={settings.staffMode ? `buddy.farm${pet.fields.path} https://buddy.farm${pet.fields.path}` : `buddy.farm${pet.fields.path}`} />
+      <CopyButton path={pet.fields.path} />
     </h1>
     <List items={petData} />
     <PetItemsList label="Level 1" items={pet.level1Items} />

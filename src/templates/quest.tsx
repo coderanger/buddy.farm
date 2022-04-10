@@ -172,7 +172,7 @@ export default ({ data: { quest } }: QuestProps) => {
     <h1>
       <img src={"https://farmrpg.com" + quest.fromImage} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {quest.name}
-      <CopyButton text={settings.staffMode ? `buddy.farm${quest.fields.path} https://buddy.farm${quest.fields.path}` : `buddy.farm${quest.fields.path}`} />
+      <CopyButton path={quest.fields.path} />
     </h1>
     <List items={questData} bigLine={true} />
     <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} copyText={questToChatText(quest.name, quest.silverRequest, quest.itemRequests)} />

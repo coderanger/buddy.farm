@@ -399,7 +399,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
         data-clipboard-text={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}
       />
       {item.name}
-      <CopyButton text={settings.staffMode ? `buddy.farm${item.fields.path} https://buddy.farm${item.fields.path}` : `buddy.farm${item.fields.path}`} />
+      <CopyButton path={item.fields.path} />
     </h1>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} settings={settings} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />

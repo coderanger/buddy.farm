@@ -73,7 +73,7 @@ export default ({ data: { questline } }: QuestlinesProps) => {
     <h1>
       <img src={"https://farmrpg.com" + questline.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       {questline.name}
-      <CopyButton text={settings.staffMode ? `buddy.farm${questline.fields.path} https://buddy.farm${questline.fields.path}` : `buddy.farm${questline.fields.path}`} />
+      <CopyButton path={questline.fields.path} />
     </h1>
     <p>
       <Input.Switch id="showText" label="Show Quest Text" defaultChecked={showText} onChange={setShowText} />
