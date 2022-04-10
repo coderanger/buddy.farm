@@ -3,8 +3,10 @@ import { useEffect, useState } from "react"
 const LOCAL_STORAGE_KEY = "buddyFarmSettings"
 
 export type Settings = { [key: string]: string }
+export type SetSettings = React.Dispatch<React.SetStateAction<Settings>>
+export type SetSetting = (key: string, value: any) => void
 
-export const useSettings = (): [Settings, React.Dispatch<React.SetStateAction<Settings>>] => {
+export const useSettings = (): [Settings, SetSettings, SetSetting] => {
   const inBrowser = typeof document !== 'undefined'
   const [settings, setSettings] = useState((): Settings => {
     if (!inBrowser) {
@@ -12,7 +14,14 @@ export const useSettings = (): [Settings, React.Dispatch<React.SetStateAction<Se
     }
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY)
     if (raw) {
-      return JSON.parse(raw)
+      const data = JSON.parse(raw)
+      // Update from the old stuff.
+      for (const key in data) {
+        if (data[key] === "on") {
+          data[key] = true
+        }
+      }
+      return data
     } else {
       return {}
     }
@@ -24,7 +33,9 @@ export const useSettings = (): [Settings, React.Dispatch<React.SetStateAction<Se
     }
   }, inBrowser ? [LOCAL_STORAGE_KEY, settings] : [])
 
-  return [settings, setSettings]
+  const setSetting = (key: string, value: any) => setSettings(mergeSettings(key, value))
+
+  return [settings, setSettings, setSetting]
 }
 
 export const mergeSettings = (key: string, value: any) => (
@@ -34,7 +45,7 @@ export const mergeSettings = (key: string, value: any) => (
       delete newState[key]
       return newState
     } else {
-      return { ...state, [key]: value.toString() }
+      return { ...state, [key]: value }
     }
   }
 )

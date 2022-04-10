@@ -27,7 +27,7 @@ export const Input = ({ id, label, children, ...props }: InputProps) => (
   </InputContext.Provider>
 )
 
-interface SwitchInputProps {
+export interface SwitchInputProps {
   id: string
   label: string
   defaultChecked: boolean
@@ -46,7 +46,7 @@ Input.Switch = ({ id, label, defaultChecked, onChange }: SwitchInputProps) => (
   </Input>
 )
 
-interface TextInputProps {
+export interface TextInputProps {
   id: string
   label: string
   placeholder?: string
@@ -77,7 +77,7 @@ Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, pa
   </Input>
 )
 
-interface SelectInputProps {
+export interface SelectInputProps {
   id: string
   label: string
   defaultValue: string
@@ -98,7 +98,7 @@ Input.Select = ({ id, label, defaultValue, onChange, children }: SelectInputProp
 )
 
 
-interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: string
   data: string
   label: string

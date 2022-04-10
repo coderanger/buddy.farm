@@ -1,10 +1,12 @@
 import { Link } from 'gatsby'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Accordion from 'react-bootstrap/Accordion'
 import Form from 'react-bootstrap/Form'
 
 import { Input } from '../components/input'
 import Layout from '../components/layout'
+import { GlobalContext } from '../utils/context'
+import { Settings } from "../hooks/settings"
 
 interface CalculatorProps<T> {
   pageTitle: string
@@ -73,4 +75,29 @@ Calculator.Perks = ({ children }: CalculatorPerksProps) => {
       </Accordion.Body>
     </Accordion.Item>
   </Accordion>
+}
+
+// Compile values and defaults to a single set of data.
+const compileData = <T,>(values: Partial<T>, defaults: T) => {
+  const data: T = { ...defaults }
+  for (const key of Object.keys(values) as Array<keyof T>) {
+    const value = values[key]
+    if (value !== undefined) {
+      (data[key] as any) = value
+    }
+  }
+  return data as Readonly<T>
+}
+
+// Set up hooks for a calculator.
+Calculator.useData = <T,>(defaults: T, settingsFn: (settings: Settings) => Partial<T>): [Readonly<T>, Partial<T>, React.Dispatch<React.SetStateAction<Partial<T>>>] => {
+  const ctx = useContext(GlobalContext)
+  const defaultValues = settingsFn(ctx.settings)
+  const [values, setValues] = useState(defaultValues)
+  for (const key in defaultValues) {
+    useEffect(() => {
+      ctx.setSetting(key as string, values[key])
+    }, [values[key]])
+  }
+  return [compileData(values, defaults), values, setValues]
 }

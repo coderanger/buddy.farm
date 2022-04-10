@@ -25,17 +25,8 @@ const DEFAULT_DATA: TowerData = {
 }
 
 export default () => {
-  const ctx = useContext(GlobalContext)
-  const [values, setValues] = useState({
-  } as Partial<TowerData>)
-  // Combine inputs and defaults.
-  const data: TowerData = { ...DEFAULT_DATA }
-  for (const key of Object.keys(values) as Array<keyof TowerData>) {
-    const value = values[key]
-    if (value !== undefined) {
-      (data[key] as any) = value
-    }
-  }
+  const [data, values, setValues] = Calculator.useData(DEFAULT_DATA, () => ({}))
+
 
   // Calculations.
   let totalSilver = 0

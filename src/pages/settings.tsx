@@ -1,67 +1,45 @@
-import React, { useState, useContext } from 'react'
-import Form from 'react-bootstrap/Form'
+import React, { useContext, useState } from 'react'
 
+import { Input, SwitchInputProps, TextInputProps, SelectInputProps } from '../components/input'
 import Layout from '../components/layout'
 import { Settings } from '../hooks/settings'
-import { Input } from "../components/input"
 import { GlobalContext } from '../utils/context'
 
-interface SwitchSettingProps {
-  id: string
-  label: string
+interface SwitchSettingProps extends Omit<SwitchInputProps, "defaultChecked"> {
   settings: Settings
 }
 
-const SwitchSetting = ({ id, label, settings }: SwitchSettingProps) => (
-  <Input.Switch id={id} label={label} defaultChecked={!!settings[id]} />
+const SwitchSetting = ({ settings, ...props }: SwitchSettingProps) => (
+  <Input.Switch defaultChecked={!!settings[props.id]} {...props} />
 )
 
-interface TextSettingProps {
-  id: string
-  label: string
-  placeholder: string
-  after?: string
+interface TextSettingProps extends Omit<TextInputProps, "defaultValue"> {
   settings: Settings
 }
 
-const TextSetting = ({ id, label, placeholder, after, settings }: TextSettingProps) => (
-  <Input.Text id={id} label={label} placeholder={placeholder} after={after} defaultValue={settings[id]} />
+const TextSetting = ({ settings, ...props }: TextSettingProps) => (
+  <Input.Text defaultValue={settings[props.id]} {...props} />
 )
 
-interface SelectSettingProps {
+interface SelectSettingProps extends Omit<SelectInputProps, "defaultValue"> {
   id: string
   label: string
   settings: Settings
   children: JSX.Element[] | JSX.Element
 }
 
-const SelectSetting = ({ id, label, settings, children }: SelectSettingProps) => (
-  <Input.Select id={id} label={label} defaultValue={settings[id]}>
-    {children}
-  </Input.Select>
+const SelectSetting = ({ settings, ...props }: SelectSettingProps) => (
+  <Input.Select defaultValue={settings[props.id]} {...props} />
 )
 
 export default () => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [secretKnock, setSecretKnock] = useState(0)
-  const formRef = React.createRef<HTMLFormElement>()
-  const onChange = () => {
-    if (formRef.current === null) {
-      return
-    }
-    const data: { [key: string]: string } = {}
-    // Typescript is wrong about the inputs to URLSearchParams.
-    // @ts-ignore
-    for (const [key, value] of new URLSearchParams(new FormData(formRef.current))) {
-      data[key] = value
-    }
-    ctx.setSettings(data)
-  }
 
   const secretKnockEnabled = secretKnock >= 3
   return <Layout pageTitle="Settings" settingsBack={true}>
-    <Form ref={formRef} onChange={onChange} onSubmit={evt => evt.preventDefault()}>
+    <Input.Form valueSetter={ctx.setSettings}>
       <fieldset>
         <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
         <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} />
@@ -88,20 +66,20 @@ export default () => {
           <option value="">Plot Harvests</option>
           <option value="harvestAll">Harvest Alls</option>
         </SelectSetting>
-        <TextSetting id="cropRows" label="Crop Rows" placeholder='2' settings={settings} />
+        <TextSetting id="cropRows" label="Crop Rows" placeholder='2' type="number" settings={settings} />
       </fieldset>
       <fieldset>
         <legend>Perks</legend>
         <SwitchSetting id="ironDepot" label="Iron Depot" settings={settings} />
-        <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" settings={settings} />
+        <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" type="number" settings={settings} />
         <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
         <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
-        <TextSetting id="primerFarming" label="Bonus Farming XP" placeholder='0' after="%" settings={settings} />
-        <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' after="%" settings={settings} />
-        <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' after="%" settings={settings} />
-        <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' after="%" settings={settings} />
-        <TextSetting id="resourceSaver" label="Resource Saver" placeholder='20' after="%" settings={settings} />
+        <TextSetting id="primerFarming" label="Bonus Farming XP" placeholder='0' type="number" after="%" settings={settings} />
+        <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' type="number" after="%" settings={settings} />
+        <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' type="number" after="%" settings={settings} />
+        <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' type="number" after="%" settings={settings} />
+        <TextSetting id="resourceSaver" label="Resource Saver" placeholder='20' type="number" after="%" settings={settings} />
       </fieldset>
-    </Form>
+    </Input.Form>
   </Layout>
 }

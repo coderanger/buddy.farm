@@ -3,8 +3,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Calculator } from '../components/calculator'
 import { Input } from '../components/input'
 import { useLocations } from '../hooks/locations'
-import { mergeSettings } from '../hooks/settings'
-import { GlobalContext } from '../utils/context'
 
 const DEFAULT_TREES = 2100
 
@@ -37,37 +35,13 @@ const DEFAULT_DATA: OrchardData = {
 }
 
 export default () => {
-  const ctx = useContext(GlobalContext)
   const locations = useLocations("explore")
-  const [values, setValues] = useState({
-    forester: ctx.settings.forester ? parseInt(ctx.settings.forester, 10) : undefined,
-    resourceSaver: ctx.settings.resourceSaver ? parseInt(ctx.settings.resourceSaver, 10) : undefined,
-    wanderer: ctx.settings.wanderer ? parseInt(ctx.settings.wanderer, 10) : undefined,
-    lemonSqueezer: !!ctx.settings.lemonSqueezer ? true : undefined,
-  } as Partial<OrchardData>)
-  // Combine inputs and defaults.
-  const data: OrchardData = { ...DEFAULT_DATA }
-  for (const key of Object.keys(values) as Array<keyof OrchardData>) {
-    const value = values[key]
-    if (value !== undefined) {
-      (data[key] as any) = value
-    }
-  }
-
-  // Write-back for settings.
-  // TODO Abstract this, it's silly.
-  useEffect(() => {
-    ctx.setSettings(mergeSettings("forester", values.forester))
-  }, [values.forester])
-  useEffect(() => {
-    ctx.setSettings(mergeSettings("resourceSaver", values.resourceSaver))
-  }, [values.resourceSaver])
-  useEffect(() => {
-    ctx.setSettings(mergeSettings("wanderer", values.wanderer))
-  }, [values.wanderer])
-  useEffect(() => {
-    ctx.setSettings(mergeSettings("lemonSqueezer", values.lemonSqueezer))
-  }, [values.lemonSqueezer])
+  const [data, values, setValues] = Calculator.useData(DEFAULT_DATA, (settings) => ({
+    forester: settings.forester ? parseInt(settings.forester, 10) : undefined,
+    resourceSaver: settings.resourceSaver ? parseInt(settings.resourceSaver, 10) : undefined,
+    wanderer: settings.wanderer ? parseInt(settings.wanderer, 10) : undefined,
+    lemonSqueezer: settings.lemonSqueezer === undefined ? undefined : !!settings.lemonSqueezer,
+  }))
 
   // Calculations.
   const resourceSaverMul = 1 / (1 - (data.resourceSaver / 100))

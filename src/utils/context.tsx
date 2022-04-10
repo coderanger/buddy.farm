@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { Searchable } from '../hooks/searchables'
-import { Settings, useSettings } from '../hooks/settings'
+import { Settings, SetSettings, SetSetting, useSettings } from '../hooks/settings'
 
 interface ContextProps {
   searchables: Searchable[] | null
@@ -9,7 +9,8 @@ interface ContextProps {
   query: string | null
   setQuery: React.Dispatch<React.SetStateAction<string | null>>
   settings: Settings
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>
+  setSettings: SetSettings
+  setSetting: SetSetting
 }
 
 export const GlobalContext = React.createContext<ContextProps>({
@@ -19,6 +20,7 @@ export const GlobalContext = React.createContext<ContextProps>({
   setQuery: () => null,
   settings: {},
   setSettings: () => null,
+  setSetting: () => null,
 })
 
 interface ProviderProps {
@@ -28,7 +30,7 @@ interface ProviderProps {
 const Provider = ({ children }: ProviderProps) => {
   const [searchables, setSearchables] = useState<Searchable[] | null>(null)
   const [query, setQuery] = useState<string | null>(null)
-  const [settings, setSettings] = useSettings()
+  const [settings, setSettings, setSetting] = useSettings()
 
   useEffect(() => {
     if (typeof document !== undefined) {
@@ -39,7 +41,7 @@ const Provider = ({ children }: ProviderProps) => {
   }, [settings.darkMode])
 
   return (
-    <GlobalContext.Provider value={{ searchables, setSearchables, query, setQuery, settings, setSettings }}>
+    <GlobalContext.Provider value={{ searchables, setSearchables, query, setQuery, settings, setSettings, setSetting }}>
       {children}
     </GlobalContext.Provider>
   )
