@@ -343,6 +343,13 @@ exports.createPages = async ({ actions, graphql }) => {
       type: null,
       href: "/towercalc/",
     },
+    {
+      name: "Farm Animal Calculator",
+      image: "/img/items/7210.png",
+      searchText: "farm animal calculator",
+      type: null,
+      href: "/animalcalc/",
+    },
   ]
   for (const node of searchData.locations.nodes) {
     searchables.push(nodeToSearchable(node))

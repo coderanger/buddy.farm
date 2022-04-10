@@ -143,9 +143,7 @@ export default () => {
             { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
             { name: "Exploring", image: "/img/items/6075.png", fields: { path: "/exploring/" } },
             { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
-            { name: "XP Calculator", image: "/img/items/7210.png", fields: { path: "/xpcalc/" } },
-            { name: "Orchard Calculator", image: "/img/items/7210.png", fields: { path: "/orchardcalc/" } },
-            { name: "Tower Calculator", image: "/img/items/7210.png", fields: { path: "/towercalc/" } },
+            { name: "Calculators", image: "/img/items/7210.png", fields: { path: "/calculators/" } },
             { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
           ]} />
         </div>

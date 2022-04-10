@@ -27,7 +27,6 @@ const DEFAULT_DATA: TowerData = {
 export default () => {
   const [data, values, setValues] = Calculator.useData(DEFAULT_DATA, () => ({}))
 
-
   // Calculations.
   let totalSilver = 0
   let totalAK = 0

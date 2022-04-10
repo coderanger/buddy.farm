@@ -120,6 +120,13 @@ export const useSearchables = () => {
       type: null,
       href: "/towercalc/",
     },
+    {
+      name: "Farm Animal Calculator",
+      image: "/img/items/7210.png",
+      searchText: "farm animal calculator",
+      type: null,
+      href: "/animalcalc/",
+    },
   ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))
