@@ -72,7 +72,7 @@ const MiniList = ({ label, items }: MiniListProps) => (
     <h5 className="mb-1">{label}</h5>
     <ListGroup variant="flush">
       {items.map(it => (
-        <ListGroup.Item className="px-0">
+        <ListGroup.Item className="px-0" key={it.fields.path}>
           <Link to={it.fields.path} css={{ color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit", textDecoration: "underline" } }}>
             <img src={"https://farmrpg.com" + it.image} className="d-inline-block align-text-top" width="20" height="20" css={{ marginRight: 10, boxSizing: "border-box" }} />
             {it.name}
