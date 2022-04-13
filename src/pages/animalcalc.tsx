@@ -13,6 +13,7 @@ interface AnimalData {
   animalLover: boolean
   animalCharmer: boolean
   sellPrice: number
+  slaughterhouse: boolean
   verbose: boolean
 }
 
@@ -21,7 +22,9 @@ const DEFAULT_DATA: AnimalData = {
   leatherValue: 1625,
   feedCost: 2083,
   animalLover: true,
+  animalCharmer: false,
   sellPrice: 60,
+  slaughterhouse: true,
   verbose: false,
 }
 
@@ -40,12 +43,23 @@ interface AnimalTable {
   }[]
 }
 
+const xpBonus = (data: AnimalData) => {
+  let bonus = 0
+  if (data.animalLover) {
+    bonus += 350
+  }
+  if (data.animalCharmer) {
+    bonus += 500
+  }
+  return bonus
+}
+
 const chickenTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
   const table: AnimalTable = {
     headers: ["Level", "Days", "Eggs/day"],
     rows: [],
   }
-  const xpPerDay = data.animalLover ? 700 : 350
+  const xpPerDay = 350 + xpBonus(data)
   for (let level = 2; level <= 15; level++) {
     const days = Math.ceil(xpMap[level] / xpPerDay)
     table.rows.push({
@@ -58,13 +72,30 @@ const chickenTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
 
 const cowTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
   const table: AnimalTable = {
+    headers: ["Level", "Days", "Steaks", "Leather", "Milk/day"],
+    rows: [],
+  }
+  const xpPerDay = 350 + xpBonus(data)
+  for (let level = 2; level <= 15; level++) {
+    const days = Math.ceil(xpMap[level] / xpPerDay)
+    const steaks = level >= 5 ? (level - 4) * 2 : 0
+    table.rows.push({
+      values: [level, days, steaks, steaks * 5, level],
+      best: [],
+    })
+  }
+  return table
+}
+
+const cowSlaughterhouseTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
+  const table: AnimalTable = {
     headers: ["Level", "Days", "Cows/day", "Profit/day", "Leather/day"],
     rows: [],
   }
   if (data.verbose) {
     table.headers.splice(3, 0, "Value/day", "Cost/day")
   }
-  const xpPerDay = data.animalLover ? 700 : 350
+  const xpPerDay = 350 + xpBonus(data)
   const sellPriceMul = 1 + (data.sellPrice / 100)
   let lastDays = 0
   let milk = 0
@@ -121,13 +152,31 @@ const cowTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
 
 const pigTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
   const table: AnimalTable = {
+    headers: ["Level", "Days", "Bacon"],
+    rows: [],
+  }
+  const xpPerDay = 1000 + xpBonus(data)
+  for (let level = 2; level <= 15; level++) {
+    const days = Math.ceil(xpMap[level] / xpPerDay)
+    const bacon = level >= 5 ? 25 + ((level - 5) * 10) : 0
+    table.rows.push({
+      values: [level, days, bacon],
+      best: [],
+    })
+  }
+  return table
+}
+
+
+const pigSlaughterhouseTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
+  const table: AnimalTable = {
     headers: ["Level", "Days", "Pigs/day", "Profit/day", "Bacon/day"],
     rows: [],
   }
   if (data.verbose) {
     table.headers.splice(3, 0, "Value/day", "Cost/day")
   }
-  const xpPerDay = data.animalLover ? 1350 : 1000
+  const xpPerDay = 1000 + xpBonus(data)
   const sellPriceMul = 1 + (data.sellPrice / 100)
   for (let level = 2; level <= 15; level++) {
     const days = Math.ceil(xpMap[level] / xpPerDay)
@@ -148,22 +197,28 @@ const pigTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
         baconPerDay,
       ],
       best: Array(10).fill(false),
-      profitPerDay
+      profitPerDay,
+      itemPerDay: baconPerDay,
     }
     if (data.verbose) {
       row.values.splice(3, 0, valuePerDay, costPerDay)
     }
     table.rows.push(row)
   }
-  let bestProfit = 0, bestProfitRow = 0
+  let bestProfit = 0, bestProfitRow = 0, bestBacon = 0, bestBaconRow = 0
   for (let i = 0; i < 9; i++) {
     const row = table.rows[i]
     if (row.profitPerDay && row.profitPerDay > bestProfit) {
       bestProfit = row.profitPerDay
       bestProfitRow = i
     }
+    if (row.itemPerDay && row.itemPerDay > bestBacon) {
+      bestBacon = row.itemPerDay
+      bestBaconRow = i
+    }
   }
-  table.rows[bestProfitRow].best.fill(true)
+  table.rows[bestProfitRow].best.fill(true, 0, table.rows[bestProfitRow].values.length - 1)
+  table.rows[bestBaconRow].best[table.rows[bestProfitRow].values.length - 1] = true
   return table
 }
 
@@ -172,7 +227,7 @@ const raptorsTable = ({ data, xpMap }: AnimalTableProps): AnimalTable => {
     headers: ["Level", "Days", "Antlers/day", "Kabobs/day"],
     rows: [],
   }
-  const xpPerDay = data.animalLover ? 1700 : 850
+  const xpPerDay = 1350 + xpBonus(data)
   for (let level = 2; level <= 15; level++) {
     const days = Math.ceil(xpMap[level] / xpPerDay)
     const bobs = level >= 5 ? level * 5 : 0
@@ -217,8 +272,8 @@ export default () => {
 
   const table = {
     "chickens": chickenTable,
-    "cows": cowTable,
-    "pigs": pigTable,
+    "cows": data.slaughterhouse ? cowSlaughterhouseTable : cowTable,
+    "pigs": data.slaughterhouse ? pigSlaughterhouseTable : pigTable,
     "raptors": raptorsTable,
   }[data.animal]({ data, xpMap })
 
@@ -238,6 +293,11 @@ export default () => {
       <option value="2083">Hedgehog Broccoli (2083)</option>
     </Input.Select>}
     {(data.animal === "cows" || data.animal === "pigs") && <Input.Switch
+      id="slaughterhouse"
+      label="Slaughterhouse Averages"
+      defaultChecked={data.slaughterhouse}
+    />}
+    {(data.animal === "cows" || data.animal === "pigs") && data.slaughterhouse && <Input.Switch
       id="verbose"
       label="Verbose"
       defaultChecked={data.verbose}
@@ -251,9 +311,8 @@ export default () => {
       />
       <Input.Switch
         id="animalCharmer"
-        label="Animal Charmer (not supported yet)"
+        label="Animal Charmer"
         defaultChecked={data.animalCharmer}
-        disabled={true}
       />
       <Input.Text
         id="sellPrice"
@@ -261,7 +320,7 @@ export default () => {
         placeholder="60"
         after="%"
         defaultValue={values.sellPrice?.toString()}
-        pattern="^\d{1,2}$"
+        pattern="^\d{1,3}$"
         type="number"
       />
     </Calculator.Perks>
@@ -276,7 +335,7 @@ export default () => {
         {table.rows.map((row, i) => (
           <tr key={i}>
             {row.values.map((val, j) => (
-              <td key={j} className={row.best[j] ? "table-success" : ""}>
+              <td key={`${j}-${val}-${row.best[j]}`} className={row.best[j] ? "table-success" : ""}>
                 {typeof val === "number" ? val.toLocaleString(undefined, { maximumFractionDigits: 2 }) : val}
               </td>
             ))}
