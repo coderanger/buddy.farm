@@ -127,6 +127,13 @@ export const useSearchables = () => {
       type: null,
       href: "/animalcalc/",
     },
+    {
+      name: "Emblems",
+      image: "/img/emblems/def.png",
+      searchText: "emblems",
+      type: null,
+      href: "/emblems/",
+    },
   ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))
