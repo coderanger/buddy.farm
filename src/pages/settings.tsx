@@ -74,6 +74,7 @@ export default () => {
         <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" type="number" settings={settings} />
         <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
         <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
+        <SwitchSetting id="fishingTrawl" label="Fishing Trawl" settings={settings} />
         <TextSetting id="primerFarming" label="Bonus Farming XP" placeholder='0' type="number" after="%" settings={settings} />
         <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' type="number" after="%" settings={settings} />
         <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' type="number" after="%" settings={settings} />

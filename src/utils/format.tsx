@@ -21,7 +21,7 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
           const fishPerNet = !!settings.reinforcedNetting ? 15 : 10
           return formatDropRateUnit(rate / fishPerNet, "Nets/drop", "Drops/net")
         case "largeNets":
-          const fishPerLargeNet = !!settings.reinforcedNetting ? 400 : 250
+          const fishPerLargeNet = 250 + (settings.reinforcedNetting ? 150 : 0) + (settings.fishingTrawl ? 100 : 0)
           return formatDropRateUnit(rate / fishPerLargeNet, "Large nets/drop", "Drops/large net")
         default:
           return formatDropRateUnit(rate, "Fishes/drop", "Drops/fish")

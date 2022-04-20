@@ -44,6 +44,7 @@ interface XpData {
   // Fishing settings.
   primerFishing: number
   reinforcedNetting: boolean
+  fishingTrawl: boolean
   // Farming data.
   cropXp: number
   gjPerDay: number
@@ -68,6 +69,7 @@ const DEFAULT_DATA: XpData = {
   streak: 0,
   primerFishing: 0,
   reinforcedNetting: true,
+  fishingTrawl: false,
   cropXp: 90720, // Beets
   gjPerDay: 2,
   primerFarming: 0,
@@ -93,7 +95,7 @@ const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => 
   const manualFishes = xp / xpPerHitManual
   const fishPerNet = data.reinforcedNetting ? 15 : 10
   const nets = xp / (xpPerHitNet * fishPerNet)
-  const fishPerLargeNet = data.reinforcedNetting ? 400 : 250
+  const fishPerLargeNet = 250 + (data.reinforcedNetting ? 150 : 0) + (data.fishingTrawl ? 100 : 0)
   const largeNets = xp / (xpPerHitNet * fishPerLargeNet)
 
   return <>
@@ -124,6 +126,11 @@ const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => 
         id="reinforcedNetting"
         label="Reinforced Netting"
         defaultChecked={data.reinforcedNetting}
+      />
+      <Input.Switch
+        id="fishingTrawl"
+        label="Fishing Trawl"
+        defaultChecked={data.fishingTrawl}
       />
     </Calculator.Perks>
 
@@ -334,6 +341,7 @@ export default () => {
     wanderer: settings.wanderer ? parseInt(settings.wanderer, 10) : undefined,
     lemonSqueezer: settings.lemonSqueezer === undefined ? undefined : !!settings.lemonSqueezer,
     reinforcedNetting: settings.reinforcedNetting === undefined ? undefined : !!settings.reinforcedNetting,
+    fishingTrawl: settings.fishingTrawl === undefined ? undefined : !!settings.fishingTrawl,
     cropRows: settings.cropRows ? parseInt(settings.cropRows, 10) : undefined,
   }))
 
