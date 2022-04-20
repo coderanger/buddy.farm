@@ -145,9 +145,12 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
   const staminaPerExplore = 1 - wanderer
   const stamina = explores * staminaPerExplore
   const itemsPerLem = data.lemonSqueezer ? 20 : 10
-  // TODO: Check if the event bonus actually works on lemonade.
-  const xpPerLemonade = (5000 + (itemsPerLem * (xpPerHit || 0))) * (data.event ? 1.2 : 1)
+  const lemXpPerHit = ((xpPerHit || 0) + 250) * (data.event ? 1.2 : 1)
+  const xpPerLemonade = itemsPerLem * lemXpPerHit
   const lemonade = xp / xpPerLemonade
+  const itemsPerPalmer = data.lemonSqueezer ? 500 : 200
+  const xpPerPalmer = itemsPerPalmer * lemXpPerHit
+  const palmers = xp / xpPerPalmer
 
   return <>
     <Input.Select id="exploringLocation" label="Location" defaultValue={data.exploringLocation}>
@@ -194,6 +197,7 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
     <Input.Text id="stamina" label="Stamina" disabled={true} value={Math.ceil(stamina).toLocaleString()} />
     <Input.Text id="oj" label="OJ" disabled={true} value={Math.ceil(stamina / 100).toLocaleString()} />
     <Input.Text id="lem" label="Lemonade" disabled={true} value={Math.ceil(lemonade).toLocaleString()} />
+    <Input.Text id="palmers" label="Arnold Palmers" disabled={true} value={Math.ceil(palmers).toLocaleString()} />
   </>
 }
 
