@@ -53,7 +53,7 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
           const cropRows = parseInt(settings.cropRows || "3", 10) || 2
           return formatDropRateUnit(rate / (4 * cropRows), "Harvest alls/crop", "Crops/harvest all")
         default:
-          return formatDropRateUnit(rate, "Plot harvests/drop", "Drops/plot harvest")
+          return formatDropRateUnit(rate, "Seeds/drop", "Drops/seed")
       }
     default:
       throw `Unknown location type ${locationType}`
