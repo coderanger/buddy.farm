@@ -1,3 +1,4 @@
+import React from "react"
 import { graphql, useStaticQuery } from 'gatsby'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 
@@ -15,6 +16,7 @@ interface AnimalData {
   sellPrice: number
   slaughterhouse: boolean
   verbose: boolean
+  partials: boolean
 }
 
 const DEFAULT_DATA: AnimalData = {
@@ -26,6 +28,7 @@ const DEFAULT_DATA: AnimalData = {
   sellPrice: 60,
   slaughterhouse: true,
   verbose: false,
+  partials: false,
 }
 
 interface AnimalTableProps {
@@ -108,7 +111,7 @@ const cowSlaughterhouseTable = ({ data, xpMap }: AnimalTableProps): AnimalTable 
       continue
     }
     let cowsPerDay = 250 / days
-    if (cowsPerDay >= 1) {
+    if (cowsPerDay >= 1 && !data.partials) {
       cowsPerDay = Math.floor(cowsPerDay)
     }
     const steakPerDay = (level >= 5 ? (level - 4) * 2 : 0) * cowsPerDay
@@ -181,7 +184,7 @@ const pigSlaughterhouseTable = ({ data, xpMap }: AnimalTableProps): AnimalTable 
   for (let level = 2; level <= 15; level++) {
     const days = Math.ceil(xpMap[level] / xpPerDay)
     let pigsPerDay = 250 / days
-    if (pigsPerDay >= 1) {
+    if (pigsPerDay >= 1 && !data.partials) {
       pigsPerDay = Math.floor(pigsPerDay)
     }
     const baconPerDay = (level >= 5 ? 25 + ((level - 5) * 10) : 0) * pigsPerDay
@@ -297,11 +300,16 @@ export default () => {
       label="Slaughterhouse Averages"
       defaultChecked={data.slaughterhouse}
     />}
-    {(data.animal === "cows" || data.animal === "pigs") && data.slaughterhouse && <Input.Switch
-      id="verbose"
-      label="Verbose"
-      defaultChecked={data.verbose}
-    />}
+    {(data.animal === "cows" || data.animal === "pigs") && data.slaughterhouse && <>
+      <Input.Switch
+        id="verbose"
+        label="Verbose"
+        defaultChecked={data.verbose}
+      /><Input.Switch
+        id="partials"
+        label="Show fractional / day"
+        defaultChecked={data.partials}
+      /></>}
 
     <Calculator.Perks>
       <Input.Switch
