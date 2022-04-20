@@ -11,6 +11,7 @@ import { Helmet } from 'react-helmet'
 import ClipboardJS from "clipboard"
 
 import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
+import { FaHome } from '@react-icons/all-files/fa/FaHome'
 
 import { GlobalContext } from '../utils/context'
 import { debounce } from '../utils/debounce'
@@ -60,8 +61,9 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
     </Helmet>
     <Navbar bg="light" expand="lg">
       <Container>
-        <Link className='navbar-brand d-none d-sm-inline' to="/">
-          Buddy's Almanac
+        <Link className='navbar-brand' to="/">
+          <span className="d-none d-sm-inline">Buddy's Almanac</span>
+          <FaHome className="d-sm-none" css={{ marginTop: -3 }} />
         </Link>
         <form className="d-flex" css={{ flexGrow: 1, maxWidth: 600 }} onSubmit={evt => evt.preventDefault()}>
           <input id="nav-search" className="form-control me-2" type="search" placeholder="Search"
