@@ -18,7 +18,7 @@ interface TowerData {
 const DEFAULT_DATA: TowerData = {
   fromLevel: 0,
   mode: "level",
-  toLevel: 60,
+  toLevel: 100,
   toSilver: 1,
   toSilverUnit: "B",
   toAK: 100,
