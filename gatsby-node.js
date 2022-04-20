@@ -72,6 +72,11 @@ exports.createSchemaCustomization = ({ actions }) => {
     type TowerJson implements Node {
       item: ItemsJson @link(from: "itemName", by: "name")
     }
+
+    type CommunityCenterJson implements Node {
+      goalItem: ItemsJson! @link(by: "name")
+      rewardItem: ItemsJson! @link(by: "name")
+    }
   `
   createTypes(typeDefs)
 }
