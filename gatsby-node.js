@@ -15,6 +15,7 @@ exports.createSchemaCustomization = ({ actions }) => {
 
     type ItemsJson implements Node {
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
+      api: ItemApiJson! @link(from: "jsonId", by: "jsonId")
     }
 
     type PetsJson implements Node {
