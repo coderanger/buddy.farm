@@ -341,9 +341,9 @@ export default () => {
       </thead>
       <tbody>
         {table.rows.map((row, i) => (
-          <tr key={i}>
+          <tr key={JSON.stringify(row)}>
             {row.values.map((val, j) => (
-              <td key={`${j}-${val}-${row.best[j]}`} className={row.best[j] ? "table-success" : ""}>
+              <td key={`${val}-${row.best[j]}`} className={row.best[j] ? "table-success" : ""}>
                 {typeof val === "number" ? val.toLocaleString(undefined, { maximumFractionDigits: 2 }) : val}
               </td>
             ))}
