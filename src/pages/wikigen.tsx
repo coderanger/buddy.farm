@@ -19,6 +19,8 @@ interface WikiGenQuery {
   }
 }
 
+const wikiLink = (item: Item) => `((${item.name}${item.name.endsWith(")") ? " " : ""}))`
+
 const genMuseumCompletion = (items: Item[]) => {
   const itemCount = items.filter(it => !it.event).length
   const eventCount = items.filter(it => it.event).length
@@ -31,6 +33,7 @@ const genMuseumCompletion = (items: Item[]) => {
   ]
 
   let museumString = `This is the current list of museum completion items, there are currently ${itemCount} items in the game plus ${eventCount} Event items.
+
 [center]Warning [hl=Orangered]SPOILERS AHEAD[/hl]. Just because something is listed in here doesn't mean it's been released into the game yet. Please keep all conversation about these items in Spoilers Chat, including "Where do I find..."[/center]`
 
   for (const section of sections) {
@@ -42,7 +45,7 @@ const genMuseumCompletion = (items: Item[]) => {
 `
     for (const [i, item] of sectionItems.entries()) {
       // I don't know why Jessica's script has a double space between the 2nd and 3rd item but I'll reproduce it to keep the diff smaller.
-      museumString += `${i % 4 === 0 ? "\n" : i % 2 === 0 ? "  " : " "}((${item.name})) ${item.name}`
+      museumString += `${i % 4 === 0 ? "\n" : i % 2 === 0 ? "  " : " "}${wikiLink(item)} ${item.name}`
     }
 
   }
