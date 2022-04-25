@@ -34,7 +34,9 @@ const Provider = ({ children }: ProviderProps) => {
 
   useEffect(() => {
     if (typeof document !== undefined) {
-      document.documentElement.classList[settings.darkMode ? "add" : "remove"]("dark")
+      if (new URLSearchParams(document.location.search).get("dark") === null) {
+        document.documentElement.classList[settings.darkMode ? "add" : "remove"]("dark")
+      }
       // @ts-ignore
       typeof window !== "undefined" && window.gtag && window.gtag("set", "user_properties", { dark_mode: settings.darkMode ? "true" : "false" })
     }

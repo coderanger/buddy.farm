@@ -1,14 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-dark-5/dist/css/bootstrap-nightshade.css'
 
+import ClipboardJS from 'clipboard'
 import { Link, navigate } from 'gatsby'
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Container from 'react-bootstrap/Container'
-import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
-import NavDropdown from 'react-bootstrap/NavDropdown'
 import { Helmet } from 'react-helmet'
-import ClipboardJS from "clipboard"
 
 import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
 import { FaHome } from '@react-icons/all-files/fa/FaHome'
@@ -59,7 +57,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
       <meta charSet="utf-8" />
       <title>{pageTitle}</title>
     </Helmet>
-    <Navbar bg="light" expand="lg">
+    <Navbar bg="light" expand="lg" css={{ "html.iframe &": { "display": "none" } }}>
       <Container>
         <Link className='navbar-brand' to="/">
           <span className="d-none d-sm-inline">Buddy's Almanac</span>
