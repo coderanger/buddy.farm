@@ -201,10 +201,10 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
     <Input.Text id="remainingXp" label="Remaining XP" disabled={true} value={xp.toLocaleString()} />
     <Input.Text id="xpPerHit" label="Avg XP / Explore" disabled={true} value={xpPerHitTrue.toLocaleString()} />
     <Input.Text id="explores" label="Explores" disabled={true} value={Math.ceil(explores).toLocaleString()} />
-    <Input.Text id="stamina" label="Stamina" disabled={true} value={Math.ceil(stamina).toLocaleString()} />
-    <Input.Text id="oj" label="OJ" disabled={true} value={Math.ceil(stamina / 100).toLocaleString()} />
-    <Input.Text id="lem" label="Lemonade" disabled={true} value={Math.ceil(lemonade).toLocaleString()} />
-    <Input.Text id="palmers" label="Arnold Palmers" disabled={true} value={Math.ceil(palmers).toLocaleString()} />
+    <Input.Text id="stamina" label="Stamina" disabled={true} value={Math.ceil(stamina).toLocaleString()} tooltip={`~${(xp / stamina).toLocaleString(undefined, { maximumFractionDigits: 2 })} XP/Stamina`} />
+    <Input.Text id="oj" label="OJ" disabled={true} value={Math.ceil(stamina / 100).toLocaleString()} tooltip={`~${((xp * 100) / stamina).toLocaleString(undefined, { maximumFractionDigits: 2 })} XP/OJ`} />
+    <Input.Text id="lem" label="Lemonade" disabled={true} value={Math.ceil(lemonade).toLocaleString()} tooltip={`~${xpPerLemonade.toLocaleString(undefined, { maximumFractionDigits: 2 })} XP/Lemonade`} />
+    <Input.Text id="palmers" label="Arnold Palmers" disabled={true} value={Math.ceil(palmers).toLocaleString()} tooltip={`~${xpPerPalmer.toLocaleString(undefined, { maximumFractionDigits: 2 })} XP/Arnold Palmer`} />
   </>
 }
 

@@ -1,8 +1,10 @@
 import React, { useContext } from 'react'
+import Col from 'react-bootstrap/Col'
 import Form, { FormProps } from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import Tooltip from 'react-bootstrap/Tooltip'
 
 type InputTypes = undefined | "number"
 
@@ -12,33 +14,39 @@ interface InputContextValues {
 
 const InputContext = React.createContext({ id: "" } as InputContextValues)
 
-interface InputProps extends React.HTMLAttributes<HTMLElement> {
+interface InputProps extends Omit<React.HTMLAttributes<HTMLElement>, "onChange"> {
   id: string
   label: string
-  children: JSX.Element[] | JSX.Element
+  tooltip?: React.ReactNode
+  children: React.ReactNode
 }
 
-export const Input = ({ id, label, children, ...props }: InputProps) => (
-  <InputContext.Provider value={{ id }}>
+export const Input = ({ id, label, tooltip, children, ...props }: InputProps) => {
+  let content = children
+  if (tooltip) {
+    if (!React.isValidElement(content)) {
+      throw `Tooltips only work with single element children`
+    }
+    content = <OverlayTrigger overlay={<Tooltip>{tooltip}</Tooltip>}>{content}</OverlayTrigger>
+  }
+  return <InputContext.Provider value={{ id }}>
     <Form.Group as={Row} className="mb-3" controlId={id} {...props}>
       <Form.Label column sm={2}>{label}</Form.Label>
       <Col sm={10}>
-        {children}
+        {content}
       </Col>
     </Form.Group>
   </InputContext.Provider>
-)
+}
 
-export interface SwitchInputProps {
-  id: string
-  label: string
+export interface SwitchInputProps extends Omit<InputProps, "children"> {
   defaultChecked: boolean
   disabled?: boolean
   onChange?: (value: boolean) => void
 }
 
-Input.Switch = ({ id, label, defaultChecked, disabled, onChange }: SwitchInputProps) => (
-  <Input id={id} label={label}>
+Input.Switch = ({ id, defaultChecked, disabled, onChange, ...props }: SwitchInputProps) => (
+  <Input id={id} {...props}>
     <Form.Check
       css={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", "& input": { marginTop: 0 } }}
       type="switch"
@@ -50,9 +58,7 @@ Input.Switch = ({ id, label, defaultChecked, disabled, onChange }: SwitchInputPr
   </Input>
 )
 
-export interface TextInputProps {
-  id: string
-  label: string
+export interface TextInputProps extends Omit<InputProps, "children"> {
   placeholder?: string
   after?: string | JSX.Element
   value?: string
@@ -63,8 +69,8 @@ export interface TextInputProps {
   onChange?: (value: string) => void
 }
 
-Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, pattern, type, onChange }: TextInputProps) => (
-  <Input id={id} label={label}>
+Input.Text = ({ id, placeholder, after, value, defaultValue, disabled, pattern, type, onChange, ...props }: TextInputProps) => (
+  <Input id={id} {...props}>
     <InputGroup>
       <Form.Control
         name={id}
@@ -81,17 +87,14 @@ Input.Text = ({ id, label, placeholder, after, value, defaultValue, disabled, pa
   </Input>
 )
 
-export interface SelectInputProps {
-  id: string
-  label: string
+export interface SelectInputProps extends InputProps {
   defaultValue: string
   type?: InputTypes
   onChange?: (value: string) => void
-  children: JSX.Element[] | JSX.Element
 }
 
-Input.Select = ({ id, label, defaultValue, type, onChange, children }: SelectInputProps) => (
-  <Input id={id} label={label}>
+Input.Select = ({ id, defaultValue, type, onChange, children, ...props }: SelectInputProps) => (
+  <Input id={id} {...props}>
     <Form.Select
       name={id}
       defaultValue={defaultValue}
