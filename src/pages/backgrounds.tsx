@@ -79,8 +79,10 @@ const ProfileBackground = ({ pbg, darkMode }: ProfileBackgroundProps) => {
       src={`https://farmrpg.com/img/pbgs/${darkMode ? 'dark' : 'light'}/${pbg.image}`}
       alt={`Profile Background - ${pbg.name}`}
       css={{
+        display: "block",
         width: 400,
-        height: 400,
+        maxWidth: "95%",
+        aspectRatio: "1",
       }}
     />
     <div>{pbg.name}</div>
