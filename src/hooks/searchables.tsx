@@ -134,6 +134,13 @@ export const useSearchables = () => {
       type: null,
       href: "/emblems/",
     },
+    {
+      name: "Profile Backgrounds",
+      image: "/img/emblems/def.png",
+      searchText: "profile backgrounds",
+      type: null,
+      href: "/backgrounds/",
+    },
   ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))

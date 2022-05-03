@@ -130,7 +130,8 @@ export default () => {
         Use the search box above to look up items, locations, pets, quests, or more!
       </p>
       <p>
-        Check out the <Link to="/settings/">settings</Link> to configure your perks and other preferences. <b>Yes there is a dark mode now.</b>
+        Check out the <Link to="/settings/">settings</Link> to configure your perks and other preferences. Yes there is a dark mode now.
+        All data is player-contributed and may not always be accurate. Do not complain to the FarmRPG team if anything here does not match reality, tell Coderanger.
       </p>
     </div>
     <Row>
@@ -144,6 +145,7 @@ export default () => {
             { name: "Exploring", image: "/img/items/6075.png", fields: { path: "/exploring/" } },
             { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
             { name: "Calculators", image: "/img/items/7210.png", fields: { path: "/calculators/" } },
+            { name: "Profile Backgrounds", image: "/img/emblems/def.png", fields: { path: "/backgrounds/" } },
             { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
           ]} />
         </div>

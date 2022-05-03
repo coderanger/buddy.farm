@@ -78,6 +78,10 @@ exports.createSchemaCustomization = ({ actions }) => {
       goalItem: ItemsJson! @link(by: "name")
       rewardItem: ItemsJson! @link(by: "name")
     }
+
+    type PbgsJson implements Node {
+      costItem: ItemsJson @link(by: "name")
+    }
   `
   createTypes(typeDefs)
 }
@@ -362,6 +366,13 @@ exports.createPages = async ({ actions, graphql }) => {
       searchText: "emblems",
       type: null,
       href: "/emblems/",
+    },
+    {
+      name: "Profile Backgrounds",
+      image: "/img/emblems/def.png",
+      searchText: "profile backgrounds",
+      type: null,
+      href: "/backgrounds/",
     },
   ]
   for (const node of searchData.locations.nodes) {
