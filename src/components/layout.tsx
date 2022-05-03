@@ -13,6 +13,7 @@ import { FaHome } from '@react-icons/all-files/fa/FaHome'
 
 import { GlobalContext } from '../utils/context'
 import { debounce } from '../utils/debounce'
+import './layout.css'
 
 const navigateToSearch = debounce((query: string, setSearchFired: (arg0: boolean) => void) => {
   console.debug("defaultOnSearch actually navigating", query)
