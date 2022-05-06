@@ -65,15 +65,15 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
   </OverlayTrigger>
   let elm = <>
     <div className="mw-100 flex-shrink-0 d-flex">
-      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
+      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top bf-list-image" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
       <div className="d-inline-block align-text-top flex-shrink-1">
-        <div css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
-        <div>{item.lineTwo}</div>
+        <div className="bf-list-line-one" css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
+        <div className="bf-list-line-two">{item.lineTwo}</div>
       </div>
     </div>
     <div>
       {alert}
-      <span css={bigLineStyle}>{item.value}</span>
+      <span className="bf-list-value" css={bigLineStyle}>{item.value}</span>
     </div>
   </>
   if (href) {
