@@ -82,6 +82,15 @@ exports.createSchemaCustomization = ({ actions }) => {
     type PbgsJson implements Node {
       costItem: ItemsJson @link(by: "name")
     }
+
+    type PasswordsJson implements Node {
+      items: [PasswordItemsJson!] @link(by: "password.jsonId", from: "jsonId")
+    }
+
+    type PasswordItemsJson implements Node {
+      password: PasswordsJson! @link(by: "jsonId")
+      item: ItemsJson! @link(by: "jsonId")
+    }
   `
   createTypes(typeDefs)
 }

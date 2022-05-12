@@ -4,6 +4,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
 
+import { css } from '@emotion/react'
 import { BsFillExclamationCircleFill } from '@react-icons/all-files/bs/BsFillExclamationCircleFill'
 import {
   BsFillExclamationTriangleFill
@@ -14,14 +15,16 @@ import { CopyButton } from '../components/clipboard'
 
 export interface ListItem {
   key?: string
-  image: string
-  lineOne: string
-  lineTwo?: string | JSX.Element | JSX.Element[] | false | null | undefined
-  value?: string | false | null | undefined
+  image?: string
+  lineOne: Exclude<React.ReactNode, boolean | null | undefined>
+  lineTwo?: React.ReactNode | false | null | undefined
+  value?: React.ReactNode | false | null | undefined
   href?: string | false | null | undefined
   hrefSlugify?: string | false | null | undefined
   alert?: string | null
   alertIcon?: string | null
+  onClick?: React.MouseEventHandler<HTMLDivElement>
+  copyText?: string
 }
 
 interface ListItemProps {
@@ -29,7 +32,8 @@ interface ListItemProps {
   bigLine: boolean | undefined
 }
 
-interface ListProps {
+type listPropsBase = Parameters<typeof ListGroup>[0]
+interface ListProps extends listPropsBase {
   label?: string
   items: ListItem[]
   bigLine?: boolean
@@ -47,14 +51,14 @@ const alertIcon = (alertIcon: string | null | undefined) => {
   }
 }
 
-const bigLineStyle = {
+const bigLineStyle = css({
   fontSize: 32,
   lineHeight: "48px",
   "@media (max-width: 576px)": {
     fontSize: 16,
     fontWeight: "bold",
   }
-}
+})
 
 const ListItem = ({ item, bigLine }: ListItemProps) => {
   const href = item.href || (item.hrefSlugify && `/${item.hrefSlugify.toLowerCase().replace(/\s+/g, '-')}/`)
@@ -65,7 +69,7 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
   </OverlayTrigger>
   let elm = <>
     <div className="mw-100 flex-shrink-0 d-flex">
-      <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top bf-list-image" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
+      {item.image && <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top bf-list-image" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />}
       <div className="d-inline-block align-text-top flex-shrink-1">
         <div className="bf-list-line-one" css={bigLine && !item.lineTwo ? bigLineStyle : { fontWeight: "bold" }}>{item.lineOne}</div>
         <div className="bf-list-line-two">{item.lineTwo}</div>
@@ -73,20 +77,20 @@ const ListItem = ({ item, bigLine }: ListItemProps) => {
     </div>
     <div>
       {alert}
-      <span className="bf-list-value" css={bigLineStyle}>{item.value}</span>
+      <span className="bf-list-value" css={typeof item.value === "string" ? bigLineStyle : {}}>{item.value}</span>
     </div>
   </>
   if (href) {
     elm = <Link className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap", color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit" } }} to={href}>{elm}</Link>
   }
-  return <ListGroup.Item key={item.key || item.lineOne} className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap" }}>{elm}</ListGroup.Item>
+  return <ListGroup.Item className={`d-flex w-100 justify-content-between ${item.copyText ? "clipboard" : ""}`} css={{ flexWrap: "wrap" }} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
 }
 
-export default ({ label, items, bigLine, copyText }: ListProps) => (
+export default ({ label, items, bigLine, copyText, ...props }: ListProps) => (
   <>
     {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}{copyText && <CopyButton text={copyText} />}</h3>}
-    <ListGroup variant="flush">
-      {items.map((item: ListItem) => <ListItem item={item} bigLine={bigLine} />)}
+    <ListGroup variant="flush" {...props}>
+      {items.map((item: ListItem) => <ListItem key={item.key || item.lineOne.toString()} item={item} bigLine={bigLine} />)}
     </ListGroup>
   </>
 )

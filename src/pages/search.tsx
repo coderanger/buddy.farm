@@ -7,7 +7,7 @@ import Layout from '../components/layout'
 import List from '../components/list'
 import { Searchable } from '../hooks/searchables'
 import { GlobalContext } from '../utils/context'
-import { debounce } from '../utils/debounce'
+import { useDebounce } from '../hooks/debounce'
 
 declare global {
   interface Window { _farmSearchables?: Searchable[] | undefined }
@@ -24,7 +24,7 @@ interface ScoredResult {
 const prepScoring = (query: string) => {
   const pattern = ["(.*?)"]
   for (const letter of query) {
-    pattern.push(letter, "(.*?)")
+    pattern.push(letter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "(.*?)")
   }
   return new RegExp(pattern.join(""))
 }
@@ -103,7 +103,7 @@ export default ({ location }: SearchProps) => {
     }
   }, [])
 
-  const slowSetQuery = debounce(setQuery, 150)
+  const slowSetQuery = useDebounce(setQuery, 150)
 
   const onSearch = (query: string) => {
     slowSetQuery(query)

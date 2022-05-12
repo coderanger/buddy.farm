@@ -1,13 +1,14 @@
 import Button from 'react-bootstrap/Button'
+import type { ButtonProps } from 'react-bootstrap/Button'
 
 import { BsClipboard } from '@react-icons/all-files/bs/BsClipboard'
 
-interface CopyButtonProps {
+interface CopyButtonProps extends ButtonProps {
   text?: string
   path?: string
 }
 
-export const CopyButton = ({ text, path }: CopyButtonProps) => (
+export const CopyButton = ({ text, path, ...props }: CopyButtonProps) => (
   <Button
     data-clipboard-text={path ? `https://buddy.farm${path}` : text}
     variant="outline-secondary"
@@ -19,6 +20,7 @@ export const CopyButton = ({ text, path }: CopyButtonProps) => (
       verticalAlign: "middle !important",
       marginTop: -5
     }}
+    {...props}
   >
     <BsClipboard css={{ fontSize: 12, verticalAlign: "text-top" }} />
   </Button>

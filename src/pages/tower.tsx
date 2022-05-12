@@ -66,7 +66,7 @@ export default () => {
     byLevel[t.level.toString()].push(t)
   }
   const content = Object.values(byLevel).sort((a, b) => a[0].level - b[0].level).map(ti => (
-    <div className="mb-3">
+    <div className="mb-3" key={ti[0].level}>
       <h3 id={`level${ti[0].level}`}>Level {ti[0].level}</h3>
       <p className="mb-2">Costs {towerCostString(ti[0].level)} silver and 100 Ascension Knowledge.</p>
       <List items={ti.sort((a, b) => a.order - b.order).map(i => ({

@@ -125,13 +125,13 @@ export default () => {
   return <Layout pageTitle="Buddy's Almanac">
     <h1>Welcome to Buddy's Almanac</h1>
     <div>
-      <p>This is a repository of game information for <a href="https://farmrpg.com/">FarmRPG</a>.</p>
+      <p>This is a repository of game information for <a href="https://farmrpg.com/">Farm RPG</a>.</p>
       <p>
         Use the search box above to look up items, locations, pets, quests, or more!
       </p>
       <p>
         Check out the <Link to="/settings/">settings</Link> to configure your perks and other preferences. Yes there is a dark mode now.
-        All data is player-contributed and may not always be accurate. Do not complain to the FarmRPG team if anything here does not match reality, tell Coderanger.
+        All data is player-contributed and may not always be accurate. Do not complain to the Farm RPG team if anything here does not match reality, tell Coderanger.
       </p>
     </div>
     <Row>

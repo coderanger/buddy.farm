@@ -45,6 +45,7 @@ export default () => {
         <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} />
         <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
         <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
+        <SwitchSetting id="showPasswords" label="Show Mailbox Passwords" settings={settings} />
         <div className={secretKnockEnabled ? "" : "d-none"}>
           <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
         </div>
