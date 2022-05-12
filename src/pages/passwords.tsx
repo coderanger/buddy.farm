@@ -146,7 +146,7 @@ const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => 
 
   return <div className="mb-4">
     <div className="d-flex justify-content-between mb-1">
-      <h3 id={pw.jsonId}>Password {pw.jsonId}</h3>
+      <h3 id={pw.jsonId.toString()}>Password {pw.jsonId}</h3>
       {buttonText && <Button onClick={onClick}>{buttonText}</Button>}
     </div>
     <List items={listItems} bigLine={true} css={{ "& .bf-list-line-one": maskedStringStyle }} />
@@ -208,7 +208,7 @@ export default () => {
     groups.push("Done")
   }
 
-  const locationId = document?.location?.hash?.substring(1)
+  const locationId = typeof document === "undefined" ? "" : document.location.hash?.substring(1)
   const locationGroup = pwIdToGroup[locationId]
   const defaultGroup = locationGroup || groups[0]
 
@@ -228,8 +228,8 @@ export default () => {
   </Accordion>
 
   const showAllButton = ctx.settings.showPasswords ?
-    <Button variant="secondary" onClick={() => ctx.setSetting("showPasswords", false)}>Bring Back The Clues</Button>
-    : <Button onClick={() => ctx.setSetting("showPasswords", true)}>Not Interested In The Puzzle, Just Show Me The Passwords</Button>
+    <Button variant="secondary" onClick={() => ctx.setSetting("showPasswords", false)}>Bring back the clues</Button>
+    : <Button onClick={() => ctx.setSetting("showPasswords", true)}>Not interested in the puzzle, just show me the passwords</Button>
 
   // A wrapper to functionally disable SSR.
   const allContent = <>
