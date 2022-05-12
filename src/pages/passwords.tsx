@@ -19,7 +19,7 @@ const SPECIAL_IMAGES: { [key: string]: string } = {
 }
 
 interface Password {
-  jsonId: string
+  jsonId: number
   group: string
   password: string
   clue1: string
@@ -191,6 +191,7 @@ export default () => {
   const ctx = useContext(GlobalContext)
 
   const passwordsByGroup: { [key: string]: Password[] } = {}
+  const pwIdToGroup: { [key: string]: string } = {}
   const groups: string[] = []
   for (const pw of passwords.nodes) {
     const group = used[pw.jsonId] > 4 ? "Done" : pw.group
@@ -201,19 +202,24 @@ export default () => {
       passwordsByGroup[group] = []
     }
     passwordsByGroup[group].push(pw)
+    pwIdToGroup[pw.jsonId] = group
   }
   if (passwordsByGroup["Done"]) {
     groups.push("Done")
   }
 
-  const content = <Accordion defaultActiveKey={groups[0]} className="mb-3">
+  const locationId = document?.location?.hash?.substring(1)
+  const locationGroup = pwIdToGroup[locationId]
+  const defaultGroup = locationGroup || groups[0]
+
+  const content = <Accordion defaultActiveKey={defaultGroup} className="mb-3">
     {groups.map(group => (
       <Accordion.Item eventKey={group} key={group}>
         <Accordion.Header>{group}</Accordion.Header>
         <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>
           {group === "Done" ? <Button className="mb-3" onClick={() => setAllUsed({})}>Reset Finished Passwords</Button> : undefined}
           {(passwordsByGroup[group] || []).map(pw => (
-            <PasswordList key={pw.jsonId} pw={pw} used={used[pw.jsonId] || 0} setUsed={(val: number) => setUsed(pw.jsonId, val)} showDefault={ctx.settings.showPasswords} />
+            <PasswordList key={pw.jsonId} pw={pw} used={used[pw.jsonId] || 0} setUsed={(val: number) => setUsed(pw.jsonId.toString(), val)} showDefault={ctx.settings.showPasswords} />
           ))}
         </Accordion.Body>
       </Accordion.Item>
