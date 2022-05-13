@@ -189,7 +189,10 @@ const QuestList = ({ label, item, quests, oldQuests }: QuestListProps) => {
   const now = Date.now()
   if (!oldQuests) {
     // Filter anything we don't need.
-    quests = quests.filter(q => !(q.extra.availableTo && q.extra.availableTo < now))
+    const filteredQuests = quests.filter(q => !(q.extra.availableTo && q.extra.availableTo < now))
+    if (filteredQuests.length !== 0) {
+      quests = filteredQuests
+    }
   }
   const listItems = quests.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(q => ({
     image: q.fromImage,
