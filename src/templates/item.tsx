@@ -120,6 +120,22 @@ interface Tower {
   quantity: number
 }
 
+interface CommunityCenter {
+  date: string
+  goalItem: {
+    name: string
+  }
+  goalQuantity: number
+}
+
+interface Password {
+  password: {
+    jsonId: number
+    password: string
+  }
+  quantity: number
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -153,6 +169,8 @@ interface ItemProps {
     locksmithItems: { nodes: LocksmithItems[] }
     buildings: { nodes: Building[] }
     tower: { nodes: Tower[] }
+    communityCenter: { nodes: CommunityCenter[] },
+    passwords: { nodes: Password[] },
   }
 }
 
@@ -242,10 +260,12 @@ interface ItemListProps {
   wishingWell: WishingWell[]
   buildings: Building[]
   tower: Tower[]
+  communityCenter: CommunityCenter[]
+  passwords: Password[]
   settings: Settings
 }
 
-const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, buildings, tower, settings }: ItemListProps) => {
+const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithItems, wishingWell, buildings, tower, communityCenter, passwords, settings }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
   const listItems = []
   for (const rate of drops.nodes) {
@@ -352,6 +372,16 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: `/tower/#level${t.level}`,
   })))
 
+  // Passwords sources.
+  listItems.push(...passwords.sort((a, b) => a.password.jsonId - b.password.jsonId).map(pw => ({
+    key: `p${pw.password.jsonId}`,
+    image: "/img/items/postoffice.png",
+    lineOne: `Mailbox Password ${pw.password.jsonId}`,
+    lineTwo: settings.showPasswords ? `x${pw.quantity}` : "Click for password clues",
+    value: settings.showPasswords ? pw.password.password : pw.quantity.toLocaleString(),
+    href: `/passwords/#${pw.password.jsonId}`,
+  })))
+
   // Trading.
   if (item.givable) {
     listItems.push({
@@ -388,7 +418,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings, tower } }: ItemProps) => {
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings, tower, communityCenter, passwords } }: ItemProps) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
@@ -413,7 +443,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       {item.name}
       <CopyButton path={item.fields.path} />
     </h1>
-    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} settings={settings} />
+    <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} communityCenter={communityCenter.nodes} passwords={passwords.nodes} settings={settings} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
@@ -671,5 +701,26 @@ export const pageQuery = graphql`
       }
     }
 
+    # Community center (reward items).
+    communityCenter: allCommunityCenterJson(filter: {rewardItem: {name: {eq: $name}}}) {
+      nodes {
+        date
+        goalItem {
+          name
+        }
+        goalQuantity
+      }
+    }
+
+    # Mailbox passwords.
+    passwords: allPasswordItemsJson(filter: {item: {name: {eq: $name}}}) {
+      nodes {
+        password {
+          jsonId
+          password
+        }
+        quantity
+      }
+    }
   }
 `
