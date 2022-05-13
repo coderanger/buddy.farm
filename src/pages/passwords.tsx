@@ -54,7 +54,7 @@ const maskedStringStyle = css({
   // A different breakpoint than the usual for the list value because these are longer.
   "@media (max-width: 768px)": {
     fontSize: 16,
-    lineHeight: "24px",
+    // lineHeight: "24px",
     // No bold for the small screen value, it reads better here IMO.
   }
 })
@@ -72,7 +72,11 @@ const maskedStringStyleMasked = css({
   },
 })
 
-
+const maskedStringStyleMultiline = css(maskedStringStyle, {
+  "@media (max-width: 768px)": {
+    lineHeight: "24px",
+  }
+})
 
 const MaskedString = ({ show, copyButton, value, children }: MaskedStringProps) => {
   const cssToUse = []
@@ -84,6 +88,16 @@ const MaskedString = ({ show, copyButton, value, children }: MaskedStringProps) 
   }
   if (copyButton) {
     cssToUse.push(css({ whiteSpace: "nowrap" }))
+  }
+  // HACKS
+  if (value && !copyButton && typeof document !== "undefined") {
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+    const valueWidth = vw - 171
+    const valueChars = valueWidth / 8 // 1ch on this font is ~10px
+    // console.log("HACKS", children, vw, valueWidth, valueChars, children.length)
+    if (children.length >= valueChars) {
+      cssToUse.push(maskedStringStyleMultiline)
+    }
   }
   return <span key={`${children}-${show}`} css={cssToUse}>
     {children}
