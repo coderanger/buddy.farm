@@ -30,8 +30,8 @@ export default () => {
 
   return <Layout pageTitle="Server Time">
     <div className="w-100 d-flex flex-column gap-4 align-items-center">
-      <div className="display-3">Server Time is <span className="font-weight-bold">{time}</span></div>
-      <div className="display-5">Daily Reset in <span className="font-weight-bold">{rollover}</span></div>
+      <div className="display-3">Server Time is <strong>{time}</strong></div>
+      <div className="display-5">Daily Reset in <strong>{rollover}</strong></div>
     </div>
   </Layout>
 }
