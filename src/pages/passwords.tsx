@@ -82,6 +82,9 @@ const MaskedString = ({ show, copyButton, value, children }: MaskedStringProps) 
   if (value) {
     cssToUse.push(maskedStringStyle)
   }
+  if (copyButton) {
+    cssToUse.push(css({ whiteSpace: "nowrap" }))
+  }
   return <span key={`${children}-${show}`} css={cssToUse}>
     {children}
     {copyButton && <CopyButton text={children} />}
