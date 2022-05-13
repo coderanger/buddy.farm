@@ -361,6 +361,13 @@ exports.createPages = async ({ actions, graphql }) => {
       type: null,
       href: "/backgrounds/",
     },
+    {
+      name: "Mailbox Passwords",
+      image: "/img/items/postoffice.png",
+      searchText: "mailbox passwords",
+      type: null,
+      href: "/passwords/",
+    },
   ]
   for (const node of searchData.locations.nodes) {
     searchables.push(nodeToSearchable(node))

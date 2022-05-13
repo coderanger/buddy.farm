@@ -146,6 +146,7 @@ export default () => {
             { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
             { name: "Calculators", image: "/img/items/7210.png", fields: { path: "/calculators/" } },
             { name: "Profile Backgrounds", image: "/img/emblems/def.png", fields: { path: "/backgrounds/" } },
+            { name: "Mailbox Passwords", image: "/img/items/postoffice.png", fields: { path: "/passwords/" } },
             { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
           ]} />
         </div>

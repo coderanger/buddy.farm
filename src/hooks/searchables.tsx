@@ -141,6 +141,13 @@ export const useSearchables = () => {
       type: null,
       href: "/backgrounds/",
     },
+    {
+      name: "Mailbox Passwords",
+      image: "/img/items/postoffice.png",
+      searchText: "mailbox passwords",
+      type: null,
+      href: "/passwords/",
+    },
   ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))
