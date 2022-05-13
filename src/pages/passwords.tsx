@@ -50,6 +50,7 @@ interface MaskedStringProps {
 const maskedStringStyle = css({
   fontSize: 32,
   lineHeight: "48px",
+  fontWeight: "normal",
   // A different breakpoint than the usual for the list value because these are longer.
   "@media (max-width: 768px)": {
     fontSize: 16,
