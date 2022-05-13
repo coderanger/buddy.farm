@@ -113,7 +113,7 @@ interface PasswordListProps {
 }
 
 const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => {
-  const onClick = useDebounceAfter(() => setUsed(showDefault ? 5 : used + 1), 500)
+  const onClick = useDebounceAfter(() => setUsed(showDefault ? 5 : used + 1), 350)
 
   const listItems = []
 
