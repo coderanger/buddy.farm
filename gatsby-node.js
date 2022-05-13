@@ -114,8 +114,6 @@ exports.onCreateNode = ({ node, actions }) => {
   if (pathPrefix && typeof name === "string") {
     const slug = name.toLowerCase().replace(/\W+/g, '-')
     createNodeField({ node, name: "path", value: `/${pathPrefix.short}/${slug}/` })
-    createNodeField({ node, name: "longPath", value: `/${pathPrefix.long}/${slug}/` })
-    createNodeField({ node, name: "unprefixedPath", value: `/${slug}/` })
   }
 }
 
@@ -132,8 +130,6 @@ exports.createPages = async ({ actions, graphql }) => {
              name: string
              fields: {
                path: string
-               longPath: string
-               unprefixedPath: string
              }
             }[]
           }
@@ -142,8 +138,6 @@ exports.createPages = async ({ actions, graphql }) => {
               name: string
              fields: {
                path: string
-               longPath: string
-               unprefixedPath: string
              }
             }[]
           }
@@ -152,8 +146,6 @@ exports.createPages = async ({ actions, graphql }) => {
               name: string
              fields: {
                path: string
-               longPath: string
-               unprefixedPath: string
              }
             }[]
           }
@@ -162,8 +154,6 @@ exports.createPages = async ({ actions, graphql }) => {
               name: string
              fields: {
                path: string
-               longPath: string
-               unprefixedPath: string
              }
             }[]
           }
@@ -172,8 +162,6 @@ exports.createPages = async ({ actions, graphql }) => {
               name: string
              fields: {
                path: string
-               longPath: string
-               unprefixedPath: string
              }
             }[]
           }
@@ -188,8 +176,6 @@ exports.createPages = async ({ actions, graphql }) => {
             name
             fields {
               path
-              longPath
-              unprefixedPath
             }
           }
         }
@@ -198,8 +184,6 @@ exports.createPages = async ({ actions, graphql }) => {
             name
             fields {
               path
-              longPath
-              unprefixedPath
             }
           }
         }
@@ -208,8 +192,6 @@ exports.createPages = async ({ actions, graphql }) => {
             name
             fields {
               path
-              longPath
-              unprefixedPath
             }
           }
         }
@@ -218,8 +200,6 @@ exports.createPages = async ({ actions, graphql }) => {
             name
             fields {
               path
-              longPath
-              unprefixedPath
             }
           }
         }
@@ -228,14 +208,12 @@ exports.createPages = async ({ actions, graphql }) => {
             name
             fields {
               path
-              longPath
-              unprefixedPath
             }
           }
         }
       }
     `)
-  /** @type {[{nodes: {name: string, fields: {path: string, longPath: string, unprefixedPath: string}}[]}, string][]} */
+  /** @type {[{nodes: {name: string, fields: {path: string}}[]}, string][]} */
   const types = [
     [data.allItemsJson, "item"],
     [data.allLocationsJson, "location"],
@@ -245,7 +223,7 @@ exports.createPages = async ({ actions, graphql }) => {
   ]
   types.forEach(([typeData, template]) => {
     typeData.nodes.forEach(node => {
-      [node.fields.path, node.fields.unprefixedPath].forEach(path => {
+      [node.fields.path].forEach(path => {
         actions.createPage({
           path: path,
           component: require.resolve(`./src/templates/${template}.tsx`),
