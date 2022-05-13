@@ -12,6 +12,7 @@ import {
 import { BsFillQuestionCircleFill } from '@react-icons/all-files/bs/BsFillQuestionCircleFill'
 
 import { CopyButton } from '../components/clipboard'
+import { classNames } from '../utils/classnames'
 
 export interface ListItem {
   key?: string
@@ -38,6 +39,7 @@ interface ListProps extends listPropsBase {
   items: ListItem[]
   bigLine?: boolean
   copyText?: string
+  shrink?: undefined | "none" | "key" | "value" | "both"
 }
 
 const alertIcon = (alertIcon: string | null | undefined) => {
@@ -50,6 +52,20 @@ const alertIcon = (alertIcon: string | null | undefined) => {
       return <BsFillQuestionCircleFill className="text-info" />
   }
 }
+
+const listDivStyle = css({
+  flexShrink: 0,
+  maxWidth: "100%",
+})
+
+const listKeyDivStyle = css(listDivStyle, {
+  ".bf-list-shrink-key &": { flexShrink: 1 },
+})
+
+const listValueDivStyle = css(listDivStyle, {
+  ".bf-list-shrink-value &": { flexShrink: 1 },
+})
+
 
 const bigLineStyle = css({
   fontSize: 32,
@@ -76,28 +92,35 @@ const ListItem = ({ item }: ListItemProps) => {
     <span className="bf-list-alert" css={{ marginRight: 10, fontSize: 26, display: "inline-block", verticalAlign: "text-bottom" }} onClick={evt => evt.preventDefault()}>{alertIcon(item.alertIcon)}</span>
   </OverlayTrigger>
   let elm = <>
-    <div className="mw-100 flex-shrink-0 d-flex">
+    <div className="d-flex" css={listKeyDivStyle}>
       {item.image && <img src={"https://farmrpg.com" + item.image} className="d-inline-block align-text-top bf-list-image" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />}
       <div className="d-inline-block align-text-top flex-shrink-1">
         <div className={`bf-list-line-one ${item.lineTwo ? "" : "bf-list-line-one-allow-big"}`} css={listLineOneStyle}>{item.lineOne}</div>
         <div className="bf-list-line-two">{item.lineTwo}</div>
       </div>
     </div>
-    <div>
+    <div className="d-flex justify-content-end" css={listValueDivStyle}>
       {alert}
-      <span className="bf-list-value" css={typeof item.value === "string" ? listValueStyle : {}}>{item.value}</span>
+      <span className="bf-list-value d-flex justify-content-end" css={typeof item.value === "string" ? listValueStyle : {}}>{item.value}</span>
     </div>
   </>
   if (href) {
     elm = <Link className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap", color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit" } }} to={href}>{elm}</Link>
   }
-  return <ListGroup.Item className={`d-flex w-100 justify-content-between ${item.copyText ? "clipboard" : ""}`} css={{ flexWrap: "wrap" }} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
+  return <ListGroup.Item className={`d-flex w-100 justify-content-between gap-4 ${item.copyText ? "clipboard" : ""}`} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
 }
 
-export default ({ label, items, bigLine, copyText, ...props }: ListProps) => (
+export default ({ label, items, bigLine, copyText, shrink, className, ...props }: ListProps) => (
   <>
     {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}{copyText && <CopyButton text={copyText} />}</h3>}
-    <ListGroup variant="flush" className={bigLine ? "bf-list-big-line" : ""} {...props}>
+    <ListGroup
+      variant="flush"
+      {...props}
+      className={classNames(className, {
+        "bf-list-big-line": bigLine,
+        "bf-list-shrink-key": shrink === undefined || shrink === "key" || shrink === "both",
+        "bf-list-shrink-value": shrink === "value" || shrink === "both",
+      })}>
       {items.map((item: ListItem) => <ListItem key={item.key || item.lineOne.toString()} item={item} bigLine={bigLine} />)}
     </ListGroup>
   </>

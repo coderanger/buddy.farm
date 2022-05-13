@@ -150,7 +150,7 @@ const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => 
       <h3 id={pw.jsonId.toString()}>Password {pw.jsonId}</h3>
       {buttonText && <Button onClick={onClick}>{buttonText}</Button>}
     </div>
-    <List items={listItems} bigLine={true} css={{ "& .bf-list-line-one": maskedStringStyle }} />
+    <List items={listItems} bigLine={true} shrink="value" css={{ "& .bf-list-line-one": maskedStringStyle }} />
   </div>
 }
 
