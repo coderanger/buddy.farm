@@ -63,11 +63,12 @@ export const Calculator = <T,>({ pageTitle, valueSetter, children }: CalculatorP
 }
 
 interface CalculatorPerksProps {
+  defaultOpen?: boolean
   children: JSX.Element | JSX.Element[]
 }
 
-Calculator.Perks = ({ children }: CalculatorPerksProps) => {
-  return <Accordion className="mb-3">
+Calculator.Perks = ({ defaultOpen, children }: CalculatorPerksProps) => {
+  return <Accordion className="mb-3" defaultActiveKey={defaultOpen ? "0" : undefined}>
     <Accordion.Item eventKey="0">
       <Accordion.Header>Perks</Accordion.Header>
       <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>

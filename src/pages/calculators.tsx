@@ -25,6 +25,11 @@ export default () => {
         image: "/img/items/pigpen_sm.png",
         href: "/animalcalc/",
       },
+      {
+        lineOne: "Wine Calculator",
+        image: "/img/items/wine.png",
+        href: "/winecalc/",
+      },
     ]} bigLine={true} />
   </Layout>
 }

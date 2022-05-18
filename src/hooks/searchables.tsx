@@ -116,7 +116,7 @@ export const useSearchables = () => {
     {
       name: "Tower Calculator",
       image: "/img/items/7210.png",
-      searchText: "Tower calculator",
+      searchText: "tower calculator",
       type: null,
       href: "/towercalc/",
     },
@@ -147,6 +147,13 @@ export const useSearchables = () => {
       searchText: "mailbox passwords",
       type: null,
       href: "/passwords/",
+    },
+    {
+      name: "Wine Calculator",
+      image: "/img/items/7210.png",
+      searchText: "wine cellar calculator",
+      type: null,
+      href: "/winecalc/",
     },
   ]
   for (const node of locations.nodes) {
