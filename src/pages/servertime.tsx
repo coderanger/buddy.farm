@@ -7,18 +7,20 @@ const getServerTime = () => DateTime.now().setZone("America/Chicago").toLocaleSt
 const getRollover = () => {
   const rollover = DateTime.fromObject({}, { zone: "America/Chicago" }).startOf("day").plus({ day: 1 })
   let delta = rollover.diffNow().shiftTo("hours", "minutes", "seconds").normalize()
-  if (delta.hours == 0) {
+  if (delta.hours === 0) {
     delta = delta.shiftTo("minutes", "seconds").normalize()
   }
-  if (delta.minutes == 0) {
+  if (delta.minutes === 0) {
     delta = delta.shiftTo("seconds").normalize()
   }
+  // Round down seconds. Otherwise things like seconds=59.9 shows as 60 and it looks silly.
+  delta = delta.set({ seconds: delta.seconds - (delta.seconds % 1) })
   return delta.toHuman({ maximumFractionDigits: 0 })
 }
 
 export default () => {
-  const [time, setTime] = useState(getServerTime())
-  const [rollover, setRollover] = useState(getRollover())
+  const [time, setTime] = useState(getServerTime)
+  const [rollover, setRollover] = useState(getRollover)
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -29,9 +31,9 @@ export default () => {
   }, [])
 
   return <Layout pageTitle="Server Time">
-    <div className="w-100 d-flex flex-column gap-4 align-items-center">
+    {typeof document !== "undefined" && <div className="w-100 d-flex flex-column gap-4 align-items-center">
       <div className="display-3">Server Time is <strong>{time}</strong></div>
       <div className="display-5">Daily Reset in <strong>{rollover}</strong></div>
-    </div>
+    </div>}
   </Layout>
 }
