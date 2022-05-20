@@ -127,6 +127,7 @@ interface CommunityCenter {
     name: string
   }
   goalQuantity: number
+  progress: number | null
 }
 
 interface Password {
@@ -426,8 +427,10 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
       key: `cc${cc.date}`,
       image: "/img/items/comm.png",
       lineOne: "Community Center",
-      lineTwo: `${cc.goalItem.name} x${cc.goalQuantity}`,
+      lineTwo: `${cc.goalItem.name} x${cc.goalQuantity.toLocaleString()}`,
       value: DateTime.fromFormat(cc.date, "yyyy-MM-dd").toLocaleString(DateTime.DATE_FULL),
+      alert: cc.progress !== null && cc.progress < cc.goalQuantity ? "Mission failed" : undefined,
+      alertIcon: "error",
     })))
   }
 
@@ -808,6 +811,7 @@ export const pageQuery = graphql`
           name
         }
         goalQuantity
+        progress
       }
     }
 
