@@ -16,6 +16,9 @@ exports.createSchemaCustomization = ({ actions }) => {
     type ItemsJson implements Node {
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
       api: ItemApiJson! @link(from: "jsonId", by: "jsonId")
+      locksmithItems: [LocksmithItemsJson!] @link(from: "jsonId", by: "itemId")
+      inputRecipes: [RecipesJson!] @link(from: "jsonId", by: "inputId")
+      outputRecipes: [RecipesJson!] @link(from: "jsonId", by: "outputId")
     }
 
     type PetsJson implements Node {
@@ -52,14 +55,14 @@ exports.createSchemaCustomization = ({ actions }) => {
     }
 
     type LocksmithItemsJson implements Node {
-      box: LocksmithBoxesJson! @link(by: "box")
-      boxItem: ItemsJson! @link(by: "jsonId", from: "box")
-      item: ItemsJson! @link(by: "jsonId")
+      box: LocksmithBoxesJson! @link(by: "boxId")
+      boxItem: ItemsJson! @link(by: "jsonId", from: "boxId")
+      item: ItemsJson! @link(by: "jsonId", from: "itemId")
     }
 
     type LocksmithBoxesJson implements Node {
-      box: ItemsJson! @link(by: "jsonId")
-      items: [LocksmithItemsJson!] @link(by: "boxItem.jsonId", from: "box")
+      box: ItemsJson! @link(by: "jsonId", from: "boxId")
+      items: [LocksmithItemsJson!] @link(by: "boxId", from: "boxId")
     }
 
     type BuildingProductionJson implements Node {
@@ -90,6 +93,11 @@ exports.createSchemaCustomization = ({ actions }) => {
     type PasswordItemsJson implements Node {
       password: PasswordsJson! @link(by: "jsonId")
       item: ItemsJson! @link(by: "jsonId")
+    }
+
+    type RecipesJson implements Node {
+      input: ItemsJson! @link(by: "jsonId", from: "inputId")
+      output: ItemsJson! @link(by: "jsonId", from: "outputId")
     }
   `
   createTypes(typeDefs)

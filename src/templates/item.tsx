@@ -1,5 +1,6 @@
 import { graphql } from 'gatsby'
 import React, { useEffect, useState, useContext } from 'react'
+import { DateTime } from 'luxon'
 
 import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
@@ -136,6 +137,18 @@ interface Password {
   quantity: number
 }
 
+interface RecipeItem {
+  item: {
+    jsonId: string
+    name: string
+    image: string
+    fields: {
+      path: string
+    }
+  }
+  quantity: number
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -150,6 +163,8 @@ interface Item {
   fields: {
     path: string
   }
+  inputRecipes: RecipeItem[]
+  outputRecipes: RecipeItem[]
 }
 
 interface ItemProps {
@@ -251,6 +266,22 @@ const LocksmithList = ({ label, box }: LocksmithListProps) => {
     })
   }
   return <List label={label} items={listItems} bigLine={true} />
+}
+
+interface RecipeListProps {
+  label: string
+  labelAnchor: string | undefined
+  recipeItems: RecipeItem[]
+}
+
+const RecipeList = ({ label, labelAnchor, recipeItems }: RecipeListProps) => {
+  const listItems: ListItem[] = recipeItems.map(r => ({
+    image: r.item.image,
+    lineOne: r.item.name,
+    href: r.item.fields.path,
+    value: r.quantity.toLocaleString(),
+  }))
+  return <List label={label} labelAnchor={labelAnchor} items={listItems} bigLine={true} />
 }
 
 interface ItemListProps {
@@ -385,6 +416,32 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: `/passwords/#${pw.password.jsonId}`,
   })))
 
+  // Community center sources. Only shows if there's no drop sources and isn't craftable.
+  if (drops.nodes.length === 0 &&
+    level1Pets.nodes.length === 0 &&
+    level3Pets.nodes.length === 0 &&
+    level6Pets.nodes.length === 0 &&
+    item.outputRecipes.length === 0) {
+    listItems.push(...communityCenter.map(cc => ({
+      key: `cc${cc.date}`,
+      image: "/img/items/comm.png",
+      lineOne: "Community Center",
+      lineTwo: `${cc.goalItem.name} x${cc.goalQuantity}`,
+      value: DateTime.fromFormat(cc.date, "yyyy-MM-dd").toLocaleString(DateTime.DATE_FULL),
+    })))
+  }
+
+  // Crafting.
+  if (item.outputRecipes.length !== 0) {
+    listItems.push({
+      image: "/img/items/workshop_sm.png",
+      lineOne: "Workshop",
+      lineTwo: "See below",
+      href: "#recipe",
+      value: "Craftable",
+    })
+  }
+
   // Trading.
   if (item.givable) {
     listItems.push({
@@ -447,6 +504,8 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       <CopyButton path={item.fields.path} />
     </h1>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} communityCenter={communityCenter.nodes} passwords={passwords.nodes} settings={settings} />
+    <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.outputRecipes} />
+    <RecipeList label="Used In" labelAnchor={undefined} recipeItems={item.inputRecipes} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
@@ -469,6 +528,43 @@ export const pageQuery = graphql`
       }
       fields {
         path
+      }
+      # This is not used right now, it's backup for future corruption debugging because I'm seeing data desync.
+      # Also I should probably do more of this using this kind of query, sigh.
+      locksmithItems {
+        quantityLow
+        quantityHigh
+        boxItem {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
+
+      inputRecipes {
+        item: output {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+        quantity
+      }
+      outputRecipes {
+        item: input {
+          jsonId
+          name
+          image
+          fields {
+            path
+          }
+        }
+        quantity
       }
     }
     normalDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {

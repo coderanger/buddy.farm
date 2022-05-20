@@ -36,6 +36,7 @@ interface ListItemProps {
 type listPropsBase = Parameters<typeof ListGroup>[0]
 interface ListProps extends listPropsBase {
   label?: string
+  labelAnchor?: string
   items: ListItem[]
   bigLine?: boolean
   copyText?: string
@@ -110,9 +111,9 @@ const ListItem = ({ item }: ListItemProps) => {
   return <ListGroup.Item className={`d-flex w-100 justify-content-between gap-4 ${item.copyText ? "clipboard" : ""}`} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
 }
 
-export default ({ label, items, bigLine, copyText, shrink, className, ...props }: ListProps) => (
+export default ({ label, labelAnchor, items, bigLine, copyText, shrink, className, ...props }: ListProps) => (
   <>
-    {label && items.length > 0 && <h3 css={{ marginTop: 20 }}>{label}{copyText && <CopyButton text={copyText} />}</h3>}
+    {label && items.length > 0 && <h3 id={labelAnchor} css={{ marginTop: 20 }}>{label}{copyText && <CopyButton text={copyText} />}</h3>}
     <ListGroup
       variant="flush"
       {...props}
