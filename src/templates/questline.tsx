@@ -39,6 +39,14 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   return text
 }
 
+const RARITY_ORDER: Record<string, number> = {
+  "Super Rare": 0,
+  "Very Rare": 1,
+  "Rare": 2,
+  "Uncommon": 3,
+  "Common": 4,
+}
+
 export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuery>) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
@@ -70,7 +78,7 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
   // Build up the lists based on the totals.
   const lineRequestItems: Quest["itemRequests"][0][] = []
   const lineRewardItems: Quest["itemRewards"][0][] = []
-  for (const itemId of Object.keys(itemCounts).sort((a, b) => parseInt(a, 10) - parseInt(b, 10))) {
+  for (const itemId in itemCounts) {
     const quantity = itemCounts[itemId]
     if (quantity === 0) {
       continue
@@ -80,6 +88,21 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
       quantity: Math.abs(quantity),
     })
   }
+
+  // Sort the two item lists, first on rarity then quantity, then alpha.
+  const sortItems = (a: Quest["itemRequests"][0], b: Quest["itemRequests"][0]) => {
+    const aRarity = RARITY_ORDER[a.item.rarity || ""] || 5
+    const bRarity = RARITY_ORDER[b.item.rarity || ""] || 5
+    if (aRarity !== bRarity) {
+      return aRarity - bRarity
+    }
+    if (a.quantity !== b.quantity) {
+      return b.quantity - a.quantity
+    }
+    return a.item.name.localeCompare(b.item.name)
+  }
+  lineRequestItems.sort(sortItems)
+  lineRewardItems.sort(sortItems)
 
   return <Layout pageTitle={questline.name}>
     <h1>
@@ -125,6 +148,7 @@ export const pageQuery = graphql`
             jsonId
             name
             image
+            rarity
             fields {
               path
             }
@@ -138,6 +162,7 @@ export const pageQuery = graphql`
             jsonId
             name
             image
+            rarity
             fields {
               path
             }
