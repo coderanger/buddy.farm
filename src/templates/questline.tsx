@@ -1,5 +1,5 @@
 
-import { graphql } from 'gatsby'
+import { graphql, PageProps } from 'gatsby'
 import { useContext, useState } from 'react'
 
 import { CopyButton } from '../components/clipboard'
@@ -8,19 +8,9 @@ import Layout from '../components/layout'
 import List from '../components/list'
 import { GlobalContext } from '../utils/context'
 
-interface Quest {
-  name: string
-  fromImage: string
-  requiresFarming: number | null
-  requiresFishing: number | null
-  requiresCrafting: number | null
-  requiresExploring: number | null
-  text: string
-  fields: {
-    path: string
-  }
-}
+import { QuestItemList } from "./quest"
 
+type Quest = NonNullable<Queries.QuestlineTemplateQuery["questline"]>["quests"][number]
 
 const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   if (!showText && !showLevels) {
@@ -49,26 +39,48 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   return text
 }
 
-interface QuestlinesProps {
-  data: {
-    questline: {
-      name: string
-      image: string
-      quests: Quest[]
-      fields: {
-        path: string
-      }
-    }
-  }
-}
-
-
-
-export default ({ data: { questline } }: QuestlinesProps) => {
+export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuery>) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [showText, setShowText] = useState(false)
   const [showLevels, setshowLevels] = useState(false)
+  if (questline === null) {
+    throw `Unable to load questline`
+  }
+
+  // Collect info on line-wide requests and rewards. Negative rolling count is a request, positive is a reward.
+  const itemCounts: { [itemId: string]: number } = {}
+  const items: { [itemId: string]: Quest["itemRequests"][0]["item"] } = {}
+  let silverCount = 0
+  let goldCount = 0
+  for (const quest of questline.quests) {
+    silverCount -= quest.silverRequest || 0
+    silverCount += quest.silverReward || 0
+    goldCount += quest.goldReward || 0
+    for (const iq of quest.itemRequests) {
+      items[iq.item.jsonId] = iq.item
+      itemCounts[iq.item.jsonId] = (itemCounts[iq.item.jsonId] || 0) - iq.quantity
+    }
+    for (const iq of quest.itemRewards) {
+      items[iq.item.jsonId] = iq.item
+      itemCounts[iq.item.jsonId] = (itemCounts[iq.item.jsonId] || 0) + iq.quantity
+    }
+  }
+
+  // Build up the lists based on the totals.
+  const lineRequestItems: Quest["itemRequests"][0][] = []
+  const lineRewardItems: Quest["itemRewards"][0][] = []
+  for (const itemId of Object.keys(itemCounts).sort((a, b) => parseInt(a, 10) - parseInt(b, 10))) {
+    const quantity = itemCounts[itemId]
+    if (quantity === 0) {
+      continue
+    }
+    (quantity > 0 ? lineRewardItems : lineRequestItems).push({
+      item: items[itemId],
+      quantity: Math.abs(quantity),
+    })
+  }
+
   return <Layout pageTitle={questline.name}>
     <h1>
       <img src={"https://farmrpg.com" + questline.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
@@ -85,11 +97,13 @@ export default ({ data: { questline } }: QuestlinesProps) => {
       lineTwo: questText(q, showText, showLevels),
       href: q.fields.path
     }))} bigLine={true} />
+    <QuestItemList label="Total Request" silver={silverCount < 0 ? -silverCount : null} items={lineRequestItems} />
+    <QuestItemList label="Total Reward" silver={silverCount > 0 ? silverCount : null} gold={goldCount > 0 ? goldCount : null} items={lineRewardItems} />
   </Layout>
 }
 
 export const pageQuery = graphql`
-  query($name: String!) {
+  query QuestlineTemplate($name: String!) {
     questline: questlinesJson(name: {eq: $name}) {
       name
       image
@@ -103,6 +117,31 @@ export const pageQuery = graphql`
         text
         fields {
           path
+        }
+        silverRequest
+        itemRequests {
+          quantity
+          item {
+            jsonId
+            name
+            image
+            fields {
+              path
+            }
+          }
+        }
+        silverReward
+        goldReward
+        itemRewards {
+          quantity
+          item {
+            jsonId
+            name
+            image
+            fields {
+              path
+            }
+          }
         }
       }
       fields {

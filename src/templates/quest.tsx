@@ -34,7 +34,7 @@ interface QuestItemListProps {
   copyText?: string
 }
 
-const QuestItemList = ({ label, silver, gold, items, copyText }: QuestItemListProps) => {
+export const QuestItemList = ({ label, silver, gold, items, copyText }: QuestItemListProps) => {
   const listItems = []
   if (silver) {
     listItems.push({

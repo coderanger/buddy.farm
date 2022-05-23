@@ -7,6 +7,10 @@ const fs = require("fs")
 exports.createSchemaCustomization = ({ actions }) => {
   const { createTypes } = actions
   const typeDefs = `
+    type BFFields {
+      path: String!
+    }
+
     type DropRatesGqlJson implements Node {
       item: ItemsJson! @link(by: "name")
       location: LocationsJson @link(by: "name")
@@ -14,6 +18,10 @@ exports.createSchemaCustomization = ({ actions }) => {
     }
 
     type ItemsJson implements Node {
+      jsonId: String!
+      name: String!
+      image: String!
+      fields: BFFields!
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
       api: ItemApiJson! @link(from: "jsonId", by: "jsonId")
       locksmithItems: [LocksmithItemsJson!] @link(from: "jsonId", by: "itemId")
@@ -35,12 +43,18 @@ exports.createSchemaCustomization = ({ actions }) => {
     }
 
     type QuestsJson implements Node {
+      jsonId: String!
+      name: String!
+      fromImage: String!
+      fields: BFFields!
       extra: QuestExtraJson @link(from: "jsonId", by: "jsonId")
       itemRequests: [QuestReward!]!
       itemRewards: [QuestReward!]!
     }
 
     type QuestlinesJson implements Node {
+      name: String!
+      fields: BFFields!
       quests: [QuestsJson!]! @link(by: "jsonId")
     }
 
