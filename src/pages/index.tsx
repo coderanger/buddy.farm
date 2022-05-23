@@ -1,11 +1,13 @@
+import { graphql, Link, useStaticQuery } from 'gatsby'
+import { DateTime } from 'luxon'
 import React from 'react'
-import Layout from '../components/layout'
-import { Link, useStaticQuery, graphql } from 'gatsby';
-import { DateTime } from "luxon"
-import SunCalc from "suncalc"
-import Row from "react-bootstrap/Row"
-import Col from "react-bootstrap/Col"
+import Col from 'react-bootstrap/Col'
 import ListGroup from 'react-bootstrap/ListGroup'
+import Row from 'react-bootstrap/Row'
+import SunCalc from 'suncalc'
+
+import Layout from '../components/layout'
+import { useServerTime } from '../hooks/servertime'
 
 interface ListItem {
   name: string
@@ -83,6 +85,18 @@ const MiniList = ({ label, items }: MiniListProps) => (
   </>
 )
 
+const ServerTime = () => {
+  const [time, rollover] = useServerTime()
+
+  return <>
+    <h5 className="mb-1">Server Time</h5>
+    {typeof document !== "undefined" && <div>
+      <div>Server Time is <strong>{time}</strong></div>
+      <div>Daily Reset in <strong>{rollover}</strong></div>
+    </div>}
+  </>
+}
+
 
 
 interface IndexQuery {
@@ -153,6 +167,7 @@ export default () => {
       </Col>
       <Col sm>
         <MiniList label="New Quests" items={quests.nodes} />
+        <ServerTime />
       </Col>
       <Col sm>
         <MiniList label="New Items" items={items.nodes} />
