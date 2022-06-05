@@ -48,6 +48,7 @@ export default () => {
         <SwitchSetting id="showPasswords" label="Show Mailbox Passwords" settings={settings} />
         <div className={secretKnockEnabled ? "" : "d-none"}>
           <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
+          <SwitchSetting id="runecube" label="Runecube" settings={settings} />
         </div>
       </fieldset>
       <fieldset>

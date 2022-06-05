@@ -168,28 +168,6 @@ interface Item {
   outputRecipes: RecipeItem[]
 }
 
-interface ItemProps {
-  data: {
-    item: Item
-    normalDrops: DropRates
-    ironDepotDrops: DropRates
-    manualFishingDrops: DropRates
-    level1Pets: Pets
-    level3Pets: Pets
-    level6Pets: Pets
-    questRequests: { nodes: Quest[] }
-    questRewards: { nodes: Quest[] }
-    wellInput: { nodes: WishingWell[] }
-    wellOutput: { nodes: WishingWell[] }
-    locksmithBox: LocksmithBox | null
-    locksmithItems: { nodes: LocksmithItems[] }
-    buildings: { nodes: Building[] }
-    tower: { nodes: Tower[] }
-    communityCenter: { nodes: CommunityCenter[] },
-    passwords: { nodes: Password[] },
-  }
-}
-
 interface SortableListItem extends ListItem {
   _sortValue: number
 }
@@ -481,18 +459,45 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   return <List items={listItems} />
 }
 
-export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings, tower, communityCenter, passwords } }: ItemProps) => {
+interface ItemProps {
+  data: {
+    item: Item
+    normalDrops: DropRates
+    ironDepotDrops: DropRates
+    manualFishingDrops: DropRates
+    runecubeNormalDrops: DropRates
+    runecubeIronDepotDrops: DropRates
+    runecubeManualFishingDrops: DropRates
+    level1Pets: Pets
+    level3Pets: Pets
+    level6Pets: Pets
+    questRequests: { nodes: Quest[] }
+    questRewards: { nodes: Quest[] }
+    wellInput: { nodes: WishingWell[] }
+    wellOutput: { nodes: WishingWell[] }
+    locksmithBox: LocksmithBox | null
+    locksmithItems: { nodes: LocksmithItems[] }
+    buildings: { nodes: Building[] }
+    tower: { nodes: Tower[] }
+    communityCenter: { nodes: CommunityCenter[] },
+    passwords: { nodes: Password[] },
+  }
+}
+
+export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops, runecubeNormalDrops, runecubeIronDepotDrops, runecubeManualFishingDrops, level1Pets, level3Pets, level6Pets, questRequests, questRewards, wellInput, wellOutput, locksmithBox, locksmithItems, buildings, tower, communityCenter, passwords } }: ItemProps) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
 
   useEffect(() => {
     if (item.dropMode?.dropMode === "explores" && !!settings.ironDepot) {
-      setDrops(ironDepotDrops)
+      setDrops(settings.runecube ? runecubeIronDepotDrops : ironDepotDrops)
     } else if (item.dropMode?.dropMode === "fishes" && (!!settings.manualFishing || item.manualFishingOnly)) {
-      setDrops(manualFishingDrops)
+      setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
+    } else if (settings.runecube) {
+      setDrops(runecubeNormalDrops)
     }
-  }, [item.dropMode?.dropMode, settings.ironDepot, settings.manualFishing])
+  }, [item.dropMode?.dropMode, settings.ironDepot, settings.manualFishing, settings.runecube])
 
   return <Layout pageTitle={item.name}>
     <h1>
@@ -517,7 +522,35 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
 }
 
 export const pageQuery = graphql`
-  query($name: String!) {
+  fragment ItemTemplateDrops on DropRatesGqlJsonConnection {
+    nodes {
+      location {
+        jsonId
+        name
+        image
+        type
+        fields {
+          path
+        }
+        extra {
+          baseDropRate
+        }
+      }
+      locationItem {
+        jsonId
+        name
+        image
+        fields {
+          path
+        }
+      }
+      rate
+      mode
+      drops
+    }
+  }
+
+  query ItemTemplate($name: String!) {
     item: itemsJson(name: {eq: $name}) {
       name
       jsonId
@@ -570,86 +603,25 @@ export const pageQuery = graphql`
         quantity
       }
     }
-    normalDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {
-      nodes {
-        location {
-          jsonId
-          name
-          image
-          type
-          fields {
-            path
-          }
-          extra {
-            baseDropRate
-          }
-        }
-        locationItem {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+
+    # Item drops stuff.
+    normalDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: false}}) {
+      ...ItemTemplateDrops
     }
-    ironDepotDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"iron_depot"}}) {
-      nodes {
-        location {
-          jsonId
-          name
-          image
-          type
-          fields {
-            path
-          }
-          extra {
-            baseDropRate
-          }
-        }
-        locationItem {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+    ironDepotDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: false}}) {
+      ...ItemTemplateDrops
     }
-    manualFishingDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type:{eq:"manual_fishing"}}) {
-      nodes {
-        location {
-          jsonId
-          name
-          image
-          type
-          fields {
-            path
-          }
-          extra {
-            baseDropRate
-          }
-        }
-        locationItem {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+    manualFishingDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: false}}) {
+      ...ItemTemplateDrops
+    }
+    runecubeNormalDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: true}}) {
+      ...ItemTemplateDrops
+    }
+    runecubeIronDepotDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: true}}) {
+      ...ItemTemplateDrops
+    }
+    runecubeManualFishingDrops: allDropRatesGqlJson(filter: {item: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: true}}) {
+      ...ItemTemplateDrops
     }
 
     # Check each level of pet items, since Gatsby appears to lack an "or" query mode.

@@ -83,21 +83,26 @@ interface LocationProps {
     normalDrops: DropRates
     ironDepotDrops: DropRates
     manualFishingDrops: DropRates
+    runecubeNormalDrops: DropRates
+    runecubeIronDepotDrops: DropRates
+    runecubeManualFishingDrops: DropRates
   }
 }
 
-export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDrops } }: LocationProps) => {
+export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDrops, runecubeNormalDrops, runecubeIronDepotDrops, runecubeManualFishingDrops } }: LocationProps) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
 
   useEffect(() => {
     if (location.type === "explore" && !!settings.ironDepot) {
-      setDrops(ironDepotDrops)
+      setDrops(settings.runecube ? runecubeIronDepotDrops : ironDepotDrops)
     } else if (location.type === "fishing" && !!settings.manualFishing) {
-      setDrops(manualFishingDrops)
+      setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
+    } else if (settings.runecube) {
+      setDrops(runecubeNormalDrops)
     }
-  }, [location.type, settings.ironDepot, settings.manualFishing])
+  }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
 
   return <Layout pageTitle={location.name}>
     <h1>
@@ -110,7 +115,24 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
 }
 
 export const pageQuery = graphql`
-  query($name: String!) {
+  fragment LocationTemplateDrops on DropRatesGqlJsonConnection {
+    nodes {
+      item {
+        jsonId
+        name
+        image
+        manualFishingOnly
+        fields {
+          path
+        }
+      }
+      rate
+      mode
+      drops
+    }
+  }
+
+  query LocationTemplate($name: String!) {
     location: locationsJson(name: {eq: $name}) {
       name
       jsonId
@@ -124,53 +146,24 @@ export const pageQuery = graphql`
         path
       }
     }
-    normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"normal"}}) {
-      nodes {
-        item {
-          jsonId
-          name
-          image
-          manualFishingOnly
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+
+    normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: false}}) {
+      ...LocationTemplateDrops
     }
-    ironDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"iron_depot"}}) {
-      nodes {
-        item {
-          jsonId
-          name
-          image
-          manualFishingOnly
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+    ironDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: false}}) {
+      ...LocationTemplateDrops
     }
-    manualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type:{eq:"manual_fishing"}}) {
-      nodes {
-        item {
-          jsonId
-          name
-          image
-          manualFishingOnly
-          fields {
-            path
-          }
-        }
-        rate
-        mode
-        drops
-      }
+    manualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: false}}) {
+      ...LocationTemplateDrops
+    }
+    runecubeNormalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: true}}) {
+      ...LocationTemplateDrops
+    }
+    runecubeIronDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: true}}) {
+      ...LocationTemplateDrops
+    }
+    runecubeManualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: true}}) {
+      ...LocationTemplateDrops
     }
   }
 `
