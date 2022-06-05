@@ -64,7 +64,7 @@ export default () => {
           <option value="largeNets">Large Nets</option>
         </SelectSetting>
         <SelectSetting id="unitFarming" label="Farming" settings={settings}>
-          <option value="">Plot Harvests</option>
+          <option value="">Seeds</option>
           <option value="harvestAll">Harvest Alls</option>
         </SelectSetting>
         <TextSetting id="cropRows" label="Crop Rows" placeholder='2' type="number" settings={settings} />
