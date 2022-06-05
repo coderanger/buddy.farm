@@ -39,14 +39,6 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   return text
 }
 
-const RARITY_ORDER: Record<string, number> = {
-  "Super Rare": 0,
-  "Very Rare": 1,
-  "Rare": 2,
-  "Uncommon": 3,
-  "Common": 4,
-}
-
 export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuery>) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
@@ -91,11 +83,6 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
 
   // Sort the two item lists, first on rarity then quantity, then alpha.
   const sortItems = (a: Quest["itemRequests"][0], b: Quest["itemRequests"][0]) => {
-    const aRarity = RARITY_ORDER[a.item.rarity || ""] || 5
-    const bRarity = RARITY_ORDER[b.item.rarity || ""] || 5
-    if (aRarity !== bRarity) {
-      return aRarity - bRarity
-    }
     if (a.quantity !== b.quantity) {
       return b.quantity - a.quantity
     }
@@ -148,7 +135,6 @@ export const pageQuery = graphql`
             jsonId
             name
             image
-            rarity
             fields {
               path
             }
@@ -162,7 +148,6 @@ export const pageQuery = graphql`
             jsonId
             name
             image
-            rarity
             fields {
               path
             }
