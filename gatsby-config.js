@@ -54,7 +54,7 @@ module.exports = {
       options: {
         name: "Buddy's Almanac",
         short_name: "buddy.farm",
-        description: "Unofficial reference data for FarmRPG.",
+        description: "Unofficial reference data for Farm RPG.",
         icon: "src/images/icon.svg",
       },
     },
