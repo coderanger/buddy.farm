@@ -284,7 +284,7 @@ const LevelInput = ({ setXp, xpMap }: LevelInputProps) => {
         <Button variant={isXp ? "primary" : "outline-secondary"} onClick={() => setIsXp(true)}>XP</Button>
         <Form.Control
           placeholder={isXp ? "0" : "1"}
-          onChange={evt => setCurrent(evt.target.value === "" ? null : parseInt(evt.target.value.replace(/,/g, ""), 10))}
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => setCurrent(evt.target.value === "" ? null : parseInt(evt.target.value.replace(/,/g, ""), 10))}
           pattern={isXp ? "^[0-9,]+$" : "^\\d{1,2}$"}
           aria-label="Current level or XP"
         />
