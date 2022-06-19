@@ -227,7 +227,7 @@ const FarmingXpCalc = ({ xp, data, values }: XpCalcProps) => {
         This calculator is only to help with the last bits of XP when already at a high level.
       </div>
     </Input>
-    <Input.Select id="cropXp" label="Crop" defaultValue={data.cropXp.toString()}>
+    <Input.Select id="cropXp" label="Crop" defaultValue={data.cropXp.toString()} type="number">
       <option value="40320">Cotton (level 70)</option>
       <option value="60480">Sunflowers (level 80)</option>
       <option value="90720">Beets (level 90)</option>
