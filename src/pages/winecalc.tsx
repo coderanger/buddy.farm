@@ -41,6 +41,9 @@ export default () => {
   const optimalProfit = prevDayProfit >= fullDayProfit ? prevDayProfit : fullDayProfit
   const optimalTotalProfit = data.maxBottles * optimalProfit
 
+  const bottlesPerDay = data.maxBottles / daysToOptimal
+
+
   return <Calculator pageTitle="Wine Calculator" valueSetter={setValues}>
     <Input.Text
       id="farmLevel"
@@ -81,5 +84,9 @@ export default () => {
       tooltip={`${optimalProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })} / bottle`}
     />
     <Input.Text id="daysToMax" label="Days To Max Value" disabled={true} value={fullDaysToMaxValue.toLocaleString()} />
+    <Input.Text id="bottlesPerDay" label="Bottles / Day" disabled={true}
+      value={Math.ceil(bottlesPerDay).toLocaleString()}
+      tooltip={bottlesPerDay.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+    />
   </Calculator>
 }
