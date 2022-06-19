@@ -37,11 +37,26 @@ export const formatDropRate = (settings: Settings, locationType: string, rate: n
           } else {
             return formatDropRateUnit(rate * staminaPerExplore, "Stamina/drop", "Drops/stamina")
           }
+        case "ciders":
+          if (baseDropRate !== null) {
+            const exploresPerCider = !!settings.cinnamonSticks ? 1250 : 1000
+            const ciderBaseDropRate = 0.4
+            const ciderDrops = exploresPerCider * ciderBaseDropRate
+            const normalExplores = ciderDrops / baseDropRate
+            const ciderRate = rate / normalExplores
+            return formatDropRateUnit(ciderRate, "Ciders/drop", "Drops/cider")
+          }
         case "lemonade":
           if (baseDropRate !== null) {
             const itemsPerLem = !!settings.lemonSqueezer ? 20 : 10
             const lemExplores = (1 / baseDropRate) * itemsPerLem
             return formatDropRateUnit(rate / lemExplores, "Lemonades/drop", "Drops/lemonade")
+          }
+        case "palmers":
+          if (baseDropRate !== null) {
+            const itemsPerPalmer = !!settings.lemonSqueezer ? 500 : 200
+            const palmerExplores = (1 / baseDropRate) * itemsPerPalmer
+            return formatDropRateUnit(rate / palmerExplores, "Arnold Palmers/drop", "Drops/arnold palmer")
           }
         // If there was no base drop rate, fall through to the default.
         default:

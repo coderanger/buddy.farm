@@ -15,6 +15,7 @@ interface OrchardData {
   resourceSaver: number
   wanderer: number
   lemonSqueezer: boolean
+  cinnamonSticks: boolean
   location: string
   makeCiders: boolean
   makePalmers: boolean
@@ -29,6 +30,7 @@ const DEFAULT_DATA: OrchardData = {
   resourceSaver: 20,
   wanderer: 33,
   lemonSqueezer: true,
+  cinnamonSticks: false,
   location: "Whispering Creek",
   makeCiders: false,
   makePalmers: true,
@@ -41,6 +43,7 @@ export default () => {
     resourceSaver: settings.resourceSaver ? parseInt(settings.resourceSaver, 10) : undefined,
     wanderer: settings.wanderer ? parseInt(settings.wanderer, 10) : undefined,
     lemonSqueezer: settings.lemonSqueezer === undefined ? undefined : !!settings.lemonSqueezer,
+    cinnamonSticks: settings.cinnamonSticks === undefined ? undefined : !!settings.cinnamonSticks,
   }))
 
   // Calculations.
@@ -51,7 +54,10 @@ export default () => {
   const oranges = Math.min(Math.round(data.orangeTrees * foresterMul), data.maxInventory)
   const lemons = Math.min(Math.round(data.lemonTrees * foresterMul), data.maxInventory)
   const appleStamina = data.makeCiders ? 0 : apples * 15
-  const oj = Math.floor((oranges / 6) * resourceSaverMul)
+  const ciders = data.makeCiders ? Math.floor((apples / 40) * resourceSaverMul) : 0
+  const ciderStamina = Math.round(ciders * (data.cinnamonSticks ? 1250 : 1000) * wandererMul)
+  const availableOranges = oranges - (data.makeCiders ? Math.floor(apples / 40) : 0)
+  const oj = Math.floor((availableOranges / 6) * resourceSaverMul)
   const ojStamina = oj * 100
   const lemonade = Math.floor((lemons / 6) * resourceSaverMul)
   const palmers = Math.floor((lemonade / 20) * resourceSaverMul)
@@ -144,8 +150,14 @@ export default () => {
         label="Lemon Squeezer"
         defaultChecked={data.lemonSqueezer}
       />
+      <Input.Switch
+        id="cinnamonSticks"
+        label="Cinnamon Sticks"
+        defaultChecked={data.cinnamonSticks}
+      />
     </Calculator.Perks>
     <Input.Text id="apples" label="Apples" disabled={true} value={apples.toLocaleString()} />
+    {data.makeCiders && <Input.Text id="ciders" label="Ciders" disabled={true} value={ciders.toLocaleString()} tooltip={`${ciderStamina.toLocaleString()} Stamina`} />}
     <Input.Text id="oj" label="OJ" disabled={true} value={oj.toLocaleString()} />
     <Input.Text id="lemOrPalmers" label={data.makePalmers ? "Arnold Palmers" : "Lemonade"} disabled={true} value={(data.makePalmers ? palmers : lemonade).toLocaleString()} />
     <Input.Text id="explores" label="Explores" disabled={true} value={explores.toLocaleString()} />

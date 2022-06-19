@@ -56,8 +56,10 @@ export default () => {
         <SelectSetting id="unitExploring" label="Exploring" settings={settings}>
           <option value="">Explores</option>
           <option value="stamina">Stamina</option>
-          <option value="oj">Orange Juice</option>
-          <option value="lemonade">Lemonade</option>
+          <option value="oj">Orange Juices</option>
+          <option value="ciders">Apple Ciders</option>
+          <option value="lemonade">Lemonades</option>
+          <option value="palmers">Arnold Palmers</option>
         </SelectSetting>
         <SelectSetting id="unitFishing" label="Fishing" settings={settings}>
           <option value="">Fishes</option>
@@ -74,6 +76,7 @@ export default () => {
         <legend>Perks</legend>
         <SwitchSetting id="ironDepot" label="Iron Depot" settings={settings} />
         <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" type="number" settings={settings} />
+        <SwitchSetting id="cinnamonSticks" label="Cinnamon Sticks" settings={settings} />
         <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
         <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
         <SwitchSetting id="fishingTrawl" label="Fishing Trawl" settings={settings} />
