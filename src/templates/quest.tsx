@@ -80,6 +80,7 @@ interface QuestProps {
       requiresFishing: number | null
       requiresCrafting: number | null
       requiresExploring: number | null
+      requiresTower: number | null
       silverRequest: number | null
       itemRequests: ItemQuantity[]
       silverReward: number | null
@@ -129,6 +130,13 @@ export default ({ data: { quest } }: QuestProps) => {
       image: "/img/items/6075.png",
       lineOne: "Exploring Level",
       value: quest.requiresExploring.toLocaleString(),
+    })
+  }
+  if (quest.requiresTower) {
+    questData.push({
+      image: "/img/items/tower.png",
+      lineOne: "Tower Level",
+      value: quest.requiresTower.toLocaleString(),
     })
   }
 
@@ -190,6 +198,7 @@ export const pageQuery = graphql`
       requiresFishing
       requiresCrafting
       requiresExploring
+      # requiresTower
       silverRequest
       itemRequests {
         quantity
