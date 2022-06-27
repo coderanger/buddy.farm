@@ -9,6 +9,9 @@ import { formatDropRate } from '../utils/format'
 import { CopyButton } from '../components/clipboard'
 import { GlobalContext } from '../utils/context'
 
+// Ignore trades more than 14 days old at the time fixtures were generated.
+const TRADE_LAST_SEEN_THRESHOLD = 60 * 60 * 24 * 14
+
 interface DropRates {
   nodes: {
     location: {
@@ -23,14 +26,7 @@ interface DropRates {
         baseDropRate: number | null
       }
     }
-    locationItem: {
-      jsonId: string
-      name: string
-      image: string
-      fields: {
-        path: string
-      }
-    }
+    locationItem: Queries.ItemTemplateItemFragment
     rate: number
     mode: string
     drops: number
@@ -68,14 +64,7 @@ interface Quest {
 
 interface WishingWell {
   chance: number
-  item: {
-    jsonId: string
-    name: string
-    image: string
-    fields: {
-      path: string
-    }
-  }
+  item: Queries.ItemTemplateItemFragment
 }
 
 interface LocksmithBox {
@@ -84,28 +73,14 @@ interface LocksmithBox {
   items: {
     quantityLow: number
     quantityHigh: number | null
-    item: {
-      jsonId: string
-      name: string
-      image: string
-      fields: {
-        path: string
-      }
-    }
+    item: Queries.ItemTemplateItemFragment
   }[]
 }
 
 interface LocksmithItems {
   quantityLow: number
   quantityHigh: number | null
-  boxItem: {
-    jsonId: string
-    name: string
-    image: string
-    fields: {
-      path: string
-    }
-  }
+  boxItem: Queries.ItemTemplateItemFragment
 }
 
 interface Building {
@@ -139,15 +114,16 @@ interface Password {
 }
 
 interface RecipeItem {
-  item: {
-    jsonId: string
-    name: string
-    image: string
-    fields: {
-      path: string
-    }
-  }
+  item: Queries.ItemTemplateItemFragment
   quantity: number
+}
+
+interface Trade {
+  item: Queries.ItemTemplateItemFragment
+  giveQuantity: number
+  receiveQuantity: number
+  lastSeenRelative: number
+  oneShot: boolean
 }
 
 interface Item {
@@ -166,6 +142,8 @@ interface Item {
   }
   inputRecipes: RecipeItem[]
   outputRecipes: RecipeItem[]
+  giveTrades: Trade[]
+  receiveTrades: Trade[]
 }
 
 interface SortableListItem extends ListItem {
@@ -261,6 +239,20 @@ const RecipeList = ({ label, labelAnchor, recipeItems }: RecipeListProps) => {
     value: r.quantity.toLocaleString(),
   }))
   return <List label={label} labelAnchor={labelAnchor} items={listItems} bigLine={true} />
+}
+
+interface TradeListProps {
+  item: Item
+}
+
+const TradeList = ({ item }: TradeListProps) => {
+  const listItems: ListItem[] = item.giveTrades.filter(t => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && !t.oneShot).map(t => ({
+    image: t.item.image,
+    lineOne: `${t.item.name} x${t.receiveQuantity}`,
+    href: t.item.fields.path,
+    value: t.giveQuantity.toLocaleString(),
+  }))
+  return <List label="Trade In At The Exchange Center" items={listItems} bigLine={true} />
 }
 
 interface ItemListProps {
@@ -373,6 +365,16 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     lineOne: b.building,
     lineTwo: "Building",
     value: b.frequency,
+  })))
+
+  // Exchange center sources.
+  listItems.push(...item.receiveTrades.filter(t => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && !t.oneShot).map(t => ({
+    key: `ec${t.item.jsonId}`,
+    image: t.item.image,
+    lineOne: `${t.item.name} x${t.giveQuantity}`,
+    lineTwo: "Exchange Center",
+    value: t.receiveQuantity.toLocaleString(),
+    href: t.item.fields.path,
   })))
 
   // Tower sources.
@@ -516,12 +518,22 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
     <RecipeList label="Used In" labelAnchor={undefined} recipeItems={item.inputRecipes} />
     <LocksmithList label={locksmithBox?.mode === "single" ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"} box={locksmithBox} />
     <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
+    <TradeList item={item} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
     <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} oldQuests={!!settings.oldQuests} />
   </Layout >
 }
 
 export const pageQuery = graphql`
+  fragment ItemTemplateItem on ItemsJson {
+    jsonId
+    name
+    image
+    fields {
+      path
+    }
+  }
+
   fragment ItemTemplateDrops on DropRatesGqlJsonConnection {
     nodes {
       location {
@@ -537,12 +549,7 @@ export const pageQuery = graphql`
         }
       }
       locationItem {
-        jsonId
-        name
-        image
-        fields {
-          path
-        }
+        ...ItemTemplateItem
       }
       rate
       mode
@@ -552,9 +559,7 @@ export const pageQuery = graphql`
 
   query ItemTemplate($name: String!) {
     item: itemsJson(name: {eq: $name}) {
-      name
-      jsonId
-      image
+      ...ItemTemplateItem
       manualFishingOnly
       givable
       buyPrice
@@ -562,45 +567,48 @@ export const pageQuery = graphql`
       dropMode {
         dropMode
       }
-      fields {
-        path
-      }
       # This is not used right now, it's backup for future corruption debugging because I'm seeing data desync.
       # Also I should probably do more of this using this kind of query, sigh.
       locksmithItems {
         quantityLow
         quantityHigh
         boxItem {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
       }
 
+      # Recipes.
       inputRecipes {
         item: output {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
         quantity
       }
       outputRecipes {
         item: input {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
         quantity
+      }
+
+      # Exchange Center Trades.
+      giveTrades {
+        item: receiveItem {
+          ...ItemTemplateItem
+        }
+        giveQuantity
+        receiveQuantity
+        lastSeenRelative
+        oneShot
+      }
+      receiveTrades {
+        item: giveItem {
+          ...ItemTemplateItem
+        }
+        giveQuantity
+        receiveQuantity
+        lastSeenRelative
+        oneShot
       }
     }
 
@@ -701,12 +709,7 @@ export const pageQuery = graphql`
       nodes {
         chance
         item: output {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+         ...ItemTemplateItem
         }
       }
     }
@@ -714,12 +717,7 @@ export const pageQuery = graphql`
       nodes {
         chance
         item: input {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
       }
     }
@@ -732,12 +730,7 @@ export const pageQuery = graphql`
         quantityLow
         quantityHigh
         item {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
       }
     }
@@ -746,12 +739,7 @@ export const pageQuery = graphql`
         quantityLow
         quantityHigh
         boxItem {
-          jsonId
-          name
-          image
-          fields {
-            path
-          }
+          ...ItemTemplateItem
         }
       }
     }

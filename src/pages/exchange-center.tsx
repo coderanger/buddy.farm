@@ -1,0 +1,94 @@
+import { graphql, Link, PageProps } from 'gatsby'
+import { DateTime } from 'luxon'
+import ListGroup from 'react-bootstrap/ListGroup'
+
+import Layout from '../components/layout'
+import itemcalc from './itemcalc'
+
+interface TradeItemProps {
+  item: Queries.ExchangeCenterPageItemFragment
+  quantity: number
+}
+
+const TradeItem = ({ item, quantity }: TradeItemProps) => {
+  return <div>
+    <Link to={item.fields.path} className="text-body text-decoration-none">
+      <img
+        src={`https://farmrpg.com${item.image}`}
+        title={item.name}
+        className="me-2 align-text-bottom"
+        css={{ height: "2rem" }}
+      />
+      <span className="fs-2">
+        {item.name}
+        <span className="ms-2 fs-3">
+          x{quantity}
+        </span>
+      </span>
+    </Link>
+  </div>
+}
+
+const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>) => {
+  return <Layout pageTitle="Exchange Center">
+    <h1>Exchange Center</h1>
+    <ListGroup variant="flush" css={{ maxWidth: 750, margin: "auto" }}>
+      <div className="mb-1 d-flex justify-content-around">
+        <div className="fw-bold">Trade In:</div>
+        <div className="fw-bold">You Receive:</div>
+      </div>
+      {data.trades.nodes.map(t => (
+        <ListGroup.Item key={t.id}>
+          <div className="mb-2 d-flex justify-content-between" gap-3>
+            <TradeItem item={t.giveItem} quantity={t.giveQuantity} />
+            <TradeItem item={t.receiveItem} quantity={t.receiveQuantity} />
+          </div>
+          <div className="mb-2">
+            <span className="fw-bold me-1">First Seen:</span>
+            {DateTime.fromSeconds(t.firstSeen).toLocaleString()}
+          </div>
+          {!t.oneShot && <div className="mb-2">
+            <span className="fw-bold me-1">Last Seen:</span>
+            {DateTime.fromSeconds(t.lastSeen).toLocaleString()}
+          </div>}
+          {t.oneShot && <div className="mb-2">
+            <span className="fw-bold me-1">One Shot</span>
+          </div>}
+        </ListGroup.Item>
+      ))}
+    </ListGroup>
+  </Layout>
+}
+
+export default ExchangeCenterPage
+
+export const query = graphql`
+  fragment ExchangeCenterPageItem on ItemsJson {
+    jsonId
+    name
+    image
+    fields {
+      path
+    }
+  }
+
+  query ExchangeCenterPage {
+    trades: allTradesJson {
+      nodes {
+        id
+        jsonId
+        giveItem {
+          ...ExchangeCenterPageItem
+        }
+        giveQuantity
+        receiveItem {
+          ...ExchangeCenterPageItem
+        }
+        receiveQuantity
+        firstSeen
+        lastSeen
+        oneShot
+      }
+    }
+  }
+`

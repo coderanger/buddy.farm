@@ -27,6 +27,8 @@ exports.createSchemaCustomization = ({ actions }) => {
       locksmithItems: [LocksmithItemsJson!] @link(from: "jsonId", by: "itemId")
       inputRecipes: [RecipesJson!] @link(from: "jsonId", by: "inputId")
       outputRecipes: [RecipesJson!] @link(from: "jsonId", by: "outputId")
+      giveTrades: [TradesJson!] @link(from: "name", by: "giveItemName")
+      receiveTrades: [TradesJson!] @link(from: "name", by: "receiveItemName")
     }
 
     type PetsJson implements Node {
@@ -113,6 +115,21 @@ exports.createSchemaCustomization = ({ actions }) => {
       input: ItemsJson! @link(by: "jsonId", from: "inputId")
       output: ItemsJson! @link(by: "jsonId", from: "outputId")
     }
+
+    type TradesJson implements Node {
+      jsonId: String!
+      firstSeen: Float!
+      giveItem: ItemsJson! @link(by: "name", from: "giveItemName")
+      giveItemName: String!
+      giveQuantity: Int!
+      lastSeen: Float!
+      lastSeenRelative: Int!
+      oneShot: Boolean!
+      order: Int!
+      receiveItem: ItemsJson! @link(by: "name", from: "receiveItemName")
+      receiveItemName: String!
+      receiveQuantity: Int!
+    }
   `
   createTypes(typeDefs)
 }
@@ -123,6 +140,7 @@ const pathPrefixes = {
   "PetsJson": { short: "p", long: "pets" },
   "QuestlinesJson": { short: "ql", long: "questlines" },
   "QuestsJson": { short: "q", long: "quests" },
+  "TradesJson": { short: "t", long: "trades" },
 }
 
 /**
@@ -132,7 +150,7 @@ exports.onCreateNode = ({ node, actions }) => {
   const { createNodeField } = actions
   const pathPrefix = pathPrefixes[node.internal.type]
   /** @type {string | any} */
-  const name = node.name
+  const name = node.name || node.jsonId
   if (pathPrefix && typeof name === "string") {
     const slug = name.toLowerCase().replace(/\W+/g, '-')
     createNodeField({ node, name: "path", value: `/${pathPrefix.short}/${slug}/` })
@@ -187,6 +205,14 @@ exports.createPages = async ({ actions, graphql }) => {
              }
             }[]
           }
+          allTradesJson: {
+            nodes: {
+              name: string
+             fields: {
+               path: string
+             }
+            }[]
+          }
         }
       }
     }
@@ -233,6 +259,14 @@ exports.createPages = async ({ actions, graphql }) => {
             }
           }
         }
+        allTradesJson {
+          nodes {
+            name: jsonId
+            fields {
+              path
+            }
+          }
+        }
       }
     `)
   /** @type {[{nodes: {name: string, fields: {path: string}}[]}, string][]} */
@@ -242,6 +276,7 @@ exports.createPages = async ({ actions, graphql }) => {
     [data.allPetsJson, "pet"],
     [data.allQuestsJson, "quest"],
     [data.allQuestlinesJson, "questline"],
+    // [data.allTradesJson, "trade"],
   ]
   types.forEach(([typeData, template]) => {
     typeData.nodes.forEach(node => {
@@ -396,6 +431,13 @@ exports.createPages = async ({ actions, graphql }) => {
       searchText: "wine cellar calculator",
       type: null,
       href: "/winecalc/",
+    },
+    {
+      name: "Exchange Center",
+      image: "/img/items/exchange.png?1",
+      searchText: "exchange center trades",
+      type: null,
+      href: "/exchange-center/",
     },
   ]
   for (const node of searchData.locations.nodes) {

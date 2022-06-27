@@ -155,6 +155,13 @@ export const useSearchables = () => {
       type: null,
       href: "/winecalc/",
     },
+    {
+      name: "Exchange Center",
+      image: "/img/items/exchange.png?1",
+      searchText: "exchange center trades",
+      type: null,
+      href: "/exchange-center/",
+    },
   ]
   for (const node of locations.nodes) {
     searchables.push(nodeToSearchable(node))

@@ -161,6 +161,7 @@ export default () => {
             { name: "Calculators", image: "/img/items/7210.png", fields: { path: "/calculators/" } },
             { name: "Profile Backgrounds", image: "/img/emblems/def.png", fields: { path: "/backgrounds/" } },
             { name: "Mailbox Passwords", image: "/img/items/postoffice.png", fields: { path: "/passwords/" } },
+            { name: "Exchange Center", image: "/img/items/exchange.png?1", fields: { path: "/exchange-center/" } },
             { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
           ]} />
         </div>
