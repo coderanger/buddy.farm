@@ -5,7 +5,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import { BsFillExclamationCircleFill } from '@react-icons/all-files/bs/BsFillExclamationCircleFill'
 
 import Layout from '../components/layout'
-import itemcalc from './itemcalc'
+import { useServerTime } from '../hooks/servertime'
 
 // Highlight (or ignore on item pages) trades more than 14 days old at the time fixtures
 // were generated because they are probably out of the pool.
@@ -36,8 +36,13 @@ const TradeItem = ({ item, quantity }: TradeItemProps) => {
 }
 
 const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>) => {
+  const ecUpdate = useServerTime({ exchangeCenter: true })[1]
+
   return <Layout pageTitle="Exchange Center">
     <h1>Exchange Center</h1>
+    <p>
+      The Exchange Center will update in {ecUpdate}.
+    </p>
     <ListGroup variant="flush" css={{ maxWidth: 750, margin: "auto" }}>
       <div className="mb-1 d-flex justify-content-around">
         <div className="fw-bold">Trade In:</div>
