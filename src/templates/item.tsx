@@ -8,9 +8,7 @@ import { Settings } from '../hooks/settings'
 import { formatDropRate } from '../utils/format'
 import { CopyButton } from '../components/clipboard'
 import { GlobalContext } from '../utils/context'
-
-// Ignore trades more than 14 days old at the time fixtures were generated.
-const TRADE_LAST_SEEN_THRESHOLD = 60 * 60 * 24 * 14
+import { TRADE_LAST_SEEN_THRESHOLD } from '../pages/exchange-center'
 
 interface DropRates {
   nodes: {

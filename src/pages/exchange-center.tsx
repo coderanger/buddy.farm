@@ -2,8 +2,14 @@ import { graphql, Link, PageProps } from 'gatsby'
 import { DateTime } from 'luxon'
 import ListGroup from 'react-bootstrap/ListGroup'
 
+import { BsFillExclamationCircleFill } from '@react-icons/all-files/bs/BsFillExclamationCircleFill'
+
 import Layout from '../components/layout'
 import itemcalc from './itemcalc'
+
+// Highlight (or ignore on item pages) trades more than 14 days old at the time fixtures
+// were generated because they are probably out of the pool.
+export const TRADE_LAST_SEEN_THRESHOLD = 60 * 60 * 24 * 14
 
 interface TradeItemProps {
   item: Queries.ExchangeCenterPageItemFragment
@@ -50,6 +56,7 @@ const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>
           {!t.oneShot && <div className="mb-2">
             <span className="fw-bold me-1">Last Seen:</span>
             {DateTime.fromSeconds(t.lastSeen).toLocaleString()}
+            {t.lastSeenRelative > TRADE_LAST_SEEN_THRESHOLD && <BsFillExclamationCircleFill className="text-danger ms-2 align-text-bottom" css={{ width: 20, height: 20 }} />}
           </div>}
           {t.oneShot && <div className="mb-2">
             <span className="fw-bold me-1">One Shot</span>
@@ -73,7 +80,7 @@ export const query = graphql`
   }
 
   query ExchangeCenterPage {
-    trades: allTradesJson {
+    trades: allTradesJson(sort: {fields: [firstSeen, giveItem___name], order: [DESC, ASC]}) {
       nodes {
         id
         jsonId
@@ -87,6 +94,7 @@ export const query = graphql`
         receiveQuantity
         firstSeen
         lastSeen
+        lastSeenRelative
         oneShot
       }
     }
