@@ -1,4 +1,3 @@
-
 import { graphql, PageProps } from 'gatsby'
 import { useContext, useState } from 'react'
 

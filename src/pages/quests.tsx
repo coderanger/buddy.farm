@@ -92,13 +92,13 @@ export default () => {
   return <Layout pageTitle="Quests">
     <h1>Quests ({quests.length})</h1>
     <div className="d-flex">
-      <Form.Select onChange={evt => setFilterFrom(evt.target.value)} className="mx-2">
+      <Form.Select onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterFrom(evt.target.value)} className="mx-2">
         <option value="">From</option>
         {Object.keys(fromOptions).map(from => (
           <option value={from}>{from}</option>
         ))}
       </Form.Select>
-      <Form.Select onChange={evt => setFilterQuestline(evt.target.value)} className="mx-2">
+      <Form.Select onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterQuestline(evt.target.value)} className="mx-2">
         <option value="">Questline</option>
         {data.questlines.nodes.map(ql => (
           <option value={ql.name}>{ql.name}</option>
