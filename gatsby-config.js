@@ -11,9 +11,7 @@ module.exports = {
     title: `Buddy's Almanac`,
     siteUrl: `https://buddy.farm`
   },
-  flags: {
-    GRAPHQL_TYPEGEN: true,
-  },
+  graphqlTypegen: true,
   plugins: [
     "gatsby-plugin-sass",
     "gatsby-plugin-emotion",
