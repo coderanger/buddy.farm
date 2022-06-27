@@ -35,14 +35,17 @@ const TradeItem = ({ item, quantity }: TradeItemProps) => {
   </div>
 }
 
-const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>) => {
+const UpdateTime = () => {
   const ecUpdate = useServerTime({ exchangeCenter: true })[1]
+  return <p>
+    The Exchange Center will update in {ecUpdate}.
+  </p>
+}
 
+const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>) => {
   return <Layout pageTitle="Exchange Center">
     <h1>Exchange Center</h1>
-    <p>
-      The Exchange Center will update in {ecUpdate}.
-    </p>
+    <UpdateTime />
     <ListGroup variant="flush" css={{ maxWidth: 750, margin: "auto" }}>
       <div className="mb-1 d-flex justify-content-around">
         <div className="fw-bold">Trade In:</div>

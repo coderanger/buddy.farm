@@ -7,7 +7,7 @@ export interface UseServerTimeProps {
 
 const getServerTime = () => DateTime.now().setZone("America/Chicago").toLocaleString(DateTime.TIME_SIMPLE)
 
-const getRollover = (opts: UseServerTimeProps | undefined) => {
+const getRollover = (opts: UseServerTimeProps | null = null) => {
   const rollover = DateTime.fromObject({}, { zone: "America/Chicago" }).startOf("day").plus({ day: 1 })
   let delta = rollover.diffNow().shiftTo("hours", "minutes", "seconds").normalize()
   if (delta.hours === 0) {
@@ -24,17 +24,29 @@ const getRollover = (opts: UseServerTimeProps | undefined) => {
   return delta.toHuman({ maximumFractionDigits: 0 })
 }
 
-export const useServerTime = (opts: UseServerTimeProps | undefined): [string, string] => {
-  const [time, setTime] = useState(getServerTime)
-  const [rollover, setRollover] = useState(() => getRollover(opts))
+const Spinner = () => {
+  return <span className="d-inline-block spinner-border spinner-border-sm" role="status">
+    <span className="visually-hidden">Loading...</span>
+  </span>
+}
+
+export const useServerTime = (opts: UseServerTimeProps | null = null): [React.ReactFragment, React.ReactFragment] => {
+  const [time, setTime] = useState("")
+  const [rollover, setRollover] = useState("")
 
   useEffect(() => {
+    setTime(getServerTime())
+    setRollover(getRollover(opts))
     const timer = window.setInterval(() => {
       setTime(getServerTime())
       setRollover(getRollover(opts))
     }, 100)
     return () => window.clearInterval(timer)
   }, [])
+
+  if (time === "" && rollover === "") {
+    return [<Spinner />, <Spinner />]
+  }
 
   return [time, rollover]
 }

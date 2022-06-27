@@ -90,10 +90,10 @@ const ServerTime = () => {
 
   return <>
     <h5 className="mb-1">Server Time</h5>
-    {typeof document !== "undefined" && <div>
+    <div>
       <div>Server Time is <strong>{time}</strong></div>
       <div>Daily Reset in <strong>{rollover}</strong></div>
-    </div>}
+    </div>
   </>
 }
 
