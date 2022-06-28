@@ -30,6 +30,11 @@ export default () => {
         image: "/img/items/wine.png",
         href: "/winecalc/",
       },
+      {
+        lineOne: "Farmhouse Calculator",
+        image: "/img/items/farmhouse_sm.png",
+        href: "/farmhousecalc/",
+      },
     ]} bigLine={true} />
   </Layout>
 }

@@ -253,6 +253,13 @@ const STATIC_SEARCHABLES: CompiledSearchable[] = [
     searchText: "exchange center trades",
     type: null,
     href: "/exchange-center/",
+  }, ,
+  {
+    name: "Farmhouse Calculator",
+    image: "/img/items/farmhouse_sm.png",
+    searchText: "farmhouse stamina calculator",
+    type: null,
+    href: "/farmhousecalc/",
   },
 ]
 
