@@ -1,8 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-import { useSearchables } from './src/hooks/searchables'
-
 import type { GatsbyNode } from "gatsby"
 
 export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] = ({ actions }) => {
@@ -155,117 +153,112 @@ export const onCreateNode: GatsbyNode['onCreateNode'] = ({ node, actions }) => {
   }
 }
 
-interface Templatable {
-  nodes: {
-    name: string
-    fields: {
-      path: string
-    }
-  }[]
-}
 
 // Normal typegen finds this query but the Queries namespace isn't working?
-interface GatsbyNodeCreatePagesQuery {
-  allLocationsJson: Templatable
-  allItemsJson: Templatable
-  allPetsJson: Templatable
-  allQuestsJson: Templatable
-  allQuestlinesJson: Templatable
-  allTradesJson: Templatable
+interface Searchable {
+  name: string
+  image: string
+  fields: {
+    path: string
+  }
 }
+
+interface CompiledSearchable {
+  name: string
+  image: string
+  href: string
+  searchText: string
+  type: string | null
+}
+
+interface SearchableNodes {
+  nodes: Searchable[]
+}
+
+interface GatsbyNodeCreatePagesQuery {
+  locations: SearchableNodes
+  items: SearchableNodes
+  pets: SearchableNodes
+  quests: SearchableNodes
+  questlines: SearchableNodes
+}
+
+const STATIC_SEARCHABLES: CompiledSearchable[] = [
+  {
+    name: "The Tower",
+    image: "/img/items/tower.png",
+    searchText: "the tower",
+    type: null,
+    href: "/tower/",
+  },
+  {
+    name: "XP Calculator",
+    image: "/img/items/7210.png",
+    searchText: "xp calculator",
+    type: null,
+    href: "/xpcalc/",
+  },
+  {
+    name: "Orchard Calculator",
+    image: "/img/items/7210.png",
+    searchText: "orchard calculator",
+    type: null,
+    href: "/orchardcalc/",
+  },
+  {
+    name: "Tower Calculator",
+    image: "/img/items/7210.png",
+    searchText: "Tower calculator",
+    type: null,
+    href: "/towercalc/",
+  },
+  {
+    name: "Farm Animal Calculator",
+    image: "/img/items/7210.png",
+    searchText: "farm animal calculator",
+    type: null,
+    href: "/animalcalc/",
+  },
+  {
+    name: "Emblems",
+    image: "/img/emblems/def.png",
+    searchText: "emblems",
+    type: null,
+    href: "/emblems/",
+  },
+  {
+    name: "Profile Backgrounds",
+    image: "/img/emblems/def.png",
+    searchText: "profile backgrounds",
+    type: null,
+    href: "/backgrounds/",
+  },
+  {
+    name: "Mailbox Passwords",
+    image: "/img/items/postoffice.png",
+    searchText: "mailbox passwords",
+    type: null,
+    href: "/passwords/",
+  },
+  {
+    name: "Wine Calculator",
+    image: "/img/items/7210.png",
+    searchText: "wine cellar calculator",
+    type: null,
+    href: "/winecalc/",
+  },
+  {
+    name: "Exchange Center",
+    image: "/img/items/exchange.png?1",
+    searchText: "exchange center trades",
+    type: null,
+    href: "/exchange-center/",
+  },
+]
 
 export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql }) => {
   const { data } = await graphql<GatsbyNodeCreatePagesQuery>(`
-      query GatsbyNodeCreatePages {
-        allLocationsJson {
-          nodes {
-            name
-            fields {
-              path
-            }
-          }
-        }
-        allItemsJson {
-          nodes {
-            name
-            fields {
-              path
-            }
-          }
-        }
-        allPetsJson {
-          nodes {
-            name
-            fields {
-              path
-            }
-          }
-        }
-        allQuestsJson {
-          nodes {
-            name
-            fields {
-              path
-            }
-          }
-        }
-        allQuestlinesJson {
-          nodes {
-            name
-            fields {
-              path
-            }
-          }
-        }
-        allTradesJson {
-          nodes {
-            name: jsonId
-            fields {
-              path
-            }
-          }
-        }
-      }
-    `)
-  const types: [Templatable | undefined, string][] = [
-    [data?.allItemsJson, "item"],
-    [data?.allLocationsJson, "location"],
-    [data?.allPetsJson, "pet"],
-    [data?.allQuestsJson, "quest"],
-    [data?.allQuestlinesJson, "questline"],
-    // [data.allTradesJson, "trade"],
-  ]
-  for (const [typeData, template] of types) {
-    for (const node of (typeData?.nodes || [])) {
-      for (const nodePath of [node.fields.path]) {
-        actions.createPage({
-          path: nodePath,
-          component: path.resolve(`src/templates/${template}.tsx`),
-          context: { name: node.name },
-        })
-      }
-    }
-  }
-
-  // Write out the search index.
-  /**
-   * @typedef {{name: string, image: string, fields: {path: string}}} SearchNode
-   * @typedef {{nodes: SearchNode[]}} SearchType
-   * @typedef {{name: string, image: string, href: string, type: string | null, searchText: string}} Searchable
-   */
-
-  /**
-   * @type {{
-   *  data?: {
-   *    locations: SearchType,
-   *    items: SearchType,
-   *    pets: SearchType,
-   *    quests: SearchType,
-   *    questlines: SearchType,
-   * }}}
-   */
-  const { data: searchData } = await graphql(`
-    query {
+    query GatsbyNodeCreatePages {
       locations: allLocationsJson {
         nodes {
           name
@@ -313,105 +306,59 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
       }
     }
     `)
-  /**
-   * @param {SearchNode} node
-   * @param {string | null} type
-   * @returns {Searchable}
-   */
-  const nodeToSearchable = (node, type = null) => {
-    const searchName = node.name.toLowerCase()
-    return { name: node.name, image: node.image, searchText: searchName, href: node.fields.path, type }
-  }
-  /**
-   * @type {Searchable[]}
-   */
-  const searchables = [
+  const types = [
     {
-      name: "The Tower",
-      image: "/img/items/tower.png",
-      searchText: "the tower",
-      type: null,
-      href: "/tower/",
+      nodes: data!.items,
+      template: "item",
     },
     {
-      name: "XP Calculator",
-      image: "/img/items/7210.png",
-      searchText: "xp calculator",
-      type: null,
-      href: "/xpcalc/",
+      nodes: data!.locations,
+      template: "location",
     },
     {
-      name: "Orchard Calculator",
-      image: "/img/items/7210.png",
-      searchText: "orchard calculator",
-      type: null,
-      href: "/orchardcalc/",
+      nodes: data!.pets,
+      template: "pet",
     },
+
     {
-      name: "Tower Calculator",
-      image: "/img/items/7210.png",
-      searchText: "Tower calculator",
-      type: null,
-      href: "/towercalc/",
+      nodes: data!.quests,
+      template: "quest",
     },
+
     {
-      name: "Farm Animal Calculator",
-      image: "/img/items/7210.png",
-      searchText: "farm animal calculator",
-      type: null,
-      href: "/animalcalc/",
+      nodes: data!.questlines,
+      template: "questline",
+      searchType: "Questline",
     },
-    {
-      name: "Emblems",
-      image: "/img/emblems/def.png",
-      searchText: "emblems",
-      type: null,
-      href: "/emblems/",
-    },
-    {
-      name: "Profile Backgrounds",
-      image: "/img/emblems/def.png",
-      searchText: "profile backgrounds",
-      type: null,
-      href: "/backgrounds/",
-    },
-    {
-      name: "Mailbox Passwords",
-      image: "/img/items/postoffice.png",
-      searchText: "mailbox passwords",
-      type: null,
-      href: "/passwords/",
-    },
-    {
-      name: "Wine Calculator",
-      image: "/img/items/7210.png",
-      searchText: "wine cellar calculator",
-      type: null,
-      href: "/winecalc/",
-    },
-    {
-      name: "Exchange Center",
-      image: "/img/items/exchange.png?1",
-      searchText: "exchange center trades",
-      type: null,
-      href: "/exchange-center/",
-    },
+
   ]
-  for (const node of searchData.locations.nodes) {
-    searchables.push(nodeToSearchable(node))
+  for (const typeData of types) {
+    for (const node of typeData.nodes.nodes) {
+      for (const nodePath of [node.fields.path]) {
+        actions.createPage({
+          path: nodePath,
+          component: path.resolve(`src/templates/${typeData.template}.tsx`),
+          context: { name: node.name },
+        })
+      }
+    }
   }
-  for (const node of searchData.items.nodes) {
-    searchables.push(nodeToSearchable(node))
+
+  const searchables: CompiledSearchable[] = []
+  searchables.push(...STATIC_SEARCHABLES)
+  for (const typeData of types) {
+    for (const node of typeData.nodes.nodes) {
+      const searchName = node.name.toLowerCase()
+      searchables.push({
+        name: node.name,
+        image: node.image,
+        searchText: searchName,
+        href: node.fields.path,
+        type: typeData.searchType || null,
+      })
+    }
   }
-  for (const node of searchData.pets.nodes) {
-    searchables.push(nodeToSearchable(node))
-  }
-  for (const node of searchData.quests.nodes) {
-    searchables.push(nodeToSearchable(node))
-  }
-  for (const node of searchData.questlines.nodes) {
-    searchables.push(nodeToSearchable(node, "Questline"))
-  }
+
   // Write the index to a file.
   try {
     await fs.promises.access("public")
