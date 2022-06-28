@@ -1,10 +1,11 @@
-// @ts-check
-const fs = require("fs")
+import fs from 'fs'
+import path from 'path'
 
-/**
- * @type {import('gatsby').GatsbyNode['createSchemaCustomization']}
- */
-exports.createSchemaCustomization = ({ actions }) => {
+import { useSearchables } from './src/hooks/searchables'
+
+import type { GatsbyNode } from "gatsby"
+
+export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] = ({ actions }) => {
   const { createTypes } = actions
   const typeDefs = `
     type BFFields {
@@ -143,10 +144,7 @@ const pathPrefixes = {
   "TradesJson": { short: "t", long: "trades" },
 }
 
-/**
- * @type {import('gatsby').GatsbyNode['onCreateNode']}
- */
-exports.onCreateNode = ({ node, actions }) => {
+export const onCreateNode: GatsbyNode['onCreateNode'] = ({ node, actions }) => {
   const { createNodeField } = actions
   const pathPrefix = pathPrefixes[node.internal.type]
   /** @type {string | any} */
@@ -157,68 +155,28 @@ exports.onCreateNode = ({ node, actions }) => {
   }
 }
 
-/**
- * @type {import('gatsby').GatsbyNode['createPages']}
- */
-exports.createPages = async ({ actions, graphql }) => {
-  /**
-   * @type {
-      {
-        data?: {
-          allLocationsJson: {
-            nodes: {
-             name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-          allItemsJson: {
-            nodes: {
-              name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-          allPetsJson: {
-            nodes: {
-              name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-          allQuestsJson: {
-            nodes: {
-              name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-          allQuestlinesJson: {
-            nodes: {
-              name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-          allTradesJson: {
-            nodes: {
-              name: string
-             fields: {
-               path: string
-             }
-            }[]
-          }
-        }
-      }
+interface Templatable {
+  nodes: {
+    name: string
+    fields: {
+      path: string
     }
-   */
-  const { data } = await graphql(`
-      query {
+  }[]
+}
+
+// Normal typegen finds this query but the Queries namespace isn't working?
+interface GatsbyNodeCreatePagesQuery {
+  allLocationsJson: Templatable
+  allItemsJson: Templatable
+  allPetsJson: Templatable
+  allQuestsJson: Templatable
+  allQuestlinesJson: Templatable
+  allTradesJson: Templatable
+}
+
+export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql }) => {
+  const { data } = await graphql<GatsbyNodeCreatePagesQuery>(`
+      query GatsbyNodeCreatePages {
         allLocationsJson {
           nodes {
             name
@@ -269,26 +227,25 @@ exports.createPages = async ({ actions, graphql }) => {
         }
       }
     `)
-  /** @type {[{nodes: {name: string, fields: {path: string}}[]}, string][]} */
-  const types = [
-    [data.allItemsJson, "item"],
-    [data.allLocationsJson, "location"],
-    [data.allPetsJson, "pet"],
-    [data.allQuestsJson, "quest"],
-    [data.allQuestlinesJson, "questline"],
+  const types: [Templatable | undefined, string][] = [
+    [data?.allItemsJson, "item"],
+    [data?.allLocationsJson, "location"],
+    [data?.allPetsJson, "pet"],
+    [data?.allQuestsJson, "quest"],
+    [data?.allQuestlinesJson, "questline"],
     // [data.allTradesJson, "trade"],
   ]
-  types.forEach(([typeData, template]) => {
-    typeData.nodes.forEach(node => {
-      [node.fields.path].forEach(path => {
+  for (const [typeData, template] of types) {
+    for (const node of (typeData?.nodes || [])) {
+      for (const nodePath of [node.fields.path]) {
         actions.createPage({
-          path: path,
-          component: require.resolve(`./src/templates/${template}.tsx`),
+          path: nodePath,
+          component: path.resolve(`src/templates/${template}.tsx`),
           context: { name: node.name },
         })
-      })
-    })
-  })
+      }
+    }
+  }
 
   // Write out the search index.
   /**
