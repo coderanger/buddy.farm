@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from 'react'
 
-import { Searchable } from '../hooks/searchables'
 import { Settings, SetSettings, SetSetting, useSettings } from '../hooks/settings'
 import { useToasts } from '../hooks/toasts'
+
+export interface Searchable {
+  name: string
+  image: string
+  href: string
+  searchText: string
+  type: string | null
+}
 
 interface ContextProps {
   searchables: Searchable[] | null

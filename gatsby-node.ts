@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 import type { GatsbyNode } from "gatsby"
+import type { Searchable } from "./src/utils/context"
 
 export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] = ({ actions }) => {
   const { createTypes } = actions
@@ -31,6 +32,10 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
     }
 
     type PetsJson implements Node {
+      jsonId: String!
+      name: String!
+      image: String!
+      fields: BFFields!
       extra: PetExtraJson @link(from: "name", by: "name")
       level1Items: [ItemsJson] @link(by: "name")
       level3Items: [ItemsJson] @link(by: "name")
@@ -55,6 +60,7 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
 
     type QuestlinesJson implements Node {
       name: String!
+      image: String!
       fields: BFFields!
       quests: [QuestsJson!]! @link(by: "jsonId")
     }
@@ -85,6 +91,10 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
     }
 
     type LocationsJson implements Node {
+      jsonId: String!
+      name: String!
+      image: String!
+      fields: BFFields!
       extra: LocationExtraJson! @link(from: "name", by: "name")
     }
 
@@ -133,7 +143,12 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
   createTypes(typeDefs)
 }
 
-const pathPrefixes = {
+interface PathInfo {
+  short: string
+  long: string
+}
+
+const pathPrefixes: Record<string, PathInfo> = {
   "ItemsJson": { short: "i", long: "items" },
   "LocationsJson": { short: "l", long: "locations" },
   "PetsJson": { short: "p", long: "pets" },
@@ -153,37 +168,7 @@ export const onCreateNode: GatsbyNode['onCreateNode'] = ({ node, actions }) => {
   }
 }
 
-
-// Normal typegen finds this query but the Queries namespace isn't working?
-interface Searchable {
-  name: string
-  image: string
-  fields: {
-    path: string
-  }
-}
-
-interface CompiledSearchable {
-  name: string
-  image: string
-  href: string
-  searchText: string
-  type: string | null
-}
-
-interface SearchableNodes {
-  nodes: Searchable[]
-}
-
-interface GatsbyNodeCreatePagesQuery {
-  locations: SearchableNodes
-  items: SearchableNodes
-  pets: SearchableNodes
-  quests: SearchableNodes
-  questlines: SearchableNodes
-}
-
-const STATIC_SEARCHABLES: CompiledSearchable[] = [
+const STATIC_SEARCHABLES: Searchable[] = [
   {
     name: "The Tower",
     image: "/img/items/tower.png",
@@ -264,7 +249,7 @@ const STATIC_SEARCHABLES: CompiledSearchable[] = [
 ]
 
 export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql }) => {
-  const { data } = await graphql<GatsbyNodeCreatePagesQuery>(`
+  const { data } = await graphql<Queries.GatsbyNodeCreatePagesQuery>(`
     query GatsbyNodeCreatePages {
       locations: allLocationsJson {
         nodes {
@@ -326,12 +311,10 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
       nodes: data!.pets,
       template: "pet",
     },
-
     {
       nodes: data!.quests,
       template: "quest",
     },
-
     {
       nodes: data!.questlines,
       template: "questline",
@@ -351,7 +334,7 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
     }
   }
 
-  const searchables: CompiledSearchable[] = []
+  const searchables: Searchable[] = []
   searchables.push(...STATIC_SEARCHABLES)
   for (const typeData of types) {
     for (const node of typeData.nodes.nodes) {

@@ -1,13 +1,14 @@
-import { useEffect, useState, useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { keyframes } from '@emotion/react'
 import { CgSpinner } from '@react-icons/all-files/cg/CgSpinner'
 
 import Layout from '../components/layout'
 import List from '../components/list'
-import { Searchable } from '../hooks/searchables'
-import { GlobalContext } from '../utils/context'
 import { useDebounce } from '../hooks/debounce'
+import { GlobalContext } from '../utils/context'
+
+import type { Searchable } from '../utils/context'
 
 declare global {
   interface Window { _farmSearchables?: Searchable[] | undefined }
