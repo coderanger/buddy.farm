@@ -310,6 +310,13 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   }
   listItems.sort((a, b) => a._sortValue - b._sortValue)
 
+  // Enable some extra sources not usually present if the drop doesn't have normal sources.
+  const unusualDropMode = drops.nodes.length === 0 &&
+    level1Pets.nodes.length === 0 &&
+    level3Pets.nodes.length === 0 &&
+    level6Pets.nodes.length === 0 &&
+    item.outputRecipes.length === 0
+
   // Items from pets.
   listItems.push(...level1Pets.nodes.map(pet => ({
     key: "p" + pet.id,
@@ -366,11 +373,11 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   })))
 
   // Exchange center sources.
-  listItems.push(...item.receiveTrades.filter(t => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && !t.oneShot).map(t => ({
+  listItems.push(...item.receiveTrades.filter(t => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && (unusualDropMode || !t.oneShot)).map(t => ({
     key: `ec${t.item.jsonId}`,
     image: t.item.image,
     lineOne: `${t.item.name} x${t.giveQuantity}`,
-    lineTwo: "Exchange Center",
+    lineTwo: `Exchange Center${t.oneShot ? " - One Shot" : ""}`,
     value: t.receiveQuantity.toLocaleString(),
     href: t.item.fields.path,
   })))
@@ -396,11 +403,7 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
   })))
 
   // Community center sources. Only shows if there's no drop sources and isn't craftable.
-  if (drops.nodes.length === 0 &&
-    level1Pets.nodes.length === 0 &&
-    level3Pets.nodes.length === 0 &&
-    level6Pets.nodes.length === 0 &&
-    item.outputRecipes.length === 0) {
+  if (unusualDropMode) {
     listItems.push(...communityCenter.map(cc => ({
       key: `cc${cc.date}`,
       image: "/img/items/comm.png",
