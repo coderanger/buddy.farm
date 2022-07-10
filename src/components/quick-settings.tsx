@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 
+import { useOnClient } from '../hooks/client'
 import crossMark from '../images/cross-mark.png'
 import personRunning from '../images/person-running.png'
 import { GlobalContext } from '../utils/context'
@@ -82,7 +83,8 @@ interface QuickSettingsProps {
 }
 
 export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProps) => {
-  if (!dropMode) {
+  const onClient = useOnClient()
+  if (!dropMode || !onClient) {
     return <></>
   }
   const parts: React.ReactNode[] = []
