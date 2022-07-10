@@ -78,8 +78,7 @@ export default () => {
     </div>
   ))
 
-  return <Layout pageTitle="The Tower">
-    <h1>The Tower</h1>
+  return <Layout title="The Tower">
     <p>Want to see how far you can get in the tower? Try our <Link to="/towercalc/">Tower calculator</Link>.</p>
     {content}
   </Layout>

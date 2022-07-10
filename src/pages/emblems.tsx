@@ -38,8 +38,7 @@ export default () => {
     return { ...e, id, name, image }
   })
 
-  return <Layout pageTitle="Emblems">
-    <h1>Emblems</h1>
+  return <Layout title="Emblems">
     <List items={emblems.sort((a, b) => b.id - a.id).map(e => ({
       image: e.image,
       lineOne: e.name,

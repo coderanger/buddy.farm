@@ -93,13 +93,8 @@ export default ({ data: { pet } }: PetProps) => {
     })
   }
 
-  return < Layout pageTitle={pet.name} >
-    <h1>
-      <img src={"https://farmrpg.com" + pet.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-      {pet.name}
-      <CopyButton path={pet.fields.path} />
-    </h1>
-    <List items={petData} />
+  return < Layout headerFrom={pet}>
+    <List items={petData} bigLine={true} />
     <PetItemsList label="Level 1" items={pet.level1Items} />
     <PetItemsList label="Level 3" items={pet.level3Items} />
     <PetItemsList label="Level 6" items={pet.level6Items} />

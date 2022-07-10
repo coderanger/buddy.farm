@@ -31,8 +31,7 @@ export default () => {
     }
   `)
 
-  return <Layout pageTitle="Exploring">
-    <h1>Exploring</h1>
+  return <Layout title="Exploring">
     <List items={locations.nodes.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(l => ({
       image: l.image,
       lineOne: l.name,

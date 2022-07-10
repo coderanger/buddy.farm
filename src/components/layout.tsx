@@ -7,18 +7,32 @@ import { Link, navigate } from 'gatsby'
 import React, { useContext, useEffect, useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Navbar from 'react-bootstrap/Navbar'
-import ToastContainer from 'react-bootstrap/ToastContainer'
 import Toast from 'react-bootstrap/Toast'
+import ToastContainer from 'react-bootstrap/ToastContainer'
 import { Helmet } from 'react-helmet'
 
 import { BsFillGearFill } from '@react-icons/all-files/bs/BsFillGearFill'
 import { FaHome } from '@react-icons/all-files/fa/FaHome'
 
+import { CopyButton } from '../components/clipboard'
 import { useDebounce } from '../hooks/debounce'
 import { GlobalContext } from '../utils/context'
 
+interface HeaderFromable {
+  name: string
+  image: string
+  fields: {
+    path: string
+  }
+}
+
 interface LayoutProps {
-  pageTitle: string
+  title?: string
+  headerImage?: string
+  headerCopy?: string
+  headerImageCopy?: string
+  headerFrom?: HeaderFromable
+  pageTitle?: string
   query?: string | null | undefined
   searchAutoFocus?: boolean | undefined
   onSearch?: (query: string) => void
@@ -26,7 +40,7 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
+const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
   const [searchFired, setSearchFired] = useState(false)
   const navigateToSearch = useDebounce((query: string, setSearchFired: (arg0: boolean) => void) => {
@@ -64,7 +78,7 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
   return (<>
     <Helmet>
       <meta charSet="utf-8" />
-      <title>{pageTitle}</title>
+      <title>{pageTitle || title || headerFrom?.name || "buddy.farm"}</title>
     </Helmet>
     <div
       aria-live="polite"
@@ -111,6 +125,17 @@ const Layout = ({ pageTitle, query, searchAutoFocus, onSearch, settingsBack, chi
     </Navbar>
     <main>
       <Container css={{ paddingTop: 10 }}>
+        {(title || headerFrom) && <h1>
+          {(headerImage || headerFrom) && <img
+            src={"https://farmrpg.com" + (headerImage || headerFrom?.image)}
+            className="d-inline-block align-text-top clipboard"
+            width="48" height="48"
+            css={{ marginRight: 10, boxSizing: "border-box" }}
+            data-clipboard-text={headerImageCopy}
+          />}
+          {title || headerFrom?.name}
+          {(headerCopy || headerFrom) && <CopyButton path={headerCopy || headerFrom?.fields.path} />}
+        </h1>}
         {children}
       </Container>
     </main>

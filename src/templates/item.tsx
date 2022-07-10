@@ -6,7 +6,6 @@ import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
 import { Settings } from '../hooks/settings'
 import { formatDropRate } from '../utils/format'
-import { CopyButton } from '../components/clipboard'
 import { GlobalContext } from '../utils/context'
 import { TRADE_LAST_SEEN_THRESHOLD } from '../pages/exchange-center'
 
@@ -502,18 +501,9 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
     }
   }, [item.dropMode?.dropMode, settings.ironDepot, settings.manualFishing, settings.runecube])
 
-  return <Layout pageTitle={item.name}>
-    <h1>
-      <img
-        src={"https://farmrpg.com" + item.image}
-        className="d-inline-block align-text-top clipboard"
-        width="48" height="48"
-        css={{ marginRight: 10, boxSizing: "border-box" }}
-        data-clipboard-text={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}
-      />
-      {item.name}
-      <CopyButton path={item.fields.path} />
-    </h1>
+  return <Layout
+    headerFrom={item}
+    headerImageCopy={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} communityCenter={communityCenter.nodes} passwords={passwords.nodes} settings={settings} />
     <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.outputRecipes} />
     <RecipeList label="Used In" labelAnchor={undefined} recipeItems={item.inputRecipes} />

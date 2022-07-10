@@ -43,8 +43,7 @@ const UpdateTime = () => {
 }
 
 const ExchangeCenterPage = ({ data }: PageProps<Queries.ExchangeCenterPageQuery>) => {
-  return <Layout pageTitle="Exchange Center">
-    <h1>Exchange Center</h1>
+  return <Layout title="Exchange Center">
     <UpdateTime />
     <ListGroup variant="flush" css={{ maxWidth: 750, margin: "auto" }}>
       <div className="mb-1 d-flex justify-content-around">

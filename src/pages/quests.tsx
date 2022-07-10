@@ -89,8 +89,7 @@ export default () => {
     fromOptions[quest.from] = true
   }
 
-  return <Layout pageTitle="Quests">
-    <h1>Quests ({quests.length})</h1>
+  return <Layout title={`Quests (${quests.length})`} pageTitle="Quests">
     <div className="d-flex">
       <Form.Select onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterFrom(evt.target.value)} className="mx-2">
         <option value="">From</option>

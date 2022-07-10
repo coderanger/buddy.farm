@@ -257,8 +257,7 @@ export default () => {
     {content}
   </>
 
-  return <Layout pageTitle="Mailbox Passwords">
-    <h1>Mailbox Passwords</h1>
+  return <Layout title="Mailbox Passwords">
     {typeof document !== 'undefined' && allContent}
   </Layout>
 }

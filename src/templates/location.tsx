@@ -104,12 +104,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     }
   }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
 
-  return <Layout pageTitle={location.name}>
-    <h1>
-      <img src={"https://farmrpg.com" + location.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-      {location.name}
-      <CopyButton path={location.fields.path} />
-    </h1>
+  return <Layout headerFrom={location}>
     <LocationList location={location} drops={drops} settings={settings} />
   </Layout>
 }

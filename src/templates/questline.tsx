@@ -90,12 +90,7 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
   lineRequestItems.sort(sortItems)
   lineRewardItems.sort(sortItems)
 
-  return <Layout pageTitle={questline.name}>
-    <h1>
-      <img src={"https://farmrpg.com" + questline.image} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-      {questline.name}
-      <CopyButton path={questline.fields.path} />
-    </h1>
+  return <Layout headerFrom={questline}>
     <p>
       <Input.Switch id="showText" label="Show Quest Text" defaultChecked={showText} onChange={setShowText} />
       <Input.Switch id="showLevels" label="Show Quest Levels" defaultChecked={showLevels} onChange={setshowLevels} />

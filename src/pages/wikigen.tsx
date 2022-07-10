@@ -76,7 +76,7 @@ export default () => {
       break
   }
 
-  return <Layout pageTitle="Wiki Generator">
+  return <Layout title="Wiki Generator">
     <Input.Select id="page" label="Page" defaultValue={page} onChange={setPage}>
       <option value="museumCompletion">Museum Completion</option>
     </Input.Select>

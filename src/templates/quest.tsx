@@ -176,12 +176,7 @@ export default ({ data: { quest } }: QuestProps) => {
     })
   }
 
-  return <Layout pageTitle={quest.name}>
-    <h1>
-      <img src={"https://farmrpg.com" + quest.fromImage} className="d-inline-block align-text-top" width="48" height="48" css={{ marginRight: 10, boxSizing: "border-box" }} />
-      {quest.name}
-      <CopyButton path={quest.fields.path} />
-    </h1>
+  return <Layout title={quest.name} headerImage={quest.fromImage} headerCopy={quest.fields.path}>
     <List items={questData} bigLine={true} />
     <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} copyText={questToChatText(quest.name, quest.silverRequest, quest.itemRequests)} />
     <QuestItemList label="Reward" silver={quest.silverReward} gold={quest.goldReward} items={quest.itemRewards} />
