@@ -32,6 +32,7 @@ interface LayoutProps {
   headerCopy?: string
   headerImageCopy?: string
   headerFrom?: HeaderFromable
+  headerRight?: React.ReactNode
   pageTitle?: string
   query?: string | null | undefined
   searchAutoFocus?: boolean | undefined
@@ -40,7 +41,7 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
+const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, headerRight, pageTitle, query, searchAutoFocus, onSearch, settingsBack, children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
   const [searchFired, setSearchFired] = useState(false)
   const navigateToSearch = useDebounce((query: string, setSearchFired: (arg0: boolean) => void) => {
@@ -126,6 +127,7 @@ const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, p
     <main>
       <Container css={{ paddingTop: 10 }}>
         {(title || headerFrom) && <h1>
+          {headerRight && <span className="float-end">{headerRight}</span>}
           {(headerImage || headerFrom) && <img
             src={"https://farmrpg.com" + (headerImage || headerFrom?.image)}
             className="d-inline-block align-text-top clipboard"

@@ -5,9 +5,15 @@ import { useContext, useEffect, useState } from 'react'
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
+import { QuickSettings } from '../components/quick-settings'
 import { Settings } from '../hooks/settings'
 import { GlobalContext } from '../utils/context'
 import { formatDropRate } from '../utils/format'
+
+const LOCATION_TYPE_TO_DROP_MODE: Record<string, string> = {
+  "explore": "explores",
+  "fishing": "fishes",
+}
 
 interface DropRates {
   nodes: {
@@ -100,11 +106,15 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     } else if (location.type === "fishing" && !!settings.manualFishing) {
       setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
     } else if (settings.runecube) {
-      setDrops(runecubeNormalDrops)
+      // setDrops(runecubeNormalDrops)
+      // I have no non-iron-depot data for Runecube, sorry.
+      setDrops(runecubeIronDepotDrops)
+    } else {
+      setDrops(normalDrops)
     }
   }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
 
-  return <Layout headerFrom={location}>
+  return <Layout headerFrom={location} headerRight={<QuickSettings dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]} />}>
     <LocationList location={location} drops={drops} settings={settings} />
   </Layout>
 }

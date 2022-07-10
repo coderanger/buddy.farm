@@ -1,13 +1,14 @@
 import { graphql } from 'gatsby'
-import React, { useEffect, useState, useContext } from 'react'
 import { DateTime } from 'luxon'
+import React, { useContext, useEffect, useState } from 'react'
 
 import Layout from '../components/layout'
 import List, { ListItem } from '../components/list'
+import { QuickSettings } from '../components/quick-settings'
 import { Settings } from '../hooks/settings'
-import { formatDropRate } from '../utils/format'
-import { GlobalContext } from '../utils/context'
 import { TRADE_LAST_SEEN_THRESHOLD } from '../pages/exchange-center'
+import { GlobalContext } from '../utils/context'
+import { formatDropRate } from '../utils/format'
 
 interface DropRates {
   nodes: {
@@ -133,7 +134,7 @@ interface Item {
   fleaMarket: number | null
   dropMode: {
     dropMode: string
-  }
+  } | undefined
   fields: {
     path: string
   }
@@ -497,13 +498,18 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
     } else if (item.dropMode?.dropMode === "fishes" && (!!settings.manualFishing || item.manualFishingOnly)) {
       setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
     } else if (settings.runecube) {
-      setDrops(runecubeNormalDrops)
+      // setDrops(runecubeNormalDrops)
+      // I have no non-iron-depot data for Runecube, sorry.
+      setDrops(runecubeIronDepotDrops)
+    } else {
+      setDrops(normalDrops)
     }
-  }, [item.dropMode?.dropMode, settings.ironDepot, settings.manualFishing, settings.runecube])
+  }, [item.dropMode?.dropMode, ctx.settings.ironDepot, ctx.settings.manualFishing, ctx.settings.runecube])
 
   return <Layout
     headerFrom={item}
-    headerImageCopy={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}>
+    headerImageCopy={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}
+    headerRight={<QuickSettings dropMode={item.dropMode?.dropMode} manualFishingOnly={item.manualFishingOnly} />}>
     <ItemList item={item} drops={drops} level1Pets={level1Pets} level3Pets={level3Pets} level6Pets={level6Pets} locksmithItems={locksmithItems.nodes} wishingWell={wellOutput.nodes} buildings={buildings.nodes} tower={tower.nodes} communityCenter={communityCenter.nodes} passwords={passwords.nodes} settings={settings} />
     <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.outputRecipes} />
     <RecipeList label="Used In" labelAnchor={undefined} recipeItems={item.inputRecipes} />
