@@ -143,7 +143,7 @@ export default ({ location }: SearchProps) => {
   return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch}>
     <div>Search results</div>
     {results !== null ?
-      <List items={results.map(r => ({ image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} /> :
+      <List items={results.map(r => ({ key: `${r.name}-${r.type}`, image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} /> :
       <div className="w-100 d-flex justify-content-center">
         <CgSpinner
           css={{
