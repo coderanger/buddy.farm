@@ -126,8 +126,8 @@ const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, h
     </Navbar>
     <main>
       <Container css={{ paddingTop: 10 }}>
+        {headerRight && <div className="d-none d-md-block float-end">{headerRight}</div>}
         {(title || headerFrom) && <h1>
-          {headerRight && <span className="float-end">{headerRight}</span>}
           {(headerImage || headerFrom) && <img
             src={"https://farmrpg.com" + (headerImage || headerFrom?.image)}
             className="d-inline-block align-text-top clipboard"
@@ -138,6 +138,7 @@ const Layout = ({ title, headerImage, headerCopy, headerImageCopy, headerFrom, h
           {title || headerFrom?.name}
           {(headerCopy || headerFrom) && <CopyButton path={headerCopy || headerFrom?.fields.path} />}
         </h1>}
+        {headerRight && <div className="d-md-none my-2">{headerRight}</div>}
         {children}
       </Container>
     </main>
