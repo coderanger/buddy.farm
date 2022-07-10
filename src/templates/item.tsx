@@ -497,13 +497,10 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
       setDrops(settings.runecube ? runecubeIronDepotDrops : ironDepotDrops)
     } else if (item.dropMode?.dropMode === "fishes" && (!!settings.manualFishing || item.manualFishingOnly)) {
       setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
-    } else if (item.dropMode?.dropMode === "harvests") {
-      // Harvest drops always use normal, Runecube is ignored.
-      setDrops(normalDrops)
     } else if (settings.runecube) {
       // setDrops(runecubeNormalDrops)
       // I have no non-iron-depot data for Runecube, sorry.
-      setDrops(runecubeIronDepotDrops)
+      setDrops(item.dropMode?.dropMode === "explores" ? runecubeIronDepotDrops : runecubeNormalDrops)
     } else {
       setDrops(normalDrops)
     }

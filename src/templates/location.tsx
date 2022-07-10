@@ -108,7 +108,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
     } else if (settings.runecube) {
       // setDrops(runecubeNormalDrops)
       // I have no non-iron-depot data for Runecube, sorry.
-      setDrops(runecubeIronDepotDrops)
+      setDrops(location.type === "explore" ? runecubeIronDepotDrops : runecubeNormalDrops)
     } else {
       setDrops(normalDrops)
     }
