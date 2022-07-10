@@ -48,7 +48,6 @@ export default () => {
         <SwitchSetting id="showPasswords" label="Show Mailbox Passwords" settings={settings} />
         <div className={secretKnockEnabled ? "" : "d-none"}>
           <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
-          <SwitchSetting id="runecube" label="Runecube" settings={settings} />
         </div>
       </fieldset>
       <fieldset>
@@ -85,6 +84,7 @@ export default () => {
         <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' type="number" after="%" settings={settings} />
         <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' type="number" after="%" settings={settings} />
         <TextSetting id="resourceSaver" label="Resource Saver" placeholder='20' type="number" after="%" settings={settings} />
+        <SwitchSetting id="runecube" label="Eagle Eye (Runecube)" settings={settings} />
       </fieldset>
     </Input.Form>
   </Layout>
