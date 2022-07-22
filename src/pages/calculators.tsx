@@ -35,6 +35,11 @@ export default () => {
         image: "/img/items/farmhouse_sm.png",
         href: "/farmhousecalc/",
       },
+      {
+        lineOne: "Wheel Calculator",
+        image: "/img/items/spinner.png?2",
+        href: "/wheelcalc/",
+      },
     ]} bigLine={true} />
   </Layout>
 }
