@@ -246,6 +246,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     type: null,
     href: "/farmhousecalc/",
   },
+  {
+    name: "Wheel Calculator",
+    image: "/img/items/spinner.png?2",
+    searchText: "wheel spin calculator",
+    type: null,
+    href: "/wheelcalc/",
+  },
 ]
 
 export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql }) => {
