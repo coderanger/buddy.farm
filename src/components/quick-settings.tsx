@@ -15,6 +15,7 @@ interface QuickSettingsUnitsProps {
     value: string
     label: string
     image: string
+    manualFishing?: boolean | undefined
   }[]
 }
 
@@ -28,7 +29,15 @@ const QuickSettingsUnits = ({ settingKey, units }: QuickSettingsUnitsProps) => {
         size="sm"
         variant={currentUnit === unit.value ? "secondary" : "outline-secondary"}
         title={unit.label}
-        onClick={() => ctx.setSetting(settingKey, unit.value)}>
+        onClick={() => {
+          if (unit.manualFishing === undefined) {
+            ctx.setSetting(settingKey, unit.value)
+          } else {
+            ctx.setSettings((state) => {
+              return { ...state, [settingKey]: unit.value, "manualFishing": unit.manualFishing }
+            })
+          }
+        }}>
         <img src={unit.image} css={{ height: 20 }} />
       </Button>
     ))}
@@ -56,27 +65,6 @@ const QuickSettingsRunecube = () => {
   </ButtonGroup>
 }
 
-const QuickSettingsManualFishing = () => {
-  const ctx = useContext(GlobalContext)
-  const current: boolean = ctx.settings.manualFishing || false
-  return <ButtonGroup className="ms-2" aria-label="Manual fishing setting">
-    <Button
-      size="sm"
-      variant={current ? "secondary" : "outline-secondary"}
-      title="Manual Fishing"
-      onClick={() => ctx.setSetting("manualFishing", true)}>
-      <img src="https://farmrpg.com/img/items/7758.png" css={{ height: 20 }} />
-    </Button>
-    <Button
-      size="sm"
-      variant={!current ? "secondary" : "outline-secondary"}
-      title="Nets"
-      onClick={() => ctx.setSetting("manualFishing", false)}>
-      <img src="https://farmrpg.com/img/items/7748.png" css={{ height: 20 }} />
-    </Button>
-  </ButtonGroup>
-}
-
 interface QuickSettingsProps {
   dropMode: string | undefined
   manualFishingOnly?: boolean
@@ -97,14 +85,11 @@ export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProp
       { value: "lemonade", label: "Lemonades", image: "https://farmrpg.com/img/items/lemonade.png" },
       { value: "palmers", label: "Arnold Palmers", image: "https://farmrpg.com/img/items/ap.png" },
     ]} />)
-  } else if (dropMode === "fishes") {
-    if (!manualFishingOnly) {
-      parts.push(<QuickSettingsManualFishing key="manualFishing" />)
-    }
+  } else if (dropMode === "fishes" && !manualFishingOnly) {
     parts.push(<QuickSettingsUnits key="unitFishing" settingKey="unitFishing" units={[
-      { value: "", label: "Fishes", image: "https://farmrpg.com/img/items/7783.png" },
-      { value: "nets", label: "Fishing Nets", image: "https://farmrpg.com/img/items/7748.png" },
-      { value: "largeNets", label: "Large Nets", image: "https://farmrpg.com/img/items/lnet.png?1" },
+      { value: "", label: "Manual Fishing", image: "https://farmrpg.com/img/items/7783.png", manualFishing: true },
+      { value: "nets", label: "Fishing Nets", image: "https://farmrpg.com/img/items/7748.png", manualFishing: false },
+      { value: "largeNets", label: "Large Nets", image: "https://farmrpg.com/img/items/lnet.png?1", manualFishing: false },
     ]} />)
   } else if (dropMode === "harvests") {
     parts.push(<QuickSettingsUnits key="unitFarming" settingKey="unitFarming" units={[
