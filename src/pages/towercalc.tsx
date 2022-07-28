@@ -40,11 +40,15 @@ export default () => {
   }
   while (endCondition()) {
     levelsClimbed += 1
-    totalSilver += (data.fromLevel + levelsClimbed) * 50
+    const curLevel = data.fromLevel + levelsClimbed
+    totalSilver += curLevel * (curLevel > 100 ? (curLevel > 200 ? 150 : 100) : 50)
     totalAK += 100
   }
   const displaySilverUnit = totalSilver > 1000 ? "B" : "M"
   const displaySilver = totalSilver > 1000 ? totalSilver / 1000 : totalSilver
+
+  const endLevel = data.fromLevel + levelsClimbed
+  const mmsRequired = endLevel <= 100 ? 0 : Math.ceil((endLevel - 100) / 4)
 
   return <Calculator pageTitle="Tower Calculator" valueSetter={setValues}>
     <Input.Text
@@ -96,5 +100,6 @@ export default () => {
     {data.mode !== "level" && <Input.Text id="level" label="Gets To Level" disabled={true} value={(data.fromLevel + levelsClimbed).toLocaleString()} />}
     <Input.Text id="silver" label="Silver Used" disabled={true} value={displaySilver.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + displaySilverUnit} />
     <Input.Text id="ak" label="AK Used" disabled={true} value={totalAK.toLocaleString()} />
+    <Input.Text id="mms" label="Mega-Masteries Required" disabled={true} value={mmsRequired.toLocaleString()} />
   </Calculator>
 }
