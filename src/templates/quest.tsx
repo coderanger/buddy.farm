@@ -193,7 +193,7 @@ export const pageQuery = graphql`
       requiresFishing
       requiresCrafting
       requiresExploring
-      # requiresTower
+      requiresTower
       silverRequest
       itemRequests {
         quantity
