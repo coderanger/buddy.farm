@@ -124,7 +124,7 @@ export default ({ location }: SearchProps) => {
       }
 
       // Setup for scoring.
-      const queryLower = query.toLowerCase()
+      const queryLower = query.toLowerCase().trim()
       const queryRegexp = prepScoring(queryLower)
 
       // Transform to a scored list.
