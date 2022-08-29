@@ -376,6 +376,7 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
       nodes: data!.quizzes,
       template: "quiz",
       image: "/img/items/schoolhouse.png",
+      searchType: "Schoolhouse Quiz",
     },
   ]
   for (const typeData of types) {

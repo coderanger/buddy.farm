@@ -1,15 +1,11 @@
-import { graphql, PageProps } from 'gatsby'
-import { useContext } from 'react'
+import { graphql, PageProps, Link } from 'gatsby'
 
-import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
 import List from '../components/list'
-import { GlobalContext } from '../utils/context'
-
 
 export default ({ data: { maybeQuiz } }: PageProps<Queries.QuizTemplateQuery>) => {
   const quiz = maybeQuiz!
-  // const ctx = useContext(GlobalContext)
+
   const header = {
     name: quiz.name,
     image: "/img/items/schoolhouse.png",
@@ -18,13 +14,14 @@ export default ({ data: { maybeQuiz } }: PageProps<Queries.QuizTemplateQuery>) =
 
   const rewardsListItems = quiz.rewards.slice().sort((a,b) => a.score - b.score).map(r => ({
     lineOne: r.item.name,
-    lineTwo: `Score ${r.score}% or above`,
+    lineTwo: `Score ${r.score}%${r.score < 100 ? " or better" : ""}`,
     image: r.item.image,
     href: r.item.fields.path,
     value: r.amount.toLocaleString(),
   }))
 
   return <Layout headerFrom={header}>
+    <p><Link to="/quizzes/">Back to all quizzes</Link></p>
     <p>{quiz.description.replace(/<br.*\/?>/, " ")}</p>
     <List items={rewardsListItems} />
     {quiz.answers.slice().sort((a, b) => a.display_order - b.display_order).map(a => (

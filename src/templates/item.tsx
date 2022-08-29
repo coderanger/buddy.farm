@@ -124,6 +124,18 @@ interface Trade {
   oneShot: boolean
 }
 
+interface QuizReward {
+  amount: number
+  score: number
+  quiz: {
+    jsonId: number
+    name: string
+    fields: {
+      path: string
+    }
+  }
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -142,6 +154,7 @@ interface Item {
   outputRecipes: RecipeItem[]
   giveTrades: Trade[]
   receiveTrades: Trade[]
+  quizRewards: QuizReward[]
 }
 
 interface SortableListItem extends ListItem {
@@ -402,6 +415,16 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: `/passwords/#${pw.password.jsonId}`,
   })))
 
+  // Quiz sources.
+  listItems.push(...item.quizRewards.sort((a, b) => a.quiz.jsonId - b.quiz.jsonId).map(q => ({
+    key: `qz${q.quiz.jsonId}`,
+    image: "/img/items/schoolhouse.png",
+    lineOne: `${q.quiz.name} Quiz`,
+    lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
+    value: q.amount.toLocaleString(),
+    href: q.quiz.fields.path,
+  })))
+
   // Community center sources. Only shows if there's no drop sources and isn't craftable.
   if (unusualDropMode) {
     listItems.push(...communityCenter.map(cc => ({
@@ -606,6 +629,19 @@ export const pageQuery = graphql`
         receiveQuantity
         lastSeenRelative
         oneShot
+      }
+
+      # Quizzes.
+      quizRewards {
+        amount
+        score
+        quiz {
+          jsonId
+          name
+          fields {
+            path
+          }
+        }
       }
     }
 
