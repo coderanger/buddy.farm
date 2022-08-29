@@ -155,6 +155,7 @@ export default () => {
         </div>
         <div>
           <MiniList label="Useful Links" items={[
+            { name: "Schoolhouse Quizzes", image: "/img/items/schoolhouse.png", fields: { path: "/quizzes/" } },
             { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
             { name: "Exploring", image: "/img/items/6075.png", fields: { path: "/exploring/" } },
             { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },

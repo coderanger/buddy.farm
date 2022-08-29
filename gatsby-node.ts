@@ -1,5 +1,5 @@
-import fs from 'fs'
-import path from 'path'
+import fs from "fs"
+import path from "path"
 
 import type { GatsbyNode } from "gatsby"
 import type { Searchable } from "./src/utils/context"
@@ -25,10 +25,18 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
       api: ItemApiJson! @link(from: "jsonId", by: "jsonId")
       locksmithItems: [LocksmithItemsJson!] @link(from: "jsonId", by: "itemId")
+      recipe: [ItemsJsonRecipe!]
       inputRecipes: [RecipesJson!] @link(from: "jsonId", by: "inputId")
       outputRecipes: [RecipesJson!] @link(from: "jsonId", by: "outputId")
       giveTrades: [TradesJson!] @link(from: "name", by: "giveItemName")
       receiveTrades: [TradesJson!] @link(from: "name", by: "receiveItemName")
+      quizRewards: [QuizRewardsJson!] @link(from: "name", by: "reward")
+    }
+
+    type ItemsJsonRecipe {
+      jsonId: String!
+      name: String!
+      quantity: Int!
     }
 
     type PetsJson implements Node {
@@ -139,6 +147,34 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       receiveItemName: String!
       receiveQuantity: Int!
     }
+
+    type QuizzesJson implements Node {
+      jsonId: Int!
+      name: String!
+      fields: BFFields!
+      description: String!
+      rewards: [QuizRewardsJson!]! @link(by: "quiz_id" from: "jsonId")
+      answers: [QuizAnswersJson!]! @link(by: "quiz_id" from: "jsonId")
+    }
+
+    type QuizRewardsJson implements Node {
+      amount: Int!
+      score: Int!
+      reward: String!
+      quiz: QuizzesJson! @link(by: "jsonId", from: "quiz_id")
+      item: ItemsJson! @link(by: "name", from: "reward")
+    }
+
+    type QuizAnswersJson implements Node {
+      question: String!
+      display_order: Int!
+      answer1: String!
+      answer2: String!
+      answer3: String!
+      answer4: String!
+      correct: Int!
+      quiz: QuizzesJson! @link(by: "jsonId", from: "quiz_id")
+    }
   `
   createTypes(typeDefs)
 }
@@ -149,21 +185,22 @@ interface PathInfo {
 }
 
 const pathPrefixes: Record<string, PathInfo> = {
-  "ItemsJson": { short: "i", long: "items" },
-  "LocationsJson": { short: "l", long: "locations" },
-  "PetsJson": { short: "p", long: "pets" },
-  "QuestlinesJson": { short: "ql", long: "questlines" },
-  "QuestsJson": { short: "q", long: "quests" },
-  "TradesJson": { short: "t", long: "trades" },
+  ItemsJson: { short: "i", long: "items" },
+  LocationsJson: { short: "l", long: "locations" },
+  PetsJson: { short: "p", long: "pets" },
+  QuestlinesJson: { short: "ql", long: "questlines" },
+  QuestsJson: { short: "q", long: "quests" },
+  TradesJson: { short: "t", long: "trades" },
+  QuizzesJson: { short: "qz", long: "quizzes" },
 }
 
-export const onCreateNode: GatsbyNode['onCreateNode'] = ({ node, actions }) => {
+export const onCreateNode: GatsbyNode["onCreateNode"] = ({ node, actions }) => {
   const { createNodeField } = actions
   const pathPrefix = pathPrefixes[node.internal.type]
   /** @type {string | any} */
   const name = node.name || node.jsonId
   if (pathPrefix && typeof name === "string") {
-    const slug = name.toLowerCase().replace(/\W+/g, '-')
+    const slug = name.trim().toLowerCase().replace(/\W+/g, "-")
     createNodeField({ node, name: "path", value: `/${pathPrefix.short}/${slug}/` })
   }
 }
@@ -246,9 +283,16 @@ const STATIC_SEARCHABLES: Searchable[] = [
     type: null,
     href: "/farmhousecalc/",
   },
+  {
+    name: "Schoolhouse Quizzes",
+    image: "/img/items/schoolhouse.png",
+    searchText: "schoolhouse quizzes",
+    type: null,
+    href: "/quizzes/",
+  },
 ]
 
-export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql }) => {
+export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql }) => {
   const { data } = await graphql<Queries.GatsbyNodeCreatePagesQuery>(`
     query GatsbyNodeCreatePages {
       locations: allLocationsJson {
@@ -296,8 +340,16 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
           }
         }
       }
+      quizzes: allQuizzesJson {
+        nodes {
+          name
+          fields {
+            path
+          }
+        }
+      }
     }
-    `)
+  `)
   const types = [
     {
       nodes: data!.items,
@@ -320,7 +372,11 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
       template: "questline",
       searchType: "Questline",
     },
-
+    {
+      nodes: data!.quizzes,
+      template: "quiz",
+      image: "/img/items/schoolhouse.png",
+    },
   ]
   for (const typeData of types) {
     for (const node of typeData.nodes.nodes) {
@@ -341,7 +397,7 @@ export const createPages: GatsbyNode['createPages'] = async ({ actions, graphql 
       const searchName = node.name.toLowerCase()
       searchables.push({
         name: node.name,
-        image: node.image,
+        image: node.image || typeData.image,
         searchText: searchName,
         href: node.fields.path,
         type: typeData.searchType || null,

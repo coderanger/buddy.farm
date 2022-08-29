@@ -26,6 +26,7 @@ export interface ListItem {
   alertIcon?: string | null
   onClick?: React.MouseEventHandler<HTMLDivElement>
   copyText?: string
+  background?: string
 }
 
 interface ListItemProps {
@@ -108,7 +109,7 @@ const ListItem = ({ item }: ListItemProps) => {
   if (href) {
     elm = <Link className="d-flex w-100 justify-content-between" css={{ flexWrap: "wrap", color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit" } }} to={href}>{elm}</Link>
   }
-  return <ListGroup.Item className={`d-flex w-100 justify-content-between gap-4 ${item.copyText ? "clipboard" : ""}`} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
+  return <ListGroup.Item className={`d-flex w-100 justify-content-between gap-4 ${item.copyText ? "clipboard" : ""}`} css={{backgroundColor: item.background}} onClick={item.onClick} data-clipboard-text={item.copyText}>{elm}</ListGroup.Item>
 }
 
 export default ({ label, labelAnchor, items, bigLine, copyText, shrink, className, ...props }: ListProps) => (
