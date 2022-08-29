@@ -29,7 +29,7 @@ const SPECIAL_IMAGES: { [key: string]: string } = {
 }
 
 const towerCostString = (level: number) => {
-  const cost = level * 50
+  const cost = level * 50 * Math.ceil(level / 100)
   if (cost >= 1000) {
     return `${(cost / 1000).toLocaleString()}B`
   } else {
@@ -69,6 +69,7 @@ export default () => {
     <div className="mb-3" key={ti[0].level}>
       <h3 id={`level${ti[0].level}`}>Level {ti[0].level}</h3>
       <p className="mb-2">Costs {towerCostString(ti[0].level)} silver and 100 Ascension Knowledge.</p>
+      {ti[0].level > 100 && <p className="mb-2">Requires at least {Math.ceil((ti[0].level - 100) / 4)} Mega-Master{Math.ceil((ti[0].level - 100) / 4) == 1 ? "y" : "ies"}.</p>}
       <List items={ti.sort((a, b) => a.order - b.order).map(i => ({
         image: i.item?.image || SPECIAL_IMAGES[i.itemName] || "/img/items/item.png",
         lineOne: i.itemName,
