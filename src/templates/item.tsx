@@ -395,14 +395,14 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: t.item.fields.path,
   })))
 
-  // Tower sources.
-  listItems.push(...tower.sort((a, b) => a.level === b.level ? a.order - b.order : a.level - b.level).map(t => ({
-    key: `t${t.level}${t.order}`,
-    image: "/img/items/tower.png",
-    lineOne: "Tower",
-    lineTwo: `x${t.quantity.toLocaleString()}`,
-    value: `Level ${t.level}`,
-    href: `/tower/#level${t.level}`,
+  // Quiz sources.
+  listItems.push(...item.quizRewards.sort((a, b) => a.quiz.jsonId - b.quiz.jsonId).map(q => ({
+    key: `qz${q.quiz.jsonId}`,
+    image: "/img/items/schoolhouse.png",
+    lineOne: `${q.quiz.name} Quiz`,
+    lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
+    value: q.amount.toLocaleString(),
+    href: q.quiz.fields.path,
   })))
 
   // Passwords sources.
@@ -415,14 +415,14 @@ const ItemList = ({ item, drops, level1Pets, level3Pets, level6Pets, locksmithIt
     href: `/passwords/#${pw.password.jsonId}`,
   })))
 
-  // Quiz sources.
-  listItems.push(...item.quizRewards.sort((a, b) => a.quiz.jsonId - b.quiz.jsonId).map(q => ({
-    key: `qz${q.quiz.jsonId}`,
-    image: "/img/items/schoolhouse.png",
-    lineOne: `${q.quiz.name} Quiz`,
-    lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
-    value: q.amount.toLocaleString(),
-    href: q.quiz.fields.path,
+  // Tower sources.
+  listItems.push(...tower.sort((a, b) => a.level === b.level ? a.order - b.order : a.level - b.level).map(t => ({
+    key: `t${t.level}${t.order}`,
+    image: "/img/items/tower.png",
+    lineOne: "Tower",
+    lineTwo: `x${t.quantity.toLocaleString()}`,
+    value: `Level ${t.level}`,
+    href: `/tower/#level${t.level}`,
   })))
 
   // Community center sources. Only shows if there's no drop sources and isn't craftable.
