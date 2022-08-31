@@ -31,6 +31,7 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       giveTrades: [TradesJson!] @link(from: "name", by: "giveItemName")
       receiveTrades: [TradesJson!] @link(from: "name", by: "receiveItemName")
       quizRewards: [QuizRewardsJson!] @link(from: "name", by: "reward")
+      npcs: [NpcItemsJson!] @link(from: "name", by: "item_name")
     }
 
     type ItemsJsonRecipe {
@@ -175,6 +176,22 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       correct: Int!
       quiz: QuizzesJson! @link(by: "jsonId", from: "quiz_id")
     }
+
+    type NpcsJson implements Node {
+      name: String!
+      short_name: String
+      image: String!
+      fields: BFFields!
+      items: [NpcItemsJson!]! @link(by: "npc_name" from: "name")
+    }
+
+    type NpcItemsJson implements Node {
+      adjective: String!
+      item_name: String!
+      npc_name: String!
+      item: ItemsJson! @link(by: "name", from: "item_name")
+      npc: NpcsJson! @link(by: "name", from: "npc_name")
+    }
   `
   createTypes(typeDefs)
 }
@@ -192,6 +209,7 @@ const pathPrefixes: Record<string, PathInfo> = {
   QuestsJson: { short: "q", long: "quests" },
   TradesJson: { short: "t", long: "trades" },
   QuizzesJson: { short: "qz", long: "quizzes" },
+  NpcsJson: { short: "t", long: "townsfolk" },
 }
 
 export const onCreateNode: GatsbyNode["onCreateNode"] = ({ node, actions }) => {
@@ -290,6 +308,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     type: null,
     href: "/quizzes/",
   },
+  {
+    name: "Townsfolk",
+    image: "/img/items/town_sm.png",
+    searchText: "townsfolk npcs",
+    type: null,
+    href: "/townsfolk/",
+  },
 ]
 
 export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql }) => {
@@ -348,6 +373,15 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
           }
         }
       }
+      npcs: allNpcsJson {
+        nodes {
+          name
+          image
+          fields {
+            path
+          }
+        }
+      }
     }
   `)
   const types = [
@@ -377,6 +411,11 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
       template: "quiz",
       image: "/img/items/schoolhouse.png",
       searchType: "Schoolhouse Quiz",
+    },
+    {
+      nodes: data!.npcs,
+      template: "npc",
+      searchType: "Townsfolk",
     },
   ]
   for (const typeData of types) {

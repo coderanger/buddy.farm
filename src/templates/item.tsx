@@ -136,6 +136,17 @@ interface QuizReward {
   }
 }
 
+interface NpcItem {
+  adjective: "loves" | "likes" | "hates"
+  npc: {
+    name: string
+    image: string
+    fields: {
+      path: string
+    }
+  }
+}
+
 interface Item {
   name: string
   jsonId: string
@@ -155,6 +166,7 @@ interface Item {
   giveTrades: Trade[]
   receiveTrades: Trade[]
   quizRewards: QuizReward[]
+  npcs: NpcItem[]
 }
 
 interface SortableListItem extends ListItem {
@@ -264,6 +276,32 @@ const TradeList = ({ item }: TradeListProps) => {
     value: t.giveQuantity.toLocaleString(),
   }))
   return <List label="Trade In At The Exchange Center" items={listItems} bigLine={true} />
+}
+
+interface NPCListProps {
+  item: Item
+}
+
+const ADJECTIVE_ORDER = {
+  loves: 0,
+  likes: 1,
+  hates: 2,
+}
+
+const ADJECTIVE_VALUE = {
+  loves: "Loves (150 XP)",
+  likes: "Likes (25 XP)",
+  hates: "Hates (-50 XP)",
+}
+
+const NPCList = ({ item }: NPCListProps) => {
+  const listItems: ListItem[] = item.npcs.sort((a, b) => a.adjective === b.adjective ? a.npc.name.localeCompare(b.npc.name) : ADJECTIVE_ORDER[a.adjective] - ADJECTIVE_ORDER[b.adjective]).map(n => ({
+    image: n.npc.image,
+    lineOne: n.npc.name,
+    href: n.npc.fields.path,
+    value: ADJECTIVE_VALUE[n.adjective],
+  }))
+  return <List label="Townsfolk" items={listItems} bigLine={true} />
 }
 
 interface ItemListProps {
@@ -541,6 +579,7 @@ export default ({ data: { item, normalDrops, ironDepotDrops, manualFishingDrops,
     <TradeList item={item} />
     <QuestList label="Needed For Quests" item={item.name} quests={questRequests.nodes} oldQuests={!!settings.oldQuests} />
     <QuestList label="Received From Quests" item={item.name} quests={questRewards.nodes} oldQuests={!!settings.oldQuests} />
+    <NPCList item={item} />
   </Layout >
 }
 
@@ -638,6 +677,18 @@ export const pageQuery = graphql`
         quiz {
           jsonId
           name
+          fields {
+            path
+          }
+        }
+      }
+
+      # Townsfolk.
+      npcs {
+        adjective
+        npc {
+          name
+          image
           fields {
             path
           }
