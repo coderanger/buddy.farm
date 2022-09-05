@@ -1,13 +1,13 @@
-import { graphql, Link, useStaticQuery } from 'gatsby'
-import { DateTime } from 'luxon'
-import React from 'react'
-import Col from 'react-bootstrap/Col'
-import ListGroup from 'react-bootstrap/ListGroup'
-import Row from 'react-bootstrap/Row'
-import SunCalc from 'suncalc'
+import { graphql, Link, useStaticQuery } from "gatsby"
+import { DateTime } from "luxon"
+import React from "react"
+import Col from "react-bootstrap/Col"
+import ListGroup from "react-bootstrap/ListGroup"
+import Row from "react-bootstrap/Row"
+import SunCalc from "suncalc"
 
-import Layout from '../components/layout'
-import { useServerTime } from '../hooks/servertime'
+import Layout from "../components/layout"
+import { useServerTime } from "../hooks/servertime"
 
 interface ListItem {
   name: string
@@ -46,11 +46,17 @@ const SteakMarketForecastDay = ({ days }: { days: number }) => {
   const date = DateTime.now().setZone("America/Chicago").startOf("day").plus({ days })
   const market = marketLevel(date)
 
-  return <div className="d-inline-block me-2">
-    <div className="d-flex justify-content-center">{date.toLocaleString({ month: 'short', day: 'numeric' })}</div>
-    <div className="d-flex justify-content-center fw-bolder">{market.level}</div>
-    <div className="small">{(50000 - market.delta).toLocaleString()}-{(50000 + market.delta).toLocaleString()}</div>
-  </div>
+  return (
+    <div className="d-inline-block me-2">
+      <div className="d-flex justify-content-center">
+        {date.toLocaleString({ month: "short", day: "numeric" })}
+      </div>
+      <div className="d-flex justify-content-center fw-bolder">{market.level}</div>
+      <div className="small">
+        {(50000 - market.delta).toLocaleString()}-{(50000 + market.delta).toLocaleString()}
+      </div>
+    </div>
+  )
 }
 
 const SteakMarketForecast = () => (
@@ -73,10 +79,23 @@ const MiniList = ({ label, items }: MiniListProps) => (
   <>
     <h5 className="mb-1">{label}</h5>
     <ListGroup variant="flush">
-      {items.map(it => (
+      {items.map((it) => (
         <ListGroup.Item className="px-0" key={it.fields.path}>
-          <Link to={it.fields.path} css={{ color: "inherit", textDecoration: "inherit", "&:hover": { color: "inherit", textDecoration: "underline" } }}>
-            <img src={"https://farmrpg.com" + it.image} className="d-inline-block align-text-top" width="20" height="20" css={{ marginRight: 10, boxSizing: "border-box" }} />
+          <Link
+            to={it.fields.path}
+            css={{
+              color: "inherit",
+              textDecoration: "inherit",
+              "&:hover": { color: "inherit", textDecoration: "underline" },
+            }}
+          >
+            <img
+              src={"https://farmrpg.com" + it.image}
+              className="d-inline-block align-text-top"
+              width="20"
+              height="20"
+              css={{ marginRight: 10, boxSizing: "border-box" }}
+            />
             {it.name}
           </Link>
         </ListGroup.Item>
@@ -88,16 +107,20 @@ const MiniList = ({ label, items }: MiniListProps) => (
 const ServerTime = () => {
   const [time, rollover] = useServerTime()
 
-  return <>
-    <h5 className="mb-1">Server Time</h5>
-    <div>
-      <div>Server Time is <strong>{time}</strong></div>
-      <div>Daily Reset in <strong>{rollover}</strong></div>
-    </div>
-  </>
+  return (
+    <>
+      <h5 className="mb-1">Server Time</h5>
+      <div>
+        <div>
+          Server Time is <strong>{time}</strong>
+        </div>
+        <div>
+          Daily Reset in <strong>{rollover}</strong>
+        </div>
+      </div>
+    </>
+  )
 }
-
-
 
 interface IndexQuery {
   quests: {
@@ -111,7 +134,7 @@ interface IndexQuery {
 export default () => {
   const { quests, items }: IndexQuery = useStaticQuery(graphql`
     query {
-      quests: allQuestsJson(sort: {fields: firstSeen, order: DESC}, limit: 5) {
+      quests: allQuestsJson(sort: { fields: firstSeen, order: DESC }, limit: 5) {
         nodes {
           name
           image: fromImage
@@ -121,9 +144,9 @@ export default () => {
         }
       }
       items: allItemsJson(
-        sort: {fields: firstSeen, order: DESC}
+        sort: { fields: firstSeen, order: DESC }
         limit: 5
-        filter: {firstSeen: {ne: null}}
+        filter: { firstSeen: { ne: null } }
       ) {
         nodes {
           name
@@ -136,50 +159,93 @@ export default () => {
     }
   `)
 
-  return <Layout pageTitle="Buddy's Almanac">
-    <h1>Welcome to Buddy's Almanac</h1>
-    <div>
-      <p>This is a repository of game information for <a href="https://farmrpg.com/">Farm RPG</a>.</p>
-      <p>
-        Use the search box above to look up items, locations, pets, quests, or more!
-      </p>
-      <p>
-        Check out the <Link to="/settings/">settings</Link> to configure your perks and other preferences. Yes there is a dark mode now.
-        All data is player-contributed and may not always be accurate. Do not complain to the Farm RPG team if anything here does not match reality, tell Coderanger.
-      </p>
-    </div>
-    <Row>
-      <Col sm>
-        <div className="mb-2">
-          <SteakMarketForecast />
-        </div>
-        <div>
-          <MiniList label="Useful Links" items={[
-            { name: "Townsfolk", image: "/img/items/town_sm.png", fields: { path: "/townsfolk/" } },
-            { name: "Schoolhouse Quizzes", image: "/img/items/schoolhouse.png", fields: { path: "/quizzes/" } },
-            { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
-            { name: "Exploring", image: "/img/items/6075.png", fields: { path: "/exploring/" } },
-            { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
-            { name: "Calculators", image: "/img/items/7210.png", fields: { path: "/calculators/" } },
-            { name: "Profile Backgrounds", image: "/img/emblems/def.png", fields: { path: "/backgrounds/" } },
-            { name: "Mailbox Passwords", image: "/img/items/postoffice.png", fields: { path: "/passwords/" } },
-            { name: "Exchange Center", image: "/img/items/exchange.png?1", fields: { path: "/exchange-center/" } },
-            { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
-          ]} />
-        </div>
-      </Col>
-      <Col sm>
-        <MiniList label="New Quests" items={quests.nodes} />
-        <ServerTime />
-      </Col>
-      <Col sm>
-        <MiniList label="New Items" items={items.nodes} />
-      </Col>
-    </Row>
-    <div className="mt-5">
-      <p>
-        Please contact Coderanger in-game or on Discord with any questions or feedback.
-      </p>
-    </div>
-  </Layout>
+  return (
+    <Layout pageTitle="Buddy's Almanac">
+      <h1>Welcome to Buddy's Almanac</h1>
+      <div>
+        <p>
+          This is a repository of game information for <a href="https://farmrpg.com/">Farm RPG</a>.
+        </p>
+        <p>Use the search box above to look up items, locations, pets, quests, or more!</p>
+        <p>
+          Check out the <Link to="/settings/">settings</Link> to configure your perks and other
+          preferences. Yes there is a dark mode now. All data is player-contributed and may not
+          always be accurate. Do not complain to the Farm RPG team if anything here does not match
+          reality, tell Coderanger.
+        </p>
+      </div>
+      <Row>
+        <Col sm>
+          <div className="mb-2">
+            <SteakMarketForecast />
+          </div>
+          <div>
+            <MiniList
+              label="Useful Links"
+              items={[
+                {
+                  name: "Townsfolk",
+                  image: "/img/items/town_sm.png",
+                  fields: { path: "/townsfolk/" },
+                },
+                {
+                  name: "Schoolhouse Quizzes",
+                  image: "/img/items/schoolhouse.png",
+                  fields: { path: "/quizzes/" },
+                },
+                { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
+                {
+                  name: "Schoolhouse Quizzes",
+                  image: "/img/items/schoolhouse.png",
+                  fields: { path: "/quizzes/" },
+                },
+                {
+                  name: "Level Rewards",
+                  image: "/img/items/7447.png",
+                  fields: { path: "/level-rewards/" },
+                },
+                {
+                  name: "Exploring",
+                  image: "/img/items/6075.png",
+                  fields: { path: "/exploring/" },
+                },
+                { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
+                {
+                  name: "Calculators",
+                  image: "/img/items/7210.png",
+                  fields: { path: "/calculators/" },
+                },
+                {
+                  name: "Profile Backgrounds",
+                  image: "/img/emblems/def.png",
+                  fields: { path: "/backgrounds/" },
+                },
+                {
+                  name: "Mailbox Passwords",
+                  image: "/img/items/postoffice.png",
+                  fields: { path: "/passwords/" },
+                },
+                {
+                  name: "Exchange Center",
+                  image: "/img/items/exchange.png?1",
+                  fields: { path: "/exchange-center/" },
+                },
+                { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
+              ]}
+            />
+          </div>
+        </Col>
+        <Col sm>
+          <MiniList label="New Quests" items={quests.nodes} />
+          <ServerTime />
+        </Col>
+        <Col sm>
+          <MiniList label="New Items" items={items.nodes} />
+        </Col>
+      </Row>
+      <div className="mt-5">
+        <p>Please contact Coderanger in-game or on Discord with any questions or feedback.</p>
+      </div>
+    </Layout>
+  )
 }

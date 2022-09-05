@@ -32,6 +32,7 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       receiveTrades: [TradesJson!] @link(from: "name", by: "receiveItemName")
       quizRewards: [QuizRewardsJson!] @link(from: "name", by: "reward")
       npcs: [NpcItemsJson!] @link(from: "name", by: "item_name")
+      levelRewards: [LevelRewardItemsJson!] @link(from: "name", by: "item_name")
     }
 
     type ItemsJsonRecipe {
@@ -192,6 +193,24 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       item: ItemsJson! @link(by: "name", from: "item_name")
       npc: NpcsJson! @link(by: "name", from: "npc_name")
     }
+
+    type LevelRewardsJson implements Node {
+      id: String!
+      skill: String!
+      level: Int!
+      silver: Int!
+      ak: Int!
+      items: [LevelRewardItemsJson!]! @link(by: "level_reward_id", from: "jsonId")
+    }
+
+    type LevelRewardItemsJson implements Node {
+      level_reward_id: String!
+      item_name: String!
+      quantity: Int!
+      order: Int!
+      level_reward: LevelRewardsJson! @link(by: "jsonId", from: "level_reward_id")
+      item: ItemsJson! @link(by: "name", from: "item_name")
+    }
   `
   createTypes(typeDefs)
 }
@@ -314,6 +333,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     searchText: "townsfolk npcs",
     type: null,
     href: "/townsfolk/",
+  },
+  {
+    name: "Level Rewards",
+    image: "/img/items/7447.png",
+    searchText: "level rewards",
+    type: null,
+    href: "/level-rewards/",
   },
 ]
 
