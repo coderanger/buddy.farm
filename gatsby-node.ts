@@ -341,6 +341,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     type: null,
     href: "/level-rewards/",
   },
+  {
+    name: "Drop Pain Chart Creator",
+    image: "/img/items/7447.png",
+    searchText: "drop pain chart creator",
+    type: null,
+    href: "/drop-pain/",
+  },
 ]
 
 export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql }) => {

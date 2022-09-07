@@ -1,5 +1,7 @@
 import "bootstrap/dist/css/bootstrap.css"
 import "bootstrap-dark-5/dist/css/bootstrap-nightshade.css"
+import "react-bootstrap-typeahead/css/Typeahead.css"
+import "react-bootstrap-typeahead/css/Typeahead.bs5.css"
 import "./layout.css"
 
 import ClipboardJS from "clipboard"
