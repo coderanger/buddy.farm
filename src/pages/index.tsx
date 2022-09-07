@@ -195,11 +195,6 @@ export default () => {
                 },
                 { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
                 {
-                  name: "Schoolhouse Quizzes",
-                  image: "/img/items/schoolhouse.png",
-                  fields: { path: "/quizzes/" },
-                },
-                {
                   name: "Level Rewards",
                   image: "/img/items/7447.png",
                   fields: { path: "/level-rewards/" },
