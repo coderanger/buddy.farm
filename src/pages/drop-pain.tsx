@@ -90,7 +90,7 @@ const useImage = () => {
     setIsLoading(true)
     setSelection(sel)
   }
-  if (image.current === undefined) {
+  if (image.current === undefined && typeof document !== "undefined") {
     loadImage(undefined)
   }
   return [image.current as HTMLImageElement, selection, isLoading, loadImage] as const
