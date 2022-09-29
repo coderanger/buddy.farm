@@ -12,6 +12,11 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
     }
 
     type DropRatesGqlJson implements Node {
+      rate: Float!
+      mode: String!
+      drops: Int!
+      hits: Int!
+      runecube: Boolean!
       item: ItemsJson! @link(by: "name")
       location: LocationsJson @link(by: "name")
       locationItem: ItemsJson @link(from: "location", by: "name")
@@ -22,23 +27,53 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       name: String!
       image: String!
       fields: BFFields!
+      manualFishingOnly: Boolean
       dropMode: ItemDropModeJson @link(from: "jsonId", by: "jsonId")
       api: ItemApiJson! @link(from: "jsonId", by: "jsonId")
-      locksmithItems: [LocksmithItemsJson!] @link(from: "jsonId", by: "itemId")
+      locksmithItems: [LocksmithItemsJson!]! @link(from: "jsonId", by: "itemId")
       recipe: [ItemsJsonRecipe!]
-      inputRecipes: [RecipesJson!] @link(from: "jsonId", by: "inputId")
-      outputRecipes: [RecipesJson!] @link(from: "jsonId", by: "outputId")
-      giveTrades: [TradesJson!] @link(from: "name", by: "giveItemName")
-      receiveTrades: [TradesJson!] @link(from: "name", by: "receiveItemName")
-      quizRewards: [QuizRewardsJson!] @link(from: "name", by: "reward")
-      npcs: [NpcItemsJson!] @link(from: "name", by: "item_name")
-      levelRewards: [LevelRewardItemsJson!] @link(from: "name", by: "item_name")
+      inputRecipes: [RecipesJson!]! @link(from: "jsonId", by: "inputId")
+      outputRecipes: [RecipesJson!]! @link(from: "jsonId", by: "outputId")
+      giveTrades: [TradesJson!]! @link(from: "name", by: "giveItemName")
+      receiveTrades: [TradesJson!]! @link(from: "name", by: "receiveItemName")
+      quizRewards: [QuizRewardsJson!]! @link(from: "name", by: "reward")
+      npcs: [NpcItemsJson!]! @link(from: "name", by: "item_name")
+      levelRewards: [LevelRewardItemsJson!]! @link(from: "name", by: "item_name")
+      npcLevelRewards: [NpcLevelRewardItemsJson!]! @link(from: "name", by: "item_name")
+      cookingRecipe: CookingRecipesJson @link(from: "name", by: "item_name")
+      cookingRecipeUnlocker: CookingRecipesJson @link(from: "name", by: "recipe_item_name")
+      cookingRecipeItems: [CookingRecipeItemsJson!]! @link(from: "name", by: "input_name")
+      buildingProductions: [BuildingProductionJson!]! @link(from: "jsonId", by: "item")
     }
 
     type ItemsJsonRecipe {
       jsonId: String!
       name: String!
       quantity: Int!
+    }
+
+    type ItemDropModeJson implements Node {
+      dropMode: String!
+      jsonId: String!
+    }
+
+    type ItemApiJson implements Node {
+      base_yield_minutes: Int!
+      buy_price: Int!
+      can_buy: Int!
+      can_sell: Int!
+      craftable: Int!
+      crafting_level: Int!
+      description: String!
+      jsonId: String!
+      img: String!
+      mailable: Int!
+      masterable: Int!
+      min_mailable_level: Int!
+      name: String!
+      sell_price: Int!
+      type: String!
+      xp: Int!
     }
 
     type PetsJson implements Node {
@@ -63,9 +98,12 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       name: String!
       fromImage: String!
       fields: BFFields!
-      extra: QuestExtraJson @link(from: "jsonId", by: "jsonId")
+      extra: QuestExtraJson! @link(from: "jsonId", by: "jsonId")
       itemRequests: [QuestReward!]!
       itemRewards: [QuestReward!]!
+      preqreq: String
+      prereqQuest: QuestsJson @link(by: "jsonId", from: "prereq")
+      dependents: [QuestsJson!] @link(by: "prereq", from: "jsonId")
     }
 
     type QuestlinesJson implements Node {
@@ -76,27 +114,44 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
     }
 
     type QuestExtraJson implements Node {
+      id: String!
+      # These are technically not floats, but Int is 32-bit only.
+      availableFrom: Float
+      availableTo: Float
       prev: QuestsJson @link(by: "jsonId")
       next: QuestsJson @link(by: "jsonId")
     }
 
     type WishingWellJson implements Node {
+      chance: Float!
       input: ItemsJson! @link(by: "jsonId")
       output: ItemsJson! @link(by: "jsonId")
     }
 
     type LocksmithItemsJson implements Node {
+      boxId: String!
+      group: Int!
+      itemId: String!
+      quantityHigh: Int
+      quantityLow: Int!
       box: LocksmithBoxesJson! @link(by: "boxId")
       boxItem: ItemsJson! @link(by: "jsonId", from: "boxId")
       item: ItemsJson! @link(by: "jsonId", from: "itemId")
     }
 
     type LocksmithBoxesJson implements Node {
+      boxId: String!
+      gold: Int
+      mode: String!
       box: ItemsJson! @link(by: "jsonId", from: "boxId")
-      items: [LocksmithItemsJson!] @link(by: "boxId", from: "boxId")
+      items: [LocksmithItemsJson!]! @link(by: "boxId", from: "boxId")
     }
 
     type BuildingProductionJson implements Node {
+      building: String!
+      image: String!
+      frequency: String!
+      sort: Int!
       item: ItemsJson! @link(by: "jsonId")
     }
 
@@ -105,14 +160,23 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       name: String!
       image: String!
       fields: BFFields!
+      type: String!
       extra: LocationExtraJson! @link(from: "name", by: "name")
     }
 
     type TowerJson implements Node {
+      itemName: String!
+      level: Int!
+      order: Int!
+      quantity: Int!
       item: ItemsJson @link(from: "itemName", by: "name")
     }
 
     type CommunityCenterJson implements Node {
+      date: String!
+      goalQuantity: Int!
+      rewardQuantity: Int!
+      progress: Int
       goalItem: ItemsJson! @link(by: "name")
       rewardItem: ItemsJson! @link(by: "name")
     }
@@ -122,15 +186,27 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
     }
 
     type PasswordsJson implements Node {
+      jsonId: Int!
+      group: String!
+      password: String!
+      clue1: String!
+      clue2: String!
+      clue3: String!
+      silver: Int
+      gold: Int
       items: [PasswordItemsJson!] @link(by: "password.jsonId", from: "jsonId")
     }
 
     type PasswordItemsJson implements Node {
+      quantity: Int!
       password: PasswordsJson! @link(by: "jsonId")
       item: ItemsJson! @link(by: "jsonId")
     }
 
     type RecipesJson implements Node {
+      inputId: String!
+      outputId: String!
+      quantity: Int!
       input: ItemsJson! @link(by: "jsonId", from: "inputId")
       output: ItemsJson! @link(by: "jsonId", from: "outputId")
     }
@@ -184,6 +260,7 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       image: String!
       fields: BFFields!
       items: [NpcItemsJson!]! @link(by: "npc_name" from: "name")
+      level_rewards: [NpcLevelRewardsJson!]!  @link(by: "npc_name" from: "name")
     }
 
     type NpcItemsJson implements Node {
@@ -210,6 +287,42 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       order: Int!
       level_reward: LevelRewardsJson! @link(by: "jsonId", from: "level_reward_id")
       item: ItemsJson! @link(by: "name", from: "item_name")
+    }
+
+    type NpcLevelRewardsJson implements Node {
+      id: String!
+      npc_name: String!
+      level: Int!
+      npc: NpcsJson! @link(by: "name", from: "npc_name")
+      items: [NpcLevelRewardItemsJson!]! @link(by: "npc_reward_id", from: "jsonId")
+    }
+
+    type NpcLevelRewardItemsJson implements Node {
+      npc_reward_id: String!
+      item_name: String!
+      quantity: Int!
+      order: Int!
+      level_reward: NpcLevelRewardsJson! @link(by: "jsonId", from: "npc_reward_id")
+      item: ItemsJson! @link(by: "name", from: "item_name")
+    }
+
+    type CookingRecipesJson implements Node {
+      item_name: String!
+      recipe_item_name: String
+      time: Int!
+      level: Int!
+      item: ItemsJson! @link(by: "name", from: "item_name")
+      recipe_item: ItemsJson @link(by: "name", from: "recipe_item_name")
+      inputs: [CookingRecipeItemsJson!]! @link(by: "recipe_name", from: "item_name")
+    }
+
+    type CookingRecipeItemsJson implements Node {
+      recipe_name: String!
+      input_name: String!
+      quantity: Int!
+      order: Int!
+      recipe: CookingRecipesJson! @link(by: "item_name", from: "recipe_name")
+      input: ItemsJson! @link(by: "name", from: "input_name")
     }
   `
   createTypes(typeDefs)
