@@ -13,7 +13,7 @@ const getRollover = (opts: UseServerTimeProps | null = null) => {
   if (delta.hours === 0) {
     delta = delta.shiftTo("minutes", "seconds").normalize()
   }
-  if (delta.minutes === 0) {
+  if (delta.hours === 0 && delta.minutes === 0) {
     delta = delta.shiftTo("seconds").normalize()
   }
   // Round down seconds. Otherwise things like seconds=59.9 shows as 60 and it looks silly.
