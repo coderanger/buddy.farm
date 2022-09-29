@@ -66,7 +66,7 @@ const TownsfolkGridPage = ({
   return (
     <Layout title="Townsfolk Grid">
       <p className="d-xl-none">This may not display well on smaller screens.</p>
-      <p>
+      <div className="mb-3">
         <Form.Check
           inline
           className="me-5"
@@ -93,14 +93,17 @@ const TownsfolkGridPage = ({
           defaultChecked={showHates}
           onChange={(e) => setShowHates(e.target.checked)}
         />
-      </p>
-      <div css={{ "& .table-responsive": { height: "calc(100vh - 170px)" } }}>
+      </div>
+      <div
+        className="table-wrapper"
+        css={{ "& > .table-responsive": { height: "calc(100vh - 170px)" } }}
+      >
         <Table bordered hover size="sm" responsive>
           <thead className={ctx.settings.darkMode ? "table-dark" : "table-light"}>
             <tr>
               <th css={stickyHeaderStyle}>Item</th>
               {npcs.nodes.map((n) => (
-                <th key={n.name} css={{ width: 80, ...stickyHeaderStyle }}>
+                <th key={n.name} css={[{ width: 64 }, stickyHeaderStyle]}>
                   <Link to={n.fields.path} className="text-body text-decoration-none text-center">
                     <div css={{ marginTop: 5 }}>
                       <img
