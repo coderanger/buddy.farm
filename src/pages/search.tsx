@@ -1,17 +1,19 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from "react"
 
-import { keyframes } from '@emotion/react'
-import { CgSpinner } from '@react-icons/all-files/cg/CgSpinner'
+import { keyframes } from "@emotion/react"
+import { CgSpinner } from "@react-icons/all-files/cg/CgSpinner"
 
-import Layout from '../components/layout'
-import List from '../components/list'
-import { useDebounce } from '../hooks/debounce'
-import { GlobalContext } from '../utils/context'
+import Layout from "../components/layout"
+import List from "../components/list"
+import { useDebounce } from "../hooks/debounce"
+import { GlobalContext } from "../utils/context"
 
-import type { Searchable } from '../utils/context'
+import type { Searchable } from "../utils/context"
 
 declare global {
-  interface Window { _farmSearchables?: Searchable[] | undefined }
+  interface Window {
+    _farmSearchables?: Searchable[] | undefined
+  }
 }
 
 interface ScoredResult {
@@ -25,7 +27,7 @@ interface ScoredResult {
 const prepScoring = (query: string) => {
   const pattern = ["(.*?)"]
   for (const letter of query) {
-    pattern.push(letter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "(.*?)")
+    pattern.push(letter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "(.*?)")
   }
   return new RegExp(pattern.join(""))
 }
@@ -74,7 +76,7 @@ export default ({ location }: SearchProps) => {
   // const [inputFocus, setInputFocus] = useState(false)
   const [query, setQuery] = useState<string | undefined>(ctx.query || undefined)
   const [results, setResults] = useState<ScoredResult[] | null>(null)
-  const inBrowser = typeof document !== 'undefined'
+  const inBrowser = typeof document !== "undefined"
 
   // Get the search query from the URL.
   // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
@@ -97,9 +99,11 @@ export default ({ location }: SearchProps) => {
       }
       if (ctx.searchables === null) {
         // Start loading the searchables.
-        fetch("/search.json").then(resp => resp.json()).then(data => {
-          ctx.setSearchables(data)
-        })
+        void fetch("/search.json")
+          .then((resp) => resp.json())
+          .then((data) => {
+            ctx.setSearchables(data)
+          })
       }
     }
   }, [])
@@ -140,21 +144,39 @@ export default ({ location }: SearchProps) => {
     }
   }, [query, ctx.searchables])
 
-  return <Layout pageTitle="Buddy's Almanac" query={query} searchAutoFocus={!!location?.state?.typing} onSearch={onSearch}>
-    <div>Search results</div>
-    {results !== null ?
-      <List items={results.map(r => ({ key: `${r.name}-${r.type}-${r.href}`, image: r.image, lineOne: r.name, lineTwo: r.type, href: r.href }))} bigLine={true} /> :
-      <div className="w-100 d-flex justify-content-center">
-        <CgSpinner
-          css={{
-            animation: `${spin} infinite 1s linear`,
-            width: 100,
-            height: 100,
-          }}
-          title="Loading"
-          role="img"
-          aria-label="Search results are loading"
+  return (
+    <Layout
+      pageTitle="Buddy's Almanac"
+      query={query}
+      searchAutoFocus={!!location?.state?.typing}
+      onSearch={onSearch}
+    >
+      <div>Search results</div>
+      {results !== null ? (
+        <List
+          items={results.map((r) => ({
+            key: `${r.name}-${r.type}-${r.href}`,
+            image: r.image,
+            lineOne: r.name,
+            lineTwo: r.type,
+            href: r.href,
+          }))}
+          bigLine={true}
         />
-      </div>}
-  </Layout>
+      ) : (
+        <div className="w-100 d-flex justify-content-center">
+          <CgSpinner
+            css={{
+              animation: `${spin} infinite 1s linear`,
+              width: 100,
+              height: 100,
+            }}
+            title="Loading"
+            role="img"
+            aria-label="Search results are loading"
+          />
+        </div>
+      )}
+    </Layout>
+  )
 }
