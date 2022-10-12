@@ -1,11 +1,11 @@
-import { graphql } from 'gatsby'
-import { DateTime } from 'luxon'
-import { useContext } from 'react'
+import { graphql } from "gatsby"
+import { DateTime } from "luxon"
+import { useContext } from "react"
 
-import { CopyButton } from '../components/clipboard'
-import Layout from '../components/layout'
-import List from '../components/list'
-import { GlobalContext } from '../utils/context'
+import { CopyButton } from "../components/clipboard"
+import Layout from "../components/layout"
+import List from "../components/list"
+import { GlobalContext } from "../utils/context"
 
 interface ItemQuantity {
   quantity: number
@@ -15,14 +15,6 @@ interface ItemQuantity {
     fields: {
       path: string
     }
-  }
-}
-
-interface QuestLink {
-  name: string
-  fromImage: string
-  fields: {
-    path: string
   }
 }
 
@@ -50,12 +42,14 @@ export const QuestItemList = ({ label, silver, gold, items, copyText }: QuestIte
       value: gold.toLocaleString(),
     })
   }
-  listItems.push(...items.map(it => ({
-    image: it.item.image,
-    lineOne: it.item.name,
-    value: it.quantity.toLocaleString(),
-    href: it.item.fields.path,
-  })))
+  listItems.push(
+    ...items.map((it) => ({
+      image: it.item.image,
+      lineOne: it.item.name,
+      value: it.quantity.toLocaleString(),
+      href: it.item.fields.path,
+    }))
+  )
   return <List label={label} items={listItems} bigLine={true} copyText={copyText} />
 }
 
@@ -64,9 +58,12 @@ const questToChatText = (name: string, silver: number | null, items: ItemQuantit
   if (silver) {
     chatText = chatText.concat(` 🪙x${silver.toLocaleString()}`)
   }
-  chatText = chatText.concat(...items.map(i =>
-    ` ((${i.item.name}${i.item.name.endsWith(")") ? " " : ""}))x${i.quantity.toLocaleString()}`
-  ))
+  chatText = chatText.concat(
+    ...items.map(
+      (i) =>
+        ` ((${i.item.name}${i.item.name.endsWith(")") ? " " : ""}))x${i.quantity.toLocaleString()}`
+    )
+  )
   return chatText
 }
 
@@ -86,9 +83,9 @@ interface QuestProps {
       silverReward: number | null
       goldReward: number | null
       itemRewards: ItemQuantity[]
+      prereqQuest: Queries.QuestTemplateLinkedQuestFragment | null
+      dependents: Queries.QuestTemplateLinkedQuestFragment[] | null
       extra: {
-        prev: QuestLink | null
-        next: QuestLink | null
         availableFrom: number | null
         availableTo: number | null
       } | null
@@ -101,7 +98,6 @@ interface QuestProps {
 
 export default ({ data: { quest } }: QuestProps) => {
   const ctx = useContext(GlobalContext)
-  const settings = ctx.settings
   const questData = []
   // Levels.
   if (quest.requiresFarming) {
@@ -142,7 +138,9 @@ export default ({ data: { quest } }: QuestProps) => {
 
   // Temporary quest stuff.
   if (quest.extra?.availableFrom) {
-    const availableFrom = DateTime.fromMillis(quest.extra.availableFrom, { zone: "America/Chicago" })
+    const availableFrom = DateTime.fromMillis(quest.extra.availableFrom, {
+      zone: "America/Chicago",
+    })
     questData.push({
       image: "/img/items/4887.png",
       lineOne: "Available From",
@@ -159,33 +157,69 @@ export default ({ data: { quest } }: QuestProps) => {
   }
 
   // Prev/next.
-  if (quest.extra?.prev) {
+  const now = Date.now()
+  if (quest.prereqQuest) {
     questData.push({
-      image: quest.extra.prev.fromImage,
+      image: quest.prereqQuest.fromImage,
       lineOne: "Previous",
-      value: quest.extra.prev.name,
-      href: quest.extra.prev.fields.path,
+      value: quest.prereqQuest.name,
+      href: quest.prereqQuest.fields.path,
+      alert:
+        quest.prereqQuest.extra?.availableTo && quest.prereqQuest.extra.availableTo < now
+          ? "Quest no longer available"
+          : null,
     })
   }
-  if (quest.extra?.next) {
-    questData.push({
-      image: quest.extra.next.fromImage,
-      lineOne: "Next",
-      value: quest.extra.next.name,
-      href: quest.extra.next.fields.path,
-    })
+  if (quest.dependents && quest.dependents.length > 0) {
+    questData.push(
+      ...quest.dependents
+        .slice()
+        .sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10))
+        .map((d) => ({
+          image: d.fromImage,
+          lineOne: "Next",
+          value: d.name,
+          href: d.fields.path,
+          alert:
+            d.extra?.availableTo && d.extra.availableTo < now ? "Quest no longer available" : null,
+        }))
+    )
   }
 
-  return <Layout title={quest.name} headerImage={quest.fromImage} headerCopy={quest.fields.path}>
-    <List items={questData} bigLine={true} />
-    <QuestItemList label="Request" silver={quest.silverRequest} items={quest.itemRequests} copyText={questToChatText(quest.name, quest.silverRequest, quest.itemRequests)} />
-    <QuestItemList label="Reward" silver={quest.silverReward} gold={quest.goldReward} items={quest.itemRewards} />
-  </Layout>
+  return (
+    <Layout title={quest.name} headerImage={quest.fromImage} headerCopy={quest.fields.path}>
+      <List items={questData} bigLine={true} />
+      <QuestItemList
+        label="Request"
+        silver={quest.silverRequest}
+        items={quest.itemRequests}
+        copyText={questToChatText(quest.name, quest.silverRequest, quest.itemRequests)}
+      />
+      <QuestItemList
+        label="Reward"
+        silver={quest.silverReward}
+        gold={quest.goldReward}
+        items={quest.itemRewards}
+      />
+    </Layout>
+  )
 }
 
 export const pageQuery = graphql`
-  query($name: String!) {
-    quest: questsJson(name: {eq: $name}) {
+  fragment QuestTemplateLinkedQuest on QuestsJson {
+    jsonId
+    name
+    fromImage
+    fields {
+      path
+    }
+    extra {
+      availableTo
+    }
+  }
+
+  query QuestTemplate($name: String!) {
+    quest: questsJson(name: { eq: $name }) {
       name
       from
       fromImage
@@ -217,21 +251,13 @@ export const pageQuery = graphql`
           }
         }
       }
+      prereqQuest {
+        ...QuestTemplateLinkedQuest
+      }
+      dependents {
+        ...QuestTemplateLinkedQuest
+      }
       extra {
-        prev {
-          name
-          fromImage
-          fields {
-						path
-          }
-        }
-        next {
-          name
-          fromImage
-          fields {
-						path
-          }
-        }
         availableFrom
         availableTo
       }
