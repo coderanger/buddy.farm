@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react"
+import { navigate } from "gatsby"
 
 import { keyframes } from "@emotion/react"
 import { CgSpinner } from "@react-icons/all-files/cg/CgSpinner"
@@ -115,6 +116,12 @@ export default ({ location }: SearchProps) => {
     history.replaceState(null, "", `?q=${encodeURIComponent(query)}`)
   }
 
+  const onSearchSubmit = () => {
+    if (results && results.length >= 1) {
+      void navigate(results[0].href)
+    }
+  }
+
   // const onSearchFocus = (focus: boolean) => {
   //   setInputFocus(focus)
   // }
@@ -129,7 +136,12 @@ export default ({ location }: SearchProps) => {
 
       // Setup for scoring.
       const queryLower = query.toLowerCase().trim()
-      const queryRegexp = prepScoring(queryLower)
+      const queryClean = queryLower.replace(/[()[\]]/g, "")
+      if (queryClean.length < 2) {
+        setResults([])
+        return
+      }
+      const queryRegexp = prepScoring(queryClean)
 
       // Transform to a scored list.
       const scored: ScoredResult[] = []
@@ -150,6 +162,7 @@ export default ({ location }: SearchProps) => {
       query={query}
       searchAutoFocus={!!location?.state?.typing}
       onSearch={onSearch}
+      onSearchSubmit={onSearchSubmit}
     >
       <div>Search results</div>
       {results !== null ? (

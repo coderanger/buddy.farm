@@ -39,6 +39,7 @@ interface LayoutProps {
   query?: string | null | undefined
   searchAutoFocus?: boolean | undefined
   onSearch?: (query: string) => void
+  onSearchSubmit?: () => void
   settingsBack?: boolean
   children: React.ReactNode
 }
@@ -54,6 +55,7 @@ const Layout = ({
   query,
   searchAutoFocus,
   onSearch,
+  onSearchSubmit,
   settingsBack,
   children,
 }: LayoutProps) => {
@@ -62,7 +64,7 @@ const Layout = ({
   const navigateToSearch = useDebounce((query: string, setSearchFired: (arg0: boolean) => void) => {
     console.debug("defaultOnSearch actually navigating", query)
     // query = query.substring(0, query.length - 3)
-    navigate(`/search/?q=${encodeURIComponent(query)}`, { state: { typing: true, query } })
+    void navigate(`/search/?q=${encodeURIComponent(query)}`, { state: { typing: true, query } })
     setSearchFired(true)
   }, 250)
   if (!onSearch) {
@@ -130,7 +132,10 @@ const Layout = ({
           <form
             className="d-flex"
             css={{ flexGrow: 1, maxWidth: 600 }}
-            onSubmit={(evt) => evt.preventDefault()}
+            onSubmit={(evt) => {
+              evt.preventDefault()
+              if (onSearchSubmit) onSearchSubmit()
+            }}
           >
             <input
               id="nav-search"
@@ -150,7 +155,7 @@ const Layout = ({
               settingsBack
                 ? (evt) => {
                     evt.preventDefault()
-                    navigate(-1)
+                    void navigate(-1)
                   }
                 : undefined
             }
