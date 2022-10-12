@@ -692,11 +692,8 @@ const ItemList = ({
           key: `npcreward${i.level_reward.npc.name}-${i.level_reward.level}`,
           image: i.level_reward.npc.image,
           lineOne: i.level_reward.npc.name,
-          lineTwo:
-            i.quantity === 1
-              ? "Friendship Level"
-              : `Friendship Level - x${i.quantity.toLocaleString()}`,
-          value: i.level_reward.level.toString(),
+          lineTwo: `Friendship Level ${i.level_reward.level}`,
+          value: i.quantity.toLocaleString(),
           href: i.level_reward.npc.fields.path,
         }))
     )
