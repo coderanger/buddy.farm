@@ -1,13 +1,12 @@
 import { graphql, useStaticQuery } from "gatsby"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import Button from "react-bootstrap/Button"
 import Form from "react-bootstrap/Form"
 import InputGroup from "react-bootstrap/InputGroup"
+import { Duration } from "luxon"
 
 import { Calculator } from "../components/calculator"
 import { Input } from "../components/input"
-import { Settings } from "../hooks/settings"
-import { GlobalContext } from "../utils/context"
 
 interface Location {
   name: string
@@ -28,7 +27,7 @@ interface XpData {
   isXp: boolean
   current: number
   target: number
-  skill: "exploring" | "fishing" | "farming"
+  skill: "exploring" | "fishing" | "farming" | "cooking"
   event: boolean
   // Exploring data.
   exploringLocation: string
@@ -51,6 +50,15 @@ interface XpData {
   // Farming settings.
   primerFarming: number
   cropRows: number
+  // Cooking data.
+  mealData: string
+  stir: boolean
+  taste: boolean
+  season: boolean
+  // Cooking settings.
+  primerCooking: number
+  quickCooking: number
+  ovens: number
 }
 
 const DEFAULT_DATA: XpData = {
@@ -74,6 +82,13 @@ const DEFAULT_DATA: XpData = {
   gjPerDay: 2,
   primerFarming: 0,
   cropRows: 9,
+  mealData: "100,10", // Bone Broth
+  stir: true,
+  taste: false,
+  season: false,
+  primerCooking: 0,
+  quickCooking: 0,
+  ovens: 1,
 }
 
 interface XpCalcProps {
@@ -373,6 +388,110 @@ const FarmingXpCalc = ({ xp, data, values }: XpCalcProps) => {
   )
 }
 
+const CookingXpCalc = ({ xp, data, values }: XpCalcProps) => {
+  const xpBonus = 1 + data.primerCooking / 100
+  const timeMul = 1 - data.quickCooking / 100
+  const mealDataParts = data.mealData.split(/,/)
+  const mealXp = parseInt(mealDataParts[0], 10)
+  const mealMinutes = parseInt(mealDataParts[1], 10) * timeMul
+  let cookMinutes = 0
+  if (data.stir) {
+    let countdown = mealMinutes
+    if (countdown >= 1) {
+      cookMinutes += 1
+      countdown -= 1
+      countdown *= 0.9
+    }
+    while (countdown >= 15) {
+      cookMinutes += 15
+      countdown -= 15
+      countdown *= 0.9
+    }
+    cookMinutes += countdown
+  } else {
+    cookMinutes = mealMinutes
+  }
+  const xpPerMeal = mealXp * xpBonus * (data.event ? 1.2 : 1) + 40
+  const meals = xp / xpPerMeal
+  const totalMinutes = Math.ceil(meals / data.ovens) * cookMinutes
+  let delta = Duration.fromObject({ minutes: totalMinutes })
+    .shiftTo("days", "hours", "minutes")
+    .normalize()
+  if (delta.days === 0) {
+    delta = delta.shiftTo("hours", "minutes").normalize()
+  }
+  if (delta.days === 0 && delta.hours === 0) {
+    delta = delta.shiftTo("minutes").normalize()
+  }
+
+  return (
+    <>
+      <Input.Select id="mealData" label="Meal" defaultValue={data.mealData.toString()}>
+        <option value="100,10">Bone Broth (level 1)</option>
+        <option value="300,60">Onion Soup (level 5)</option>
+        <option value="600,120">Over The Moon (level 10)</option>
+        <option value="600,120">Cat’s Meow (level 15)</option>
+        <option value="1500,180">Mushroom Stew (level 20)</option>
+        <option value="2000,240">Quandary Chowder (level 25)</option>
+        <option value="1500,180">Neigh Neigh (level 30)</option>
+        <option value="3000,360">Sea Pincher Special (level 30)</option>
+        <option value="750,120">Shrimp-a-Plenty (level 35)</option>
+      </Input.Select>
+      <p>
+        Enabling a cooking action assumes you perform it immediately when available with perfect
+        timing.
+      </p>
+      <p>
+        XP from the three cooking actions is not yet mapped out and so is not included here.
+        Enabling stir does correctly reduce cooking time though.
+      </p>
+      <Input.Switch id="stir" label="Stir" defaultChecked={data.stir} />
+      <Input.Switch id="taste" label="Taste" defaultChecked={data.taste} disabled={true} />
+      <Input.Switch id="season" label="Season" defaultChecked={data.season} disabled={true} />
+      <Input.Switch id="event" label="Event Bonus" defaultChecked={data.event} />
+
+      <Calculator.Perks>
+        <Input.Text
+          id="primerCooking"
+          label="Bonus Cooking XP"
+          placeholder="0"
+          after="%"
+          defaultValue={values.primerCooking?.toString()}
+          pattern="^\d{1,2}$"
+          type="number"
+        />
+        <Input.Text
+          id="ovens"
+          label="Ovens"
+          placeholder="1"
+          defaultValue={values.ovens?.toString()}
+          pattern="^\d{1,2}$"
+          type="number"
+        />
+      </Calculator.Perks>
+
+      <Input.Text
+        id="remainingXp"
+        label="Remaining XP"
+        disabled={true}
+        value={xp.toLocaleString()}
+      />
+      <Input.Text
+        id="meals"
+        label="Meals"
+        disabled={true}
+        value={Math.ceil(meals).toLocaleString()}
+      />
+      <Input.Text
+        id="time"
+        label="Total Time"
+        disabled={true}
+        value={delta.toHuman({ maximumFractionDigits: 0 })}
+      />
+    </>
+  )
+}
+
 interface LevelInputProps {
   setXp: (value: number) => void
   xpMap: number[]
@@ -459,12 +578,15 @@ export default () => {
     primerExploring: settings.primerExploring ? parseInt(settings.primerExploring, 10) : undefined,
     primerFishing: settings.primerFishing ? parseInt(settings.primerFishing, 10) : undefined,
     primerFarming: settings.primerFarming ? parseInt(settings.primerFarming, 10) : undefined,
+    primerCooking: settings.primerCooking ? parseInt(settings.primerCooking, 10) : undefined,
     wanderer: settings.wanderer ? parseInt(settings.wanderer, 10) : undefined,
     lemonSqueezer: settings.lemonSqueezer === undefined ? undefined : !!settings.lemonSqueezer,
     reinforcedNetting:
       settings.reinforcedNetting === undefined ? undefined : !!settings.reinforcedNetting,
     fishingTrawl: settings.fishingTrawl === undefined ? undefined : !!settings.fishingTrawl,
     cropRows: settings.cropRows ? parseInt(settings.cropRows, 10) : undefined,
+    quickCooking: settings.quickCooking ? parseInt(settings.quickCooking, 10) : undefined,
+    ovens: settings.ovens ? parseInt(settings.ovens, 10) : undefined,
   }))
 
   // Special handling for the total XP the user is looking for.
@@ -482,6 +604,7 @@ export default () => {
         <option value="exploring">Exploring</option>
         <option value="fishing">Fishing</option>
         <option value="farming">Farming</option>
+        <option value="cooking">Cooking</option>
       </Input.Select>
       {data.skill === "exploring" && (
         <ExploringXpCalc locations={locations.nodes} xp={xp} data={data} values={values} />
@@ -490,6 +613,7 @@ export default () => {
         <FishingXpCalc locations={locations.nodes} xp={xp} data={data} values={values} />
       )}
       {data.skill === "farming" && <FarmingXpCalc xp={xp} data={data} values={values} />}
+      {data.skill === "cooking" && <CookingXpCalc xp={xp} data={data} values={values} />}
     </Calculator>
   )
 }

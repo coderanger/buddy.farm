@@ -8,7 +8,7 @@ interface SkillLevelRewards {
   listItems: ListItem[]
 }
 
-const SKILL_ORDER = ["Farming", "Fishing", "Crafting", "Exploring"]
+const SKILL_ORDER = ["Farming", "Fishing", "Crafting", "Exploring", "Cooking"]
 
 const LevelRewardsPage = ({ data: { levelRewards } }: PageProps<Queries.LevelRewardsPageQuery>) => {
   const rewardsBySkill = levelRewards.nodes.reduce((p, c) => {
