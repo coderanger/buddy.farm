@@ -14,8 +14,10 @@ interface Location {
   image: string
   type: string
   extra: {
+    baseDropRate: number
     xpPerHit: number
     xpPerHitIronDepot: number
+    xpPerHitRunecube: number
   }
 }
 
@@ -36,6 +38,7 @@ interface XpData {
   ironDepot: boolean
   wanderer: number
   lemonSqueezer: boolean
+  runecube: boolean
   // Fishing data.
   fishingLocation: string
   bait: number
@@ -70,6 +73,7 @@ const DEFAULT_DATA: XpData = {
   exploringLocation: "10", // Whispering Creek
   primerExploring: 0,
   ironDepot: false,
+  runecube: false,
   wanderer: 33,
   lemonSqueezer: true,
   fishingLocation: "10", // Large Island
@@ -193,17 +197,20 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
   const selectedLocation = locations.find(
     (loc) => loc.type === "explore" && loc.jsonId === data.exploringLocation
   )
-  const xpPerHit = data.ironDepot
-    ? selectedLocation?.extra.xpPerHitIronDepot
-    : selectedLocation?.extra.xpPerHit
+  const xpPerHit = data.runecube 
+    ? selectedLocation?.extra.xpPerHitRunecube 
+    : data.ironDepot
+      ? selectedLocation?.extra.xpPerHitIronDepot
+      : selectedLocation?.extra.xpPerHit
   const xpBonus = 1 + data.primerExploring / 100
   const xpPerHitTrue = (125 + (xpPerHit || 0)) * xpBonus * (data.event ? 1.2 : 1)
   const explores = xp / xpPerHitTrue
   const wanderer = data.wanderer / 100
   const staminaPerExplore = 1 - wanderer
   const stamina = explores * staminaPerExplore
+  const itemDropRate = selectedLocation?.extra.baseDropRate
   const itemsPerLem = data.lemonSqueezer ? 20 : 10
-  const lemXpPerHit = ((xpPerHit || 0) + 250) * (data.event ? 1.2 : 1)
+  const lemXpPerHit = (((xpPerHit || 0) / (itemDropRate || 1)) + 250) * (data.event ? 1.2 : 1)
   const xpPerLemonade = itemsPerLem * lemXpPerHit
   const lemonade = xp / xpPerLemonade
   const itemsPerPalmer = data.lemonSqueezer ? 500 : 200
@@ -249,6 +256,7 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
           defaultChecked={data.lemonSqueezer}
         />
         <Input.Switch id="ironDepot" label="Iron Depot" defaultChecked={data.ironDepot} />
+        <Input.Switch id="runecube" label="Eagle Eye (Runecube)" defaultChecked={data.runecube} />
       </Calculator.Perks>
 
       <Input.Text
@@ -559,8 +567,10 @@ export default () => {
           image
           type
           extra {
+            baseDropRate
             xpPerHit
             xpPerHitIronDepot
+            xpPerHitRunecube
           }
         }
       }
