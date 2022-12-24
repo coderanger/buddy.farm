@@ -704,7 +704,7 @@ const ItemList = ({
     listItems.push({
       image: "/img/items/workshop_sm.png",
       lineOne: "Workshop",
-      lineTwo: "See below",
+      lineTwo: item.api.crafting_level ? `Requires Crafting Level ${item.api.crafting_level}` : "See below",
       href: "#recipe",
       value: "Craftable",
     })
@@ -923,6 +923,7 @@ export const pageQuery = graphql`
         dropMode
       }
       api {
+        crafting_level
         description
       }
       # This is not used right now, it's backup for future corruption debugging because I'm seeing data desync.
