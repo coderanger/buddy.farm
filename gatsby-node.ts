@@ -434,6 +434,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     href: "/farmhousecalc/",
   },
   {
+    name: "Wheel Calculator",
+    image: "/img/items/spinner.png?2",
+    searchText: "wheel spin calculator",
+    type: null,
+    href: "/wheelcalc/",
+  },
+  {
     name: "Schoolhouse Quizzes",
     image: "/img/items/schoolhouse.png",
     searchText: "schoolhouse quizzes",
