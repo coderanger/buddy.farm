@@ -1,3 +1,7 @@
 html.iframe body {
     background-color: transparent !important;
 }
+
+html.dark .list-group-item a {
+  color: #e1e1e1 !important;
+}
