@@ -27,6 +27,7 @@ export const Calculator = <T,>({ pageTitle, valueSetter, children }: CalculatorP
   }
 
   return <Layout title={pageTitle}>
+    <p><Link to="/calculators/">Back to all calculators</Link></p>
     <p css={{ "html.iframe &": { "display": "none" } }}>
       Ensure your perks are set correctly in <Link to="/settings/">Settings</Link> for maximum accuracy.
     </p>
