@@ -27,12 +27,17 @@ export default () => {
   let coinsTotal = 0
   let spinsPerDayString = ""
   let coinsPerDayString = ""
+  let spinsPerDayTooltip = ""
+  let coinsPerDayTooltip = ""
+  let hasRemainder = false;
 		
   if (data.numSpins % data.numDays !== 0) {
+    hasRemainder = true;
     const spinsPerDay = Math.floor(data.numSpins / data.numDays)
     const extraSpinDays = data.numSpins % data.numDays
     const regularDays = data.numDays - extraSpinDays
-    spinsPerDayString =  `$((spinsPerDay + 1).toLocaleString()} spins per day for ${extraSpinDays.toLocaleString()} days, and ${spinsPerDay.toLocaleString()} for ${regularDays.toLocaleString()} days`
+    spinsPerDayString =  `${(spinsPerDay + 1).toLocaleString()}`
+    spinsPerDayTooltip = `${(spinsPerDay + 1).toLocaleString()} spins per day for ${extraSpinDays.toLocaleString()} days, and ${spinsPerDay.toLocaleString()} for ${regularDays.toLocaleString()} days`
 
     let coinsPerDay = 0;
     const coinsPerExtraSpinDay = (spinsPerDay * (spinsPerDay + 1) * wheelCost) / 2
@@ -41,18 +46,19 @@ export default () => {
         coinsPerDay += i * wheelCost
     }
 
-    coinsPerDayString = coinsPerExtraSpinDay.toLocaleString() + " coins per day for " + extraSpinDays.toLocaleString() + " days, and " + coinsPerDay.toLocaleString() + " for " + regularDays.toLocaleString() + " days"
+    coinsPerDayString = `${coinsPerExtraSpinDay.toLocaleString()}`
+    coinsPerDayTooltip = `${coinsPerExtraSpinDay.toLocaleString()} coins per day for ${extraSpinDays.toLocaleString()} days, and ${coinsPerDay.toLocaleString()} for ${regularDays.toLocaleString()} days`
     coinsTotal = coinsPerDay * regularDays + coinsPerExtraSpinDay * extraSpinDays
   } else {
     const spinsPerDay = data.numSpins / data.numDays
-    spinsPerDayString =  spinsPerDay.toLocaleString() + " spins per day"
+    spinsPerDayString =  `${spinsPerDay.toLocaleString()}`
 
     let coinsPerDay = 0;
     for (let i = 0; i < spinsPerDay; i++)
     {
         coinsPerDay += i * wheelCost
     }
-    coinsPerDayString = coinsPerDay.toLocaleString() + " coins per day"
+    coinsPerDayString = `${coinsPerDay.toLocaleString()}`
     coinsTotal = coinsPerDay * data.numDays;
   }
 
@@ -95,10 +101,10 @@ export default () => {
   const lemonadeNeeded = Math.ceil(coinsTotal/(coinsPerLemonade + (chestsPerLemonade * 100)))
   const apNeeded = Math.ceil(coinsTotal/(coinsPerAP + (chestsPerAP * 100)))
   
-  const ojNeededString = ojNeeded.toLocaleString() + " OJ (" + Math.round(ojNeeded * coinsPerOJ).toLocaleString() + " coins through exploring & " + Math.round(ojNeeded * chestsPerOJ).toLocaleString() + " chests)"
-  const ciderNeededString = ciderNeeded.toLocaleString() + " cider (" + Math.round(ciderNeeded * coinsPerCider).toLocaleString() + " coins through exploring & " + Math.round(ciderNeeded * chestsPerCider).toLocaleString() + " chests)"
-  const lemonadeNeededString = lemonadeNeeded.toLocaleString() + " lemonade (" + Math.round(lemonadeNeeded * coinsPerLemonade).toLocaleString() + " coins through exploring & " + Math.round(lemonadeNeeded * chestsPerLemonade).toLocaleString() + " chests)"
-  const apNeededString = apNeeded.toLocaleString() + " AP (" + Math.round(apNeeded * coinsPerAP).toLocaleString() + " coins through exploring & " + Math.round(apNeeded * chestsPerAP).toLocaleString() + " chests)"
+  const ojNeededString = `${ojNeeded.toLocaleString()}`
+  const ciderNeededString = `${ciderNeeded.toLocaleString()}`
+  const lemonadeNeededString = `${lemonadeNeeded.toLocaleString()}`
+  const apNeededString = `${apNeeded.toLocaleString()}`
 
   return (
     <Calculator pageTitle="Wheel Calculator" valueSetter={setValues}>
@@ -137,25 +143,67 @@ export default () => {
         </Input>
       </Calculator.Perks>
 
-      <Input.Text id="spinsPerDay" label="Number of Spins Per Day" disabled={true} value={spinsPerDayString} />
-      <Input.Text id="costPerDay" label="Cost Per Day" disabled={true} value={coinsPerDayString}/>
-      <Input.Text id="totalCoins" label="Total Cost in Coins" disabled={true} value={coinsTotal.toLocaleString()}/>
-
+      <Input.Text 
+        id="spinsPerDay" 
+        label="Spins Per Day" 
+        disabled={true} 
+        value={spinsPerDayString}
+        tooltip={hasRemainder ? spinsPerDayTooltip : ""}
+      />
+      <Input.Text 
+        id="costPerDay" 
+        label="Cost Per Day" 
+        disabled={true} 
+        value={coinsPerDayString}
+        tooltip={hasRemainder ? coinsPerDayTooltip : ""}
+      />
+      <Input.Text 
+        id="totalCoins" 
+        label="Total Cost in Coins" 
+        disabled={true} 
+        value={coinsTotal.toLocaleString()}
+      />
       <p css={{ "html.iframe &": { "display": "none" } }}>
-          Ancient coins can be found in Large Chest 01. 
-          Large Chest 01 can be found through exploring Ember Lagoon. 
-          You can also get ancient coin drops in Ember Lagoon. 
-          This is how much exploring you will need to do to get enough coins/Large Chest 01 to fund your goal:
+        Ancient coins can be found in Large Chest 01. Without doing any exploring, this is how many Large Chest 01 you need to fully fund your goal:
       </p>
-      <Input.Text id="ojNeeded" label="Orange Juice Needed" disabled={true} value={ojNeededString} />
-      <Input.Text id="ciderNeeded" label="Cider Needed" disabled={true} value={ciderNeededString} />
-      <Input.Text id="lemonadeNeeded" label="Lemonade Needed" disabled={true} value={lemonadeNeededString} />
-      <Input.Text id="apNeeded" label="Arnold Palmer Needed" disabled={true} value={apNeededString} />
-
+      <Input.Text 
+        id="chestsNeeded" 
+        label="Large Chest 01 Needed" 
+        disabled={true} 
+        value={chestsWithoutExploring.toLocaleString()} 
+      />
       <p css={{ "html.iframe &": { "display": "none" } }}>
-          Without doing any exploring, this is how many Large Chest 01 you need to fund your goal:
+          Large Chest 01 can be found through exploring Ember Lagoon and you can also get ancient coin drops there. 
+          This is how much exploring of Ember Lagoon you will need to do to get enough Coins/Large Chest 01 to fully fund your goal:
       </p>
-      <Input.Text id="chestsNeeded" label="Large Chest 01 Needed" disabled={true} value={chestsWithoutExploring.toLocaleString()} />
+      <Input.Text 
+        id="ojNeeded" 
+        label="OJ" 
+        disabled={true} 
+        value={ojNeededString} 
+        tooltip={`${Math.round(ojNeeded * coinsPerOJ).toLocaleString()} coins through exploring & ${Math.round(ojNeeded * chestsPerOJ).toLocaleString()} chests`}
+      />
+      <Input.Text 
+        id="ciderNeeded" 
+        label="Cider" 
+        disabled={true} 
+        value={ciderNeededString} 
+        tooltip={`${Math.round(ciderNeeded * coinsPerCider).toLocaleString()} coins through exploring & ${Math.round(ciderNeeded * chestsPerCider).toLocaleString()} chests`}
+      />
+      <Input.Text 
+        id="lemonadeNeeded" 
+        label="Lemonade" 
+        disabled={true} 
+        value={lemonadeNeededString} 
+        tooltip={`${Math.round(lemonadeNeeded * coinsPerLemonade).toLocaleString()} coins through exploring & ${Math.round(lemonadeNeeded * chestsPerLemonade).toLocaleString()} chests`}
+      />
+      <Input.Text 
+        id="apNeeded" 
+        label="Arnold Palmers" 
+        disabled={true} 
+        value={apNeededString} 
+        tooltip={`${Math.round(apNeeded * coinsPerAP).toLocaleString()} coins through exploring & ${Math.round(apNeeded * chestsPerAP).toLocaleString()} chests`}
+      />      
     </Calculator>
   )
 }
