@@ -47,7 +47,7 @@ const SteakMarketForecastDay = ({ days }: { days: number }) => {
   const market = marketLevel(date)
 
   return (
-    <div className="d-inline-block me-2">
+    <div className="d-inline-block me-3">
       <div className="d-flex justify-content-center">
         {date.toLocaleString({ month: "short", day: "numeric" })}
       </div>
@@ -61,8 +61,8 @@ const SteakMarketForecastDay = ({ days }: { days: number }) => {
 
 const SteakMarketForecast = () => (
   <>
-    <h5 className="mb-1">Steak Market Forecast</h5>
-    <div>
+    <h5>Steak Market Forecast</h5>
+    <div className="d-flex flex-wrap justify-content-evenly">
       <SteakMarketForecastDay days={0} />
       <SteakMarketForecastDay days={1} />
       <SteakMarketForecastDay days={2} />
@@ -176,10 +176,10 @@ export default () => {
       </div>
       <Row>
         <Col sm>
-          <div className="mb-2">
+          <div>
             <SteakMarketForecast />
           </div>
-          <div>
+          <div className="mt-3">
             <MiniList
               label="Useful Links"
               items={[
@@ -232,7 +232,7 @@ export default () => {
         </Col>
         <Col sm>
           <MiniList label="New Quests" items={quests.nodes} />
-          <ServerTime />
+          <div className="mt-2"><ServerTime /></div>
         </Col>
         <Col sm>
           <MiniList label="New Items" items={items.nodes} />

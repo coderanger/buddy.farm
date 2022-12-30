@@ -123,7 +123,7 @@ const Layout = ({
           ))}
         </ToastContainer>
       </div>
-      <Navbar bg="light" expand="lg" css={{ "html.iframe &": { display: "none" } }}>
+      <Navbar bg={ctx.settings.darkMode ? "dark" : "light"} expand="lg" css={{ "html.iframe &": { display: "none" } }}>
         <Container>
           <Link className="navbar-brand" to="/">
             <span className="d-none d-sm-inline">Buddy's Almanac</span>
