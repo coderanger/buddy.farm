@@ -1,7 +1,6 @@
 
 import { graphql, Link } from 'gatsby'
 import { useContext, useEffect, useState } from 'react'
-import { Breadcrumb } from 'react-bootstrap'
 
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
