@@ -1,6 +1,7 @@
 
 import { graphql, Link } from 'gatsby'
 import { useContext, useEffect, useState } from 'react'
+import { Breadcrumb } from 'react-bootstrap'
 
 import { CopyButton } from '../components/clipboard'
 import Layout from '../components/layout'
@@ -99,6 +100,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(normalDrops)
+  const breadcrumbLink = location.type === "explore" ? "/exploring/" : "/fishing/"
 
   useEffect(() => {
     if (location.type === "explore" && !!settings.ironDepot) {
@@ -115,7 +117,7 @@ export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDr
   }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
 
   return <Layout headerFrom={location} headerRight={<QuickSettings dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]} />}>
-    <p><Link to="/exploring/">Back to all locations</Link></p>
+    <p><Link to={breadcrumbLink}>Back to all {location.type === "explore" ? "exploring" : "fishing"} locations</Link></p>
     <LocationList location={location} drops={drops} settings={settings} />
   </Layout>
 }
