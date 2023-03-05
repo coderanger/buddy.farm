@@ -73,6 +73,7 @@ interface QuestProps {
       name: string
       from: string
       fromImage: string
+      text: string
       requiresFarming: number | null
       requiresFishing: number | null
       requiresCrafting: number | null
@@ -107,28 +108,35 @@ export default ({ data: { quest } }: QuestProps) => {
       value: quest.requiresFarming.toLocaleString(),
     })
   }
-  if (quest.requiresFishing) {
+  if (quest.requiresFishing && quest.requiresFishing !== 1) {
     questData.push({
       image: "/img/items/7783.png",
       lineOne: "Fishing Level",
       value: quest.requiresFishing.toLocaleString(),
     })
   }
-  if (quest.requiresCrafting) {
+  if (quest.requiresCrafting && quest.requiresCrafting !== 1) {
     questData.push({
       image: "/img/items/5868.png",
       lineOne: "Crafting Level",
       value: quest.requiresCrafting.toLocaleString(),
     })
   }
-  if (quest.requiresExploring) {
+  if (quest.requiresExploring && quest.requiresExploring !== 1) {
     questData.push({
       image: "/img/items/6075.png",
       lineOne: "Exploring Level",
       value: quest.requiresExploring.toLocaleString(),
     })
   }
-  if (quest.requiresTower) {
+  if (quest.requiresCooking && quest.requiresCooking !== 1) {
+    questData.push({
+      image: "/img/items/2473.png",
+      lineOne: "Cooking Level",
+      value: quest.requiresCooking.toLocaleString(),
+    })
+  }
+  if (quest.requiresTower && quest.requiresTower !== 1) {
     questData.push({
       image: "/img/items/tower.png",
       lineOne: "Tower Level",
@@ -188,6 +196,9 @@ export default ({ data: { quest } }: QuestProps) => {
 
   return (
     <Layout title={quest.name} headerImage={quest.fromImage} headerCopy={quest.fields.path}>
+      {quest.text.split("\n\n").map((s, i) => (
+        <p key={i}>{s}</p>
+      ))}
       <List items={questData} bigLine={true} />
       <QuestItemList
         label="Request"
@@ -223,10 +234,12 @@ export const pageQuery = graphql`
       name
       from
       fromImage
+      text
       requiresFarming
       requiresFishing
       requiresCrafting
       requiresExploring
+      requiresCooking
       requiresTower
       silverRequest
       itemRequests {

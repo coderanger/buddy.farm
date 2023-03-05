@@ -1,11 +1,11 @@
-import { graphql, PageProps } from 'gatsby'
-import { useContext, useState } from 'react'
+import { graphql, PageProps } from "gatsby"
+import { useContext, useState } from "react"
 
-import { CopyButton } from '../components/clipboard'
-import { Input } from '../components/input'
-import Layout from '../components/layout'
-import List from '../components/list'
-import { GlobalContext } from '../utils/context'
+import { CopyButton } from "../components/clipboard"
+import { Input } from "../components/input"
+import Layout from "../components/layout"
+import List from "../components/list"
+import { GlobalContext } from "../utils/context"
 
 import { QuestItemList } from "./quest"
 
@@ -15,20 +15,40 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   if (!showText && !showLevels) {
     return undefined
   }
-  let text = []
+  const text = []
   if (showLevels) {
     const levelsText: JSX.Element[] = []
     if (q.requiresFarming) {
-      levelsText.push(<span className="me-2"><b className="me-1">Farming:</b>{q.requiresFarming}</span>)
+      levelsText.push(
+        <span className="me-2">
+          <b className="me-1">Farming:</b>
+          {q.requiresFarming}
+        </span>
+      )
     }
     if (q.requiresFishing) {
-      levelsText.push(<span className="me-2"><b className="me-1">Fishing:</b>{q.requiresFishing}</span>)
+      levelsText.push(
+        <span className="me-2">
+          <b className="me-1">Fishing:</b>
+          {q.requiresFishing}
+        </span>
+      )
     }
     if (q.requiresCrafting) {
-      levelsText.push(<span className="me-2"><b className="me-1">Crafting:</b>{q.requiresCrafting}</span>)
+      levelsText.push(
+        <span className="me-2">
+          <b className="me-1">Crafting:</b>
+          {q.requiresCrafting}
+        </span>
+      )
     }
     if (q.requiresExploring) {
-      levelsText.push(<span className="me-2"><b className="me-1">Exploring:</b>{q.requiresExploring}</span>)
+      levelsText.push(
+        <span className="me-2">
+          <b className="me-1">Exploring:</b>
+          {q.requiresExploring}
+        </span>
+      )
     }
     text.push(<div>{levelsText}</div>)
   }
@@ -39,10 +59,9 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
 }
 
 export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuery>) => {
-  const ctx = useContext(GlobalContext)
-  const settings = ctx.settings
+  // const ctx = useContext(GlobalContext)
   const [showText, setShowText] = useState(false)
-  const [showLevels, setshowLevels] = useState(false)
+  const [showLevels, setShowLevels] = useState(false)
   if (questline === null) {
     throw `Unable to load questline`
   }
@@ -74,7 +93,7 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
     if (quantity === 0) {
       continue
     }
-    (quantity > 0 ? lineRewardItems : lineRequestItems).push({
+    ;(quantity > 0 ? lineRewardItems : lineRequestItems).push({
       item: items[itemId],
       quantity: Math.abs(quantity),
     })
@@ -90,25 +109,52 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
   lineRequestItems.sort(sortItems)
   lineRewardItems.sort(sortItems)
 
-  return <Layout headerFrom={questline}>
-    <p>
-      <Input.Switch id="showText" label="Show Quest Text" defaultChecked={showText} onChange={setShowText} />
-      <Input.Switch id="showLevels" label="Show Quest Levels" defaultChecked={showLevels} onChange={setshowLevels} />
-    </p>
-    <List items={questline.quests.map(q => ({
-      image: q.fromImage,
-      lineOne: q.name,
-      lineTwo: questText(q, showText, showLevels),
-      href: q.fields.path
-    }))} bigLine={true} />
-    <QuestItemList label="Total Request" silver={silverCount < 0 ? -silverCount : null} items={lineRequestItems} />
-    <QuestItemList label="Total Reward" silver={silverCount > 0 ? silverCount : null} gold={goldCount > 0 ? goldCount : null} items={lineRewardItems} />
-  </Layout>
+  return (
+    <Layout headerFrom={questline}>
+      <p>
+        {/* <Input.Switch
+          id="showText"
+          label="Show Quest Text"
+          defaultChecked={showText}
+          onChange={setShowText}
+        />
+        <Input.Switch
+          id="showLevels"
+          label="Show Quest Levels"
+          defaultChecked={showLevels}
+          onChange={setShowLevels}
+        /> */}
+      </p>
+      <List
+        key="quests"
+        items={questline.quests.map((q) => ({
+          image: q.fromImage,
+          lineOne: q.name,
+          lineTwo: questText(q, showText, showLevels),
+          href: q.fields.path,
+        }))}
+        bigLine={true}
+      />
+      <QuestItemList
+        key="reqs"
+        label="Total Request"
+        silver={silverCount < 0 ? -silverCount : null}
+        items={lineRequestItems}
+      />
+      <QuestItemList
+        key="rewards"
+        label="Total Reward"
+        silver={silverCount > 0 ? silverCount : null}
+        gold={goldCount > 0 ? goldCount : null}
+        items={lineRewardItems}
+      />
+    </Layout>
+  )
 }
 
 export const pageQuery = graphql`
   query QuestlineTemplate($name: String!) {
-    questline: questlinesJson(name: {eq: $name}) {
+    questline: questlinesJson(name: { eq: $name }) {
       name
       image
       quests {
