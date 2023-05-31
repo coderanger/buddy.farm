@@ -19,7 +19,7 @@ interface WikiGenQuery {
   }
 }
 
-const UNAVAILABLE_ITEMS = ["Bananas", "Meerif Crest", "Peculiar Gem", "Wishbone Necklace"]
+const UNAVAILABLE_ITEMS = ["Meerif Crest", "Peculiar Gem", "Wishbone Necklace"]
 
 const wikiLink = (item: Item) => `((${item.name}${item.name.endsWith(")") ? " " : ""}))`
 
@@ -33,6 +33,7 @@ const genMuseumCompletion = (items: Item[]) => {
     { type: "seeds", label: "Seeds" },
     { type: "bait", label: "Bait" },
     { type: "meal", label: "Meals" },
+    { type: "card", label: "Cards" },
     { event: true, label: "Event" },
   ]
 
