@@ -254,6 +254,30 @@ const CookingReverseList = ({ item }: CookingReverseListProps) => {
   return <List label="Used In Cooking" items={listItems} bigLine={true} />
 }
 
+interface SeedDropsListProps {
+  item: Item
+  settings: Settings
+}
+
+const SeedDropsList = ({ item, settings }: SeedDropsListProps) => {
+  const listItems: ListItem[] = []
+  const seedDrops = item.dropRates.find((r) => r.runecube === !!settings.runecube)
+  if (seedDrops !== undefined) {
+    for (const rate of seedDrops.items.slice().sort((a, b) => a.rate - b.rate)) {
+      const [value, lineTwo] = formatDropRate(settings, "farming", rate.rate, false, 1)
+      listItems.push({
+        key: `seed${rate.item.id}`,
+        image: rate.item.image,
+        lineOne: rate.item.name,
+        lineTwo,
+        value,
+        href: linkFor(rate.item),
+      })
+    }
+  }
+  return <List label="Seed Drops" items={listItems} />
+}
+
 interface ItemListProps {
   item: Item
   drops: DropRates
@@ -261,7 +285,11 @@ interface ItemListProps {
 }
 
 const ItemList = ({ item, drops, settings }: ItemListProps) => {
-  // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
+  // Enable some extra sources not usually present if the drop doesn't have normal sources.
+  // No location drops, no pet sources, isn't craftable.
+  const unusualDropMode =
+    drops.length === 0 && item.petItems.length === 0 && item.recipeItems.length === 0
+
   const listItems: ListItem[] = []
   for (const rate of drops.slice().sort((a, b) => a.rate - b.rate)) {
     let key: string,
@@ -305,11 +333,6 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
       value,
     })
   }
-
-  // Enable some extra sources not usually present if the drop doesn't have normal sources.
-  // No location drops, no pet sources, isn't craftable.
-  const unusualDropMode =
-    drops.length === 0 && item.petItems.length === 0 && item.recipeItems.length === 0
 
   // Items from pets.
   listItems.push(
@@ -565,11 +588,13 @@ export default ({
     ctx.settings.runecube,
   ])
 
-  let dropMode = "harvests"
+  let dropMode = undefined
   if (drops.find((dr) => dr.dropRates.location?.type === "explore")) {
     dropMode = "explores"
   } else if (drops.find((dr) => dr.dropRates.location?.type === "fishing")) {
     dropMode = "fishes"
+  } else if (drops.find((dr) => dr.dropRates.seed !== undefined) || item.dropRates.length !== 0) {
+    dropMode = "harvests"
   }
 
   return (
@@ -582,6 +607,7 @@ export default ({
     >
       {item.type === "meal" && item.description.split(/<br\/?>/).map((d) => <p>{d}</p>)}
       <ItemList item={item} drops={drops} settings={settings} />
+      <SeedDropsList item={item} settings={settings} />
       {item.canCraft && (
         <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.recipeItems} />
       )}
