@@ -137,7 +137,7 @@ const Layout = ({
         expand="lg"
         css={{ "html.iframe &": { display: "none" } }}
       >
-        <Container>
+        <Container css={{ paddingLeft: 12, paddingRight: 12 }}>
           <Link className="navbar-brand" to="/">
             <span className="d-none d-sm-inline">Buddy's Almanac</span>
             <FaHome className="d-sm-none" css={{ marginTop: -3 }} />
@@ -179,7 +179,7 @@ const Layout = ({
         </Container>
       </Navbar>
       <main>
-        <Container css={{ paddingTop: 10 }}>
+        <Container css={{ paddingTop: 10, paddingLeft: 12, paddingRight: 12 }}>
           {headerRight && <div className="d-none d-md-block float-end">{headerRight}</div>}
           {(title || headerFrom) && (
             <h1>

@@ -1,45 +1,30 @@
 import { useStaticQuery, graphql } from "gatsby"
 
-interface LocationsQuery {
-  locations: {
-    nodes: {
-      jsonId: string
-      name: string
-      image: string
-      type: string
-      extra: {
-        baseDropRate: number
-      }
-      fields: {
-        path: string
-      }
-    }[]
-  }
-}
-
 export const useLocations = (type: string | undefined) => {
-  const { locations }: LocationsQuery = useStaticQuery(
+  const {
+    farmrpg: { locations },
+  } = useStaticQuery<Queries.UseLocationsHookQuery>(
     graphql`
-    query {
-      locations: allLocationsJson {
-        nodes {
-          jsonId
-          image
-          name
-          type
-          extra {
+      query UseLocationsHook {
+        farmrpg {
+          locations(order: { gameId: ASC }) {
+            __typename
+            id
+            type
+            name
+            image
             baseDropRate
-          }
-          fields {
-            path
           }
         }
       }
-    }
     `
   )
-  if (type !== undefined) {
-    locations.nodes = locations.nodes.filter(l => l.type === type)
+  const locationsMap: Record<string, (typeof locations)[0]> = {}
+  for (const loc of locations) {
+    if (type !== undefined && type !== loc.type) {
+      continue
+    }
+    locationsMap[loc.name] = loc
   }
-  return Object.fromEntries(locations.nodes.map(n => [n.name, n]))
+  return locationsMap
 }

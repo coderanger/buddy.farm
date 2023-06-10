@@ -1,28 +1,21 @@
 import { useStaticQuery, graphql } from "gatsby"
 
-interface ItemsQuery {
-  allItemsJson: {
-    nodes: {
-      jsonId: string
-      name: string
-      image: string
-    }[]
-  }
-}
-
 export const useItems = () => {
-  const { allItemsJson }: ItemsQuery = useStaticQuery(
+  const {
+    farmrpg: { items },
+  } = useStaticQuery<Queries.UseItemsHookQuery>(
     graphql`
-    query {
-      allItemsJson {
-        nodes {
-          jsonId
-          image
-          name
+      query UseItemsHook {
+        farmrpg {
+          items {
+            __typename
+            id
+            name
+            image
+          }
         }
       }
-    }
     `
   )
-  return Object.fromEntries(allItemsJson.nodes.map(n => [n.name, n]))
+  return Object.fromEntries(items.map((n) => [n.name, n]))
 }
