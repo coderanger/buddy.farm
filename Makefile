@@ -9,3 +9,6 @@ build: clean
 
 deploy: build
 	npm run deploy -- -y
+
+wrangler: build
+	npm run wrangler-deploy
