@@ -1,41 +1,42 @@
-import { graphql, useStaticQuery } from 'gatsby'
-import Layout from '../components/layout'
-import List from '../components/list'
+import { graphql, PageProps } from "gatsby"
 
-interface ExploringQuery {
-  locations: {
-    nodes: {
-      name: string
-      image: string
-      jsonId: string
-      fields: {
-        path: string
-      }
-    }[]
-  }
+import Layout from "../components/layout"
+import List from "../components/list"
+import linkFor from "../utils/links"
+
+const ExploringPage = ({
+  data: {
+    farmrpg: { locations },
+  },
+}: PageProps<Queries.ExploringPageQuery>) => {
+  return (
+    <Layout title="Exploring">
+      <List
+        items={locations
+          .slice()
+          .sort((a, b) => a.id - b.id)
+          .map((l) => ({
+            image: l.image,
+            lineOne: l.name,
+            href: linkFor(l),
+          }))}
+        bigLine={true}
+      />
+    </Layout>
+  )
 }
 
-export default () => {
-  const { locations }: ExploringQuery = useStaticQuery(graphql`
-    query {
-      locations: allLocationsJson(filter: {type: {eq: "explore"}}) {
-        nodes {
-          name
-          image
-          jsonId
-          fields {
-            path
-          }
-        }
+export default ExploringPage
+
+export const query = graphql`
+  query ExploringPage {
+    farmrpg {
+      locations(filters: { type: "explore" }) {
+        __typename
+        id
+        name
+        image
       }
     }
-  `)
-
-  return <Layout title="Exploring">
-    <List items={locations.nodes.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10)).map(l => ({
-      image: l.image,
-      lineOne: l.name,
-      href: l.fields.path,
-    }))} bigLine={true} />
-  </Layout>
-}
+  }
+`

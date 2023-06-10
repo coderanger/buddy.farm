@@ -1,50 +1,21 @@
+import { graphql, Link, PageProps } from "gatsby"
+import { useContext, useEffect, useState } from "react"
 
-import { graphql, Link } from 'gatsby'
-import { useContext, useEffect, useState } from 'react'
-
-import { CopyButton } from '../components/clipboard'
-import Layout from '../components/layout'
-import List, { ListItem } from '../components/list'
-import { QuickSettings } from '../components/quick-settings'
-import { Settings } from '../hooks/settings'
-import { GlobalContext } from '../utils/context'
-import { formatDropRate } from '../utils/format'
+import Layout from "../components/layout"
+import List, { ListItem } from "../components/list"
+import { QuickSettings } from "../components/quick-settings"
+import { Settings } from "../hooks/settings"
+import { GlobalContext } from "../utils/context"
+import { formatDropRate } from "../utils/format"
+import linkFor from "../utils/links"
 
 const LOCATION_TYPE_TO_DROP_MODE: Record<string, string> = {
-  "explore": "explores",
-  "fishing": "fishes",
+  explore: "explores",
+  fishing: "fishes",
 }
 
-interface DropRates {
-  nodes: {
-    item: {
-      jsonId: string
-      name: string
-      image: string
-      manualFishingOnly: boolean
-      fields: {
-        path: string
-      }
-    }
-    rate: number
-    mode: string
-    drops: number
-  }[]
-}
-
-interface Location {
-  name: string
-  jsonId: string
-  image: string
-  type: string
-  items: string[]
-  extra: {
-    baseDropRate: number | null
-  }
-  fields: {
-    path: string
-  }
-}
+type Location = Queries.LocationTemplateQuery["farmrpg"]["locations"][0]
+type DropRates = Location["dropRates"][0]
 
 interface LocationListProps {
   location: Location
@@ -52,125 +23,101 @@ interface LocationListProps {
   settings: Settings
 }
 
-interface SortableListItem extends ListItem {
-  _sortValue: number
-}
-
 const LocationList = ({ location, drops, settings }: LocationListProps) => {
-  const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.item.name, n]))
-  const listItems = []
-  for (const item of location.items) {
-    if (!dropsMap[item]) {
-      continue
-    }
-    const [value, lineTwo] = formatDropRate(settings, location.type, dropsMap[item].rate, dropsMap[item].item.manualFishingOnly, location.extra.baseDropRate)
-    const listItem: SortableListItem = {
-      key: dropsMap[item].item.jsonId,
-      image: dropsMap[item].item.image,
-      href: dropsMap[item].item.fields.path,
-      lineOne: item,
-      lineTwo,
-      value,
-      _sortValue: dropsMap[item].rate,
-    }
-    if (dropsMap[item].drops < 50) {
-      listItem.alert = `Low data available (${dropsMap[item].drops} drops)`
-      listItem.alertIcon = dropsMap[item].drops < 10 ? "error" : "warning"
-    }
-    listItems.push(listItem)
-  }
-  listItems.sort((a, b) => a._sortValue - b._sortValue)
+  const listItems: ListItem[] = drops.items
+    .slice()
+    .sort((a, b) => a.rate - b.rate)
+    .map((itemRate) => {
+      const [value, lineTwo] = formatDropRate(
+        settings,
+        location.type,
+        itemRate.rate,
+        itemRate.item.manualFishingOnly,
+        location.baseDropRate
+      )
+      return {
+        key: itemRate.item.id.toString(),
+        image: itemRate.item.image,
+        href: linkFor(itemRate.item),
+        lineOne: itemRate.item.name,
+        lineTwo,
+        value,
+      }
+    })
   return <List items={listItems} />
 }
 
-interface LocationProps {
+export default ({
   data: {
-    location: Location
-    normalDrops: DropRates
-    ironDepotDrops: DropRates
-    manualFishingDrops: DropRates
-    runecubeNormalDrops: DropRates
-    runecubeIronDepotDrops: DropRates
-    runecubeManualFishingDrops: DropRates
-  }
-}
-
-export default ({ data: { location, normalDrops, ironDepotDrops, manualFishingDrops, runecubeNormalDrops, runecubeIronDepotDrops, runecubeManualFishingDrops } }: LocationProps) => {
+    farmrpg: {
+      locations: [location],
+    },
+  },
+}: PageProps<Queries.LocationTemplateQuery>) => {
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
-  const [drops, setDrops] = useState(normalDrops)
+  const [drops, setDrops] = useState(
+    () => location.dropRates.filter((dr) => !(dr.ironDepot || dr.manualFishing || dr.runecube))[0]
+  )
   const breadcrumbLink = location.type === "explore" ? "/exploring/" : "/fishing/"
 
   useEffect(() => {
-    if (location.type === "explore" && !!settings.ironDepot) {
-      setDrops(settings.runecube ? runecubeIronDepotDrops : ironDepotDrops)
-    } else if (location.type === "fishing" && !!settings.manualFishing) {
-      setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
-    } else if (settings.runecube) {
-      // setDrops(runecubeNormalDrops)
-      // I have no non-iron-depot data for Runecube, sorry.
-      setDrops(location.type === "explore" ? runecubeIronDepotDrops : runecubeNormalDrops)
-    } else {
-      setDrops(normalDrops)
+    let drops = location.dropRates.filter((dr) => dr.runecube === !!settings.runecube)
+    switch (location.type) {
+      case "explore":
+        drops = drops.filter((dr) => !!dr.ironDepot === !!settings.ironDepot)
+        break
+      case "fishing":
+        drops = drops.filter((dr) => !!dr.manualFishing === !!settings.manualFishing)
+        break
+    }
+    if (drops.length > 0) {
+      setDrops(drops[0])
     }
   }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
 
-  return <Layout headerFrom={location} headerRight={<QuickSettings dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]} />}>
-    <p><Link to={breadcrumbLink}>Back to all {location.type === "explore" ? "exploring" : "fishing"} locations</Link></p>
-    <LocationList location={location} drops={drops} settings={settings} />
-  </Layout>
+  return (
+    <Layout
+      headerFrom={location}
+      headerRight={<QuickSettings dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]} />}
+    >
+      <p>
+        <Link to={breadcrumbLink}>
+          Back to all {location.type === "explore" ? "exploring" : "fishing"} locations
+        </Link>
+      </p>
+      <LocationList location={location} drops={drops} settings={settings} />
+    </Layout>
+  )
 }
 
 export const pageQuery = graphql`
-  fragment LocationTemplateDrops on DropRatesGqlJsonConnection {
-    nodes {
-      item {
-        jsonId
+  query LocationTemplate($name: String!) {
+    farmrpg {
+      locations(filters: { name: $name }) {
+        __typename
         name
         image
-        manualFishingOnly
-        fields {
-          path
+        type
+        baseDropRate
+        dropRates {
+          ironDepot
+          manualFishing
+          runecube
+          silverPerHit
+          xpPerHit
+          items {
+            rate
+            item {
+              __typename
+              id
+              name
+              image
+              manualFishingOnly
+            }
+          }
         }
       }
-      rate
-      mode
-      drops
-    }
-  }
-
-  query LocationTemplate($name: String!) {
-    location: locationsJson(name: {eq: $name}) {
-      name
-      jsonId
-      image
-      type
-      items
-      extra {
-        baseDropRate
-      }
-      fields {
-        path
-      }
-    }
-
-    normalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: false}}) {
-      ...LocationTemplateDrops
-    }
-    ironDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: false}}) {
-      ...LocationTemplateDrops
-    }
-    manualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: false}}) {
-      ...LocationTemplateDrops
-    }
-    runecubeNormalDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "normal"}, runecube: {eq: true}}) {
-      ...LocationTemplateDrops
-    }
-    runecubeIronDepotDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "iron_depot"}, runecube: {eq: true}}) {
-      ...LocationTemplateDrops
-    }
-    runecubeManualFishingDrops: allDropRatesGqlJson(filter: {location: {name: {eq: $name}}, rate_type: {eq: "manual_fishing"}, runecube: {eq: true}}) {
-      ...LocationTemplateDrops
     }
   }
 `

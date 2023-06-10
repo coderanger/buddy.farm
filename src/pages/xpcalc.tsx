@@ -1,4 +1,4 @@
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql, PageProps } from "gatsby"
 import React, { useEffect, useState } from "react"
 import Button from "react-bootstrap/Button"
 import Form from "react-bootstrap/Form"
@@ -8,22 +8,7 @@ import { Duration } from "luxon"
 import { Calculator } from "../components/calculator"
 import { Input } from "../components/input"
 
-interface Location {
-  name: string
-  jsonId: string
-  image: string
-  type: string
-  extra: {
-    baseDropRate: number
-    xpPerHit: number
-    xpPerHitIronDepot: number
-    xpPerHitRunecube: number
-  }
-}
-
-interface Xp {
-  xp: number
-}
+type Location = Queries.XpCalcPageLocationFragment
 
 interface XpData {
   isXp: boolean
@@ -70,13 +55,13 @@ const DEFAULT_DATA: XpData = {
   target: 99,
   skill: "exploring",
   event: false,
-  exploringLocation: "10", // Whispering Creek
+  exploringLocation: "13", // Jundland
   primerExploring: 0,
   ironDepot: false,
   runecube: false,
   wanderer: 33,
   lemonSqueezer: true,
-  fishingLocation: "10", // Large Island
+  fishingLocation: "12", // Glacier
   bait: 1,
   streak: 0,
   primerFishing: 0,
@@ -102,16 +87,19 @@ interface XpCalcProps {
 }
 
 interface LocationXpCalcProps extends XpCalcProps {
-  locations: Location[]
+  locations: readonly Location[]
 }
 
 const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => {
-  const selectedLocation = locations.find(
-    (loc) => loc.type === "fishing" && loc.jsonId === data.fishingLocation
-  )
-  const xpPerHit = selectedLocation?.extra.xpPerHit
+  const parsedData = parseInt(data.fishingLocation, 10)
+  const selectedLocation = locations.find((loc) => loc.id === parsedData)
+  const dropRates =
+    selectedLocation?.dropRates.find(
+      (dr) => dr.manualFishing === false && dr.runecube === data.runecube
+    ) || selectedLocation?.dropRates[0]
+  const xpPerHit = dropRates?.xpPerHit || 0
   const xpBonus = 1 + data.primerFishing / 100
-  const xpPerHitNet = (75 + (xpPerHit || 0)) * xpBonus * (data.event ? 1.2 : 1)
+  const xpPerHitNet = (75 + xpPerHit) * xpBonus * (data.event ? 1.2 : 1)
   const xpPerHitManual = xpPerHitNet * (1 + data.streak / 1000) * data.bait
   const manualFishes = xp / xpPerHitManual
   const fishPerNet = data.reinforcedNetting ? 15 : 10
@@ -122,14 +110,11 @@ const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => 
   return (
     <>
       <Input.Select id="fishingLocation" label="Location" defaultValue={data.fishingLocation}>
-        {locations
-          .filter((loc) => loc.type === "fishing")
-          .sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10))
-          .map((loc) => (
-            <option key={loc.jsonId} value={loc.jsonId}>
-              {loc.name}
-            </option>
-          ))}
+        {locations.map((loc) => (
+          <option key={loc.id} value={loc.id}>
+            {loc.name}
+          </option>
+        ))}
       </Input.Select>
       <Input.Select id="bait" label="Bait" defaultValue={data.bait.toString()}>
         <option value="1">Worms / Minnows / Mealworms</option>
@@ -162,6 +147,7 @@ const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => 
           defaultChecked={data.reinforcedNetting}
         />
         <Input.Switch id="fishingTrawl" label="Fishing Trawl" defaultChecked={data.fishingTrawl} />
+        <Input.Switch id="runecube" label="Eagle Eye (Runecube)" defaultChecked={data.runecube} />
       </Calculator.Perks>
 
       <Input.Text
@@ -194,23 +180,22 @@ const FishingXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => 
 }
 
 const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) => {
-  const selectedLocation = locations.find(
-    (loc) => loc.type === "explore" && loc.jsonId === data.exploringLocation
-  )
-  const xpPerHit = data.runecube 
-    ? selectedLocation?.extra.xpPerHitRunecube 
-    : data.ironDepot
-      ? selectedLocation?.extra.xpPerHitIronDepot
-      : selectedLocation?.extra.xpPerHit
+  const parsedData = parseInt(data.exploringLocation, 10)
+  const selectedLocation = locations.find((loc) => loc.id === parsedData)
+  const dropRates =
+    selectedLocation?.dropRates.find(
+      (dr) => dr.ironDepot === data.ironDepot && dr.runecube === data.runecube
+    ) || selectedLocation?.dropRates[0]
+  const xpPerHit = dropRates?.xpPerHit || 0
   const xpBonus = 1 + data.primerExploring / 100
-  const xpPerHitTrue = (125 + (xpPerHit || 0)) * xpBonus * (data.event ? 1.2 : 1)
+  const xpPerHitTrue = (125 + xpPerHit) * xpBonus * (data.event ? 1.2 : 1)
   const explores = xp / xpPerHitTrue
   const wanderer = data.wanderer / 100
   const staminaPerExplore = 1 - wanderer
   const stamina = explores * staminaPerExplore
-  const itemDropRate = selectedLocation?.extra.baseDropRate
+  const itemDropRate = selectedLocation?.baseDropRate || 1
   const itemsPerLem = data.lemonSqueezer ? 20 : 10
-  const lemXpPerHit = (((xpPerHit || 0) / (itemDropRate || 1)) + 250) * (data.event ? 1.2 : 1)
+  const lemXpPerHit = (xpPerHit / itemDropRate + 250) * (data.event ? 1.2 : 1)
   const xpPerLemonade = itemsPerLem * lemXpPerHit
   const lemonade = xp / xpPerLemonade
   const itemsPerPalmer = data.lemonSqueezer ? 500 : 200
@@ -220,14 +205,11 @@ const ExploringXpCalc = ({ locations, xp, data, values }: LocationXpCalcProps) =
   return (
     <>
       <Input.Select id="exploringLocation" label="Location" defaultValue={data.exploringLocation}>
-        {locations
-          .filter((loc) => loc.type === "explore")
-          .sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10))
-          .map((loc) => (
-            <option key={loc.jsonId} value={loc.jsonId}>
-              {loc.name}
-            </option>
-          ))}
+        {locations.map((loc) => (
+          <option key={loc.id} value={loc.id}>
+            {loc.name}
+          </option>
+        ))}
       </Input.Select>
       <Input.Switch id="event" label="Event Bonus" defaultChecked={data.event} />
 
@@ -548,41 +530,12 @@ const LevelInput = ({ setXp, xpMap }: LevelInputProps) => {
   )
 }
 
-interface XpCalcQuery {
-  locations: {
-    nodes: Location[]
-  }
-  xpCurve: {
-    nodes: Xp[]
-  }
-}
-
-export default () => {
-  const { locations, xpCurve }: XpCalcQuery = useStaticQuery(graphql`
-    query {
-      locations: allLocationsJson {
-        nodes {
-          name
-          jsonId
-          image
-          type
-          extra {
-            baseDropRate
-            xpPerHit
-            xpPerHitIronDepot
-            xpPerHitRunecube
-          }
-        }
-      }
-
-      xpCurve: allXpJson(sort: { fields: level }) {
-        nodes {
-          xp
-        }
-      }
-    }
-  `)
-
+const XpCalcPage = ({
+  data: {
+    farmrpg: { exploringLocations, fishingLocations },
+    xpCurve,
+  },
+}: PageProps<Queries.XpCalcPageQuery>) => {
   // Combine inputs and defaults.
   const [data, values, setValues] = Calculator.useData(DEFAULT_DATA, (settings) => ({
     primerExploring: settings.primerExploring ? parseInt(settings.primerExploring, 10) : undefined,
@@ -617,13 +570,48 @@ export default () => {
         <option value="cooking">Cooking</option>
       </Input.Select>
       {data.skill === "exploring" && (
-        <ExploringXpCalc locations={locations.nodes} xp={xp} data={data} values={values} />
+        <ExploringXpCalc locations={exploringLocations} xp={xp} data={data} values={values} />
       )}
       {data.skill === "fishing" && (
-        <FishingXpCalc locations={locations.nodes} xp={xp} data={data} values={values} />
+        <FishingXpCalc locations={fishingLocations} xp={xp} data={data} values={values} />
       )}
       {data.skill === "farming" && <FarmingXpCalc xp={xp} data={data} values={values} />}
       {data.skill === "cooking" && <CookingXpCalc xp={xp} data={data} values={values} />}
     </Calculator>
   )
 }
+
+export default XpCalcPage
+
+export const query = graphql`
+  fragment XpCalcPageLocation on FarmRPG_Location {
+    id
+    name
+    image
+    baseDropRate
+    dropRates {
+      ironDepot
+      manualFishing
+      runecube
+      xpPerHit
+    }
+  }
+
+  query XpCalcPage {
+    farmrpg {
+      exploringLocations: locations(filters: { type: "explore" }, order: { gameId: ASC }) {
+        ...XpCalcPageLocation
+      }
+
+      fishingLocations: locations(filters: { type: "fishing" }, order: { gameId: ASC }) {
+        ...XpCalcPageLocation
+      }
+    }
+
+    xpCurve: allXpJson(sort: { level: ASC }) {
+      nodes {
+        xp
+      }
+    }
+  }
+`

@@ -1,48 +1,48 @@
-import { graphql, useStaticQuery } from 'gatsby'
-import Layout from '../components/layout'
-import List from '../components/list'
+import { graphql, PageProps } from "gatsby"
+import { DateTime } from "luxon"
 
-interface EmblemsQuery {
-  emblems: {
-    nodes: {
-      jsonId: string
-      image: string
-      beta: boolean
-    }[]
-  }
+import Layout from "../components/layout"
+import List from "../components/list"
+
+const EmblemsPage = ({
+  data: {
+    farmrpg: { emblems },
+  },
+}: PageProps<Queries.EmblemsPageQuery>) => {
+  const data = emblems
+    .map((e) => {
+      const image = e.image[0] == "/" ? e.image : `/${e.image}`
+      const createdAt = DateTime.fromISO(e.createdAt).toMillis()
+      return { ...e, image, createdAt }
+    })
+    .sort((a, b) => b.createdAt - a.createdAt)
+
+  return (
+    <Layout title="Emblems">
+      <List
+        items={data.map((e) => ({
+          image: e.image,
+          lineOne: e.name,
+          value: e.type ? "Beta/Alpha" : "",
+        }))}
+        bigLine={true}
+      />
+    </Layout>
+  )
 }
 
-export default () => {
-  const query: EmblemsQuery = useStaticQuery(graphql`
-    query {
-      emblems: allEmblemsJson {
-        nodes {
-          jsonId
-          image
-          beta
-        }
+export default EmblemsPage
+
+export const query = graphql`
+  query EmblemsPage {
+    farmrpg {
+      emblems(filters: { nonStaff: true }) {
+        id
+        name
+        image
+        type
+        createdAt
       }
     }
-  `)
-
-  const emblems = query.emblems.nodes.map(e => {
-    const id = parseInt(e.jsonId, 10)
-    let name = e.image
-    const match = name.match(/\/(?:emblem)?([^\/]*?)(?:96(?:\s*|test)?)?\.(?:png|gif|jpg|jpeg)$/)
-    if (match) {
-      // Process into something like a useful name.
-      name = match[1].replace(/[_.-]+/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").trim()
-      name = name.charAt(0).toUpperCase() + name.slice(1)
-    }
-    const image = e.image[0] == "/" ? e.image : `/${e.image}`
-    return { ...e, id, name, image }
-  })
-
-  return <Layout title="Emblems">
-    <List items={emblems.sort((a, b) => b.id - a.id).map(e => ({
-      image: e.image,
-      lineOne: e.name,
-      value: e.beta ? "Beta/Alpha" : "",
-    }))} bigLine={true} />
-  </Layout>
-}
+  }
+`

@@ -9,34 +9,34 @@ if (!DATA_ROOT) {
 module.exports = {
   siteMetadata: {
     title: `Buddy's Almanac`,
-    siteUrl: `https://buddy.farm`
+    siteUrl: `https://buddy.farm`,
   },
   graphqlTypegen: true,
   plugins: [
     "gatsby-plugin-sass",
     "gatsby-plugin-emotion",
     {
-      resolve: 'gatsby-plugin-google-gtag',
+      resolve: "gatsby-plugin-google-gtag",
       options: {
-        "trackingIds": ["G-RYLMF5ZX56"],
-      }
+        trackingIds: ["G-RYLMF5ZX56"],
+      },
     },
     "gatsby-plugin-react-helmet",
     "gatsby-plugin-mdx",
     {
-      resolve: 'gatsby-source-filesystem',
+      resolve: "gatsby-source-filesystem",
       options: {
-        "name": "pages",
-        "path": "./src/pages/"
+        name: "pages",
+        path: "./src/pages/",
       },
-      __key: "pages"
+      __key: "pages",
     },
     "gatsby-transformer-json",
     {
-      resolve: 'gatsby-source-filesystem',
+      resolve: "gatsby-source-filesystem",
       options: {
-        "name": "data",
-        "path": DATA_ROOT,
+        name: "data",
+        path: DATA_ROOT,
       },
     },
     {
@@ -44,7 +44,7 @@ module.exports = {
       options: {
         bucketName: "buddy.farm",
         protocol: "https",
-        hostname: "buddy.farm"
+        hostname: "buddy.farm",
       },
     },
     {
@@ -56,5 +56,13 @@ module.exports = {
         icon: "src/images/icon.svg",
       },
     },
-  ]
+    {
+      resolve: "gatsby-source-graphql",
+      options: {
+        typeName: "FarmRPG",
+        fieldName: "farmrpg",
+        url: "https://api.buddy.farm/graphql",
+      },
+    },
+  ],
 }

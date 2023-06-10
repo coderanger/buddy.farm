@@ -2,21 +2,39 @@ import { graphql, PageProps, Link } from "gatsby"
 
 import Layout from "../components/layout"
 import List from "../components/list"
+import linkFor from "../utils/links"
 
-export default ({ data: { maybeNpc } }: PageProps<Queries.NpcTemplateQuery>) => {
-  const npc = maybeNpc!
+export default ({
+  data: {
+    farmrpg: {
+      npcs: [npc],
+    },
+  },
+}: PageProps<Queries.NpcTemplateQuery>) => {
+  const loves = npc.npcItems.filter((i) => i.relationship === "loves")
+  const likes = npc.npcItems.filter((i) => i.relationship === "likes")
+  const hates = npc.npcItems.filter((i) => i.relationship === "hates")
 
-  const loves = npc.items.filter((i) => i.adjective === "loves")
-  const likes = npc.items.filter((i) => i.adjective === "likes")
-  const hates = npc.items.filter((i) => i.adjective === "hates")
-
-  const npcItemsToList = (items: typeof npc.items) =>
+  const npcItemsToList = (items: typeof npc.npcItems) =>
     items.map((i) => ({
       lineOne: i.item.name,
       image: i.item.image,
-      href: i.item.fields.path,
+      href: linkFor(i.item),
     }))
 
+  const npcRewards = npc.npcRewards
+    .slice()
+    .sort((a, b) => (a.level === b.level ? a.order - b.order : a.level - b.level))
+  const rewardsByLevel: { level: number; rewards: (typeof npc.npcRewards)[0][] }[] = [
+    { level: npcRewards[0]?.level, rewards: [] },
+  ]
+  for (const reward of npcRewards) {
+    if (rewardsByLevel[rewardsByLevel.length - 1].level === reward.level) {
+      rewardsByLevel[rewardsByLevel.length - 1].rewards.push(reward)
+    } else {
+      rewardsByLevel.push({ level: reward.level, rewards: [reward] })
+    }
+  }
   return (
     <Layout headerFrom={npc}>
       <p>
@@ -26,19 +44,16 @@ export default ({ data: { maybeNpc } }: PageProps<Queries.NpcTemplateQuery>) => 
       <List label="Likes (25 XP)" items={npcItemsToList(likes)} bigLine={true} />
       <List label="Hates (-50 XP)" items={npcItemsToList(hates)} bigLine={true} />
       <p className="mt-2">All other items provide 1 XP.</p>
-      {npc.level_rewards.map((l) => (
+      {rewardsByLevel.map((l) => (
         <List
           key={l.level}
           label={`Friendship Level ${l.level}`}
-          items={l.items
-            .slice()
-            .sort((a, b) => a.order - b.order)
-            .map((i) => ({
-              lineOne: i.item.name,
-              image: i.item.image,
-              href: i.item.fields.path,
-              value: i.quantity.toLocaleString(),
-            }))}
+          items={l.rewards.map((i) => ({
+            lineOne: i.item.name,
+            image: i.item.image,
+            href: linkFor(i.item),
+            value: i.quantity.toLocaleString(),
+          }))}
           bigLine={true}
         />
       ))}
@@ -47,36 +62,28 @@ export default ({ data: { maybeNpc } }: PageProps<Queries.NpcTemplateQuery>) => 
 }
 
 export const pageQuery = graphql`
-  query NpcTemplate($name: String!) {
-    maybeNpc: npcsJson(name: { eq: $name }) {
-      name
-      image
-      fields {
-        path
-      }
-
-      items {
-        adjective
-        item {
-          name
-          image
-          fields {
-            path
-          }
-        }
-      }
-
-      level_rewards {
-        level
-        items {
-          quantity
-          order
+  query NpcTemplate($id: ID!) {
+    farmrpg {
+      npcs(filters: { id: $id }) {
+        __typename
+        name
+        image
+        npcItems {
+          relationship
           item {
+            __typename
             name
             image
-            fields {
-              path
-            }
+          }
+        }
+        npcRewards {
+          level
+          order
+          quantity
+          item {
+            __typename
+            name
+            image
           }
         }
       }

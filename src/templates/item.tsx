@@ -9,252 +9,58 @@ import { Settings } from "../hooks/settings"
 import { TRADE_LAST_SEEN_THRESHOLD } from "../pages/exchange-center"
 import { GlobalContext } from "../utils/context"
 import { formatDropRate } from "../utils/format"
+import linkFor from "../utils/links"
 
-// interface DropRates {
-//   nodes: {
-//     location: {
-//       jsonId: string
-//       name: string
-//       image: string
-//       type: string
-//       fields: {
-//         path: string
-//       }
-//       extra: {
-//         baseDropRate: number | null
-//       }
-//     }
-//     locationItem: Queries.ItemTemplateItemFragment
-//     rate: number
-//     mode: string
-//     drops: number
-//   }[]
-// }
-
-type DropRates = Queries.ItemTemplateDropsFragment
-
-// interface Pets {
-//   nodes: {
-//     id: string
-//     name: string
-//     image: string
-//     fields: {
-//       path: string
-//     }
-//   }[]
-// }
-
-type Pets = Queries.ItemTemplateQuery["level1Pets"]
-
-// interface Quest {
-//   jsonId: string
-//   name: string
-//   fromImage: string
-//   fields: {
-//     path: string
-//   }
-//   items: {
-//     quantity: number
-//     item: {
-//       name: string
-//     }
-//   }[]
-//   extra: {
-//     availableTo: number | null
-//   }
-// }
-
-type Quest = Queries.ItemTemplateQuery["questRequests"]["nodes"][0]
-
-// interface WishingWell {
-//   chance: number
-//   item: Queries.ItemTemplateItemFragment
-// }
-
-type WishingWell = Queries.ItemTemplateQuery["wellInput"]["nodes"][0]
-
-// interface LocksmithBox {
-//   gold: number | null
-//   mode: string
-//   items: {
-//     quantityLow: number
-//     quantityHigh: number | null
-//     item: Queries.ItemTemplateItemFragment
-//   }[]
-// }
-
-type LocksmithBox = NonNullable<Queries.ItemTemplateQuery["locksmithBox"]>
-
-// interface LocksmithItems {
-//   quantityLow: number
-//   quantityHigh: number | null
-//   boxItem: Queries.ItemTemplateItemFragment
-// }
-
-type LocksmithItems = Queries.ItemTemplateQuery["locksmithItems"]["nodes"][0]
-
-// interface Building {
-//   building: string
-//   image: string
-//   frequency: string
-//   sort: number
-// }
-
-type Building = Queries.ItemTemplateQuery["buildings"]["nodes"][0]
-
-// interface Tower {
-//   level: number
-//   order: number
-//   quantity: number
-// }
-
-type Tower = Queries.ItemTemplateQuery["tower"]["nodes"][0]
-
-// interface CommunityCenter {
-//   date: string
-//   goalItem: {
-//     name: string
-//   }
-//   goalQuantity: number
-//   progress: number | null
-// }
-
-type CommunityCenter = Queries.ItemTemplateQuery["communityCenter"]["nodes"][0]
-
-// interface Password {
-//   password: {
-//     jsonId: number
-//     password: string
-//   }
-//   quantity: number
-// }
-
-type Password = Queries.ItemTemplateQuery["passwords"]["nodes"][0]
-
-// interface RecipeItem {
-//   item: Queries.ItemTemplateItemFragment
-//   quantity: number
-// }
-
-type RecipeItem = NonNullable<
-  NonNullable<Queries.ItemTemplateQuery["maybeItem"]>["inputRecipes"]
->[0]
-
-// interface Trade {
-//   item: Queries.ItemTemplateItemFragment
-//   giveQuantity: number
-//   receiveQuantity: number
-//   lastSeenRelative: number
-//   oneShot: boolean
-// }
-
-type Trade = NonNullable<NonNullable<Queries.ItemTemplateQuery["maybeItem"]>["giveTrades"]>[0]
-
-// interface QuizReward {
-//   amount: number
-//   score: number
-//   quiz: {
-//     jsonId: number
-//     name: string
-//     fields: {
-//       path: string
-//     }
-//   }
-// }
-
-type QuizReward = NonNullable<NonNullable<Queries.ItemTemplateQuery["maybeItem"]>["quizRewards"]>[0]
-
-// interface NpcItem {
-//   adjective: "loves" | "likes" | "hates"
-//   npc: {
-//     name: string
-//     image: string
-//     fields: {
-//       path: string
-//     }
-//   }
-// }
-
-type NpcItem = NonNullable<NonNullable<Queries.ItemTemplateQuery["maybeItem"]>["npcs"]>[0]
-
-// interface Item {
-//   name: string
-//   jsonId: string
-//   image: string
-//   manualFishingOnly: boolean
-//   givable: boolean
-//   buyPrice: number | null
-//   fleaMarket: number | null
-//   dropMode:
-//     | {
-//         dropMode: string
-//       }
-//     | undefined
-//   fields: {
-//     path: string
-//   }
-//   inputRecipes: RecipeItem[]
-//   outputRecipes: RecipeItem[]
-//   giveTrades: Trade[]
-//   receiveTrades: Trade[]
-//   quizRewards: QuizReward[]
-//   npcs: NpcItem[]
-// }
-
-type Item = NonNullable<Queries.ItemTemplateQuery["maybeItem"]>
-
-interface SortableListItem extends ListItem {
-  _sortValue: number
-}
+type Item = Queries.ItemTemplateQuery["farmrpg"]["items"][0]
+type DropRates = Item["dropRatesItems"]
+type Quest = Item["requiredForQuests"][0] & Item["rewardForQuests"][0]
+type RecipeItem = Item["recipeItems"][0] | Item["recipeIngredientItems"][0]
 
 interface QuestListProps {
   label: string
-  item: string
   quests: readonly Quest[]
   oldQuests: boolean
 }
 
-const QuestList = ({ label, item, quests, oldQuests }: QuestListProps) => {
-  const now = Date.now()
+const QuestList = ({ label, quests, oldQuests }: QuestListProps) => {
+  const now = DateTime.now()
+  let parsedQuests = quests.map((q) => ({
+    ...q,
+    expired: q.quest.endDate !== null && DateTime.fromISO(q.quest.endDate) < now,
+  }))
   if (!oldQuests) {
     // Filter anything we don't need.
-    const filteredQuests = quests.filter(
-      (q) => !(q.extra?.availableTo && q.extra.availableTo < now)
-    )
+    const filteredQuests = parsedQuests.filter((q) => !q.expired)
     if (filteredQuests.length !== 0) {
-      quests = filteredQuests
+      parsedQuests = filteredQuests
     }
   }
-  const listItems = quests
-    .slice()
-    .sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10))
+  const listItems = parsedQuests
+    .sort((a, b) => a.quest.id - b.quest.id)
     .map((q) => ({
-      image: q.fromImage,
-      lineOne: q.name,
-      href: q.fields.path,
-      value: q.items.find((it) => it.item.name === item)?.quantity.toLocaleString(),
-      alert: q.extra?.availableTo && q.extra.availableTo < now ? "Quest no longer available" : null,
+      image: q.quest.image,
+      lineOne: q.quest.name,
+      href: linkFor(q.quest),
+      value: q.quantity.toLocaleString(),
+      alert: q.expired ? "Quest no longer available" : null,
     }))
-  const itemTotal = quests.reduce(
-    (total, q) => (q.items.find((it) => it.item.name === item)?.quantity || 0) + total,
-    0
-  )
+  const itemTotal = parsedQuests.reduce((total, q) => (q.quantity || 0) + total, 0)
   return <List label={`${label} (${itemTotal} total)`} items={listItems} bigLine={true} />
 }
 
 interface WellListProps {
   label: string
-  items: readonly WishingWell[]
+  item: Item
 }
 
-const WellList = ({ label, items }: WellListProps) => {
-  const listItems = items
+const WellList = ({ label, item }: WellListProps) => {
+  const listItems = item.wishingWellInputItems
     .slice()
-    .sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10))
+    .sort((a, b) => a.outputItem.name.localeCompare(b.outputItem.name))
     .map((it) => ({
-      image: it.item.image,
-      lineOne: it.item.name,
-      href: it.item.fields.path,
+      image: it.outputItem.image,
+      lineOne: it.outputItem.name,
+      href: linkFor(it.outputItem),
       value:
         (it.chance * 100).toLocaleString(undefined, {
           minimumFractionDigits: 0,
@@ -265,42 +71,41 @@ const WellList = ({ label, items }: WellListProps) => {
 }
 
 const formatLocksmithQuantity = ({
-  quantityLow,
-  quantityHigh,
+  quantityMin,
+  quantityMax,
 }: {
-  quantityLow: number
-  quantityHigh: number | null
+  quantityMin: number | null
+  quantityMax: number | null
 }) => {
-  if (quantityLow === quantityHigh) {
-    return quantityLow.toLocaleString()
+  if (quantityMin === null) {
+    return "?"
+  } else if (quantityMin === quantityMax) {
+    return quantityMin.toLocaleString()
   } else {
-    return `${quantityLow.toLocaleString()}-${quantityHigh?.toLocaleString() || "?"}`
+    return `${quantityMin.toLocaleString()}-${quantityMax?.toLocaleString() || "?"}`
   }
 }
 
 interface LocksmithListProps {
   label: string
-  box: LocksmithBox | null
+  item: Item
 }
 
-const LocksmithList = ({ label, box }: LocksmithListProps) => {
-  if (box === null) {
-    return null
-  }
-  const listItems: ListItem[] = box.items
+const LocksmithList = ({ label, item }: LocksmithListProps) => {
+  const listItems: ListItem[] = item.locksmithItems
     .slice()
-    .sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10))
+    .sort((a, b) => a.outputItem.name.localeCompare(b.outputItem.name))
     .map((it) => ({
-      image: it.item.image,
-      lineOne: it.item.name,
-      href: it.item.fields.path,
+      image: it.outputItem.image,
+      lineOne: it.outputItem.name,
+      href: linkFor(it.outputItem),
       value: formatLocksmithQuantity(it),
     }))
-  if (box.gold) {
+  if (item.locksmithGold) {
     listItems.unshift({
       image: "/img/items/gold.png",
       lineOne: "Gold",
-      value: box.gold.toLocaleString(),
+      value: item.locksmithGold.toLocaleString(),
     })
   }
   return <List label={label} items={listItems} bigLine={true} />
@@ -316,7 +121,7 @@ const RecipeList = ({ label, labelAnchor, recipeItems }: RecipeListProps) => {
   const listItems: ListItem[] = recipeItems.map((r) => ({
     image: r.item.image,
     lineOne: r.item.name,
-    href: r.item.fields.path,
+    href: linkFor(r.item),
     value: r.quantity.toLocaleString(),
   }))
   return <List label={label} labelAnchor={labelAnchor} items={listItems} bigLine={true} />
@@ -327,13 +132,17 @@ interface TradeListProps {
 }
 
 const TradeList = ({ item }: TradeListProps) => {
-  const listItems: ListItem[] = item.giveTrades
-    .filter((t) => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && !t.oneShot)
+  const listItems: ListItem[] = item.exchangeCenterInputs
+    .filter(
+      (t) =>
+        DateTime.fromISO(t.lastSeen).diffNow("seconds").seconds * -1 < TRADE_LAST_SEEN_THRESHOLD &&
+        !t.oneshot
+    )
     .map((t) => ({
-      image: t.item.image,
-      lineOne: `${t.item.name} x${t.receiveQuantity}`,
-      href: t.item.fields.path,
-      value: t.giveQuantity.toLocaleString(),
+      image: t.outputItem.image,
+      lineOne: `${t.outputItem.name} x${t.outputQuantity}`,
+      href: linkFor(t.outputItem),
+      value: t.inputQuantity.toLocaleString(),
     }))
   return <List label="Trade In At The Exchange Center" items={listItems} bigLine={true} />
 }
@@ -355,18 +164,18 @@ const ADJECTIVE_VALUE: Record<string, string> = {
 }
 
 const NPCList = ({ item }: NPCListProps) => {
-  const listItems: ListItem[] = item.npcs
+  const listItems: ListItem[] = item.npcItems
     .slice()
     .sort((a, b) =>
-      a.adjective === b.adjective
+      a.relationship === b.relationship
         ? a.npc.name.localeCompare(b.npc.name)
-        : ADJECTIVE_ORDER[a.adjective] - ADJECTIVE_ORDER[b.adjective]
+        : ADJECTIVE_ORDER[a.relationship] - ADJECTIVE_ORDER[b.relationship]
     )
     .map((n) => ({
       image: n.npc.image,
       lineOne: n.npc.name,
-      href: n.npc.fields.path,
-      value: ADJECTIVE_VALUE[n.adjective],
+      href: linkFor(n.npc),
+      value: ADJECTIVE_VALUE[n.relationship],
     }))
   return <List label="Townsfolk" items={listItems} bigLine={true} />
 }
@@ -376,10 +185,10 @@ interface CookingRecipeListProps {
 }
 
 const CookingRecipeList = ({ item }: CookingRecipeListProps) => {
-  if (item.cookingRecipe === null) {
+  if (!item.canCook) {
     return <></>
   }
-  let cookingTime = item.cookingRecipe.time / 60
+  let cookingTime = item.baseYieldMinutes
   let cookingTimeSuffix = "m"
   if (cookingTime >= 60) {
     cookingTime = cookingTime / 60
@@ -389,7 +198,7 @@ const CookingRecipeList = ({ item }: CookingRecipeListProps) => {
     {
       lineOne: "Cooking Level",
       image: "/img/items/2473.png",
-      value: item.cookingRecipe.level.toString(),
+      value: (item.cookingLevel || 1).toString(),
     },
     {
       lineOne: "Base Time",
@@ -399,21 +208,23 @@ const CookingRecipeList = ({ item }: CookingRecipeListProps) => {
       })}${cookingTimeSuffix}`,
     },
   ].concat(
-    item.cookingRecipe.inputs
+    item.recipeItems
       .slice()
-      .sort((a, b) => a.order - b.order)
+      .sort((a, b) =>
+        a.quantity === b.quantity ? a.item.name.localeCompare(b.item.name) : b.quantity - a.quantity
+      )
       .map((r) => ({
-        lineOne: r.input.name,
-        image: r.input.image,
-        href: r.input.fields.path,
+        lineOne: r.item.name,
+        image: r.item.image,
+        href: linkFor(r.item),
         value: r.quantity.toLocaleString(),
       }))
   )
-  if (item.cookingRecipe.recipe_item !== null) {
+  if (item.cookingRecipeItem !== null) {
     listItems.unshift({
-      lineOne: item.cookingRecipe.recipe_item.name,
-      image: item.cookingRecipe.recipe_item.image,
-      href: item.cookingRecipe.recipe_item.fields.path,
+      lineOne: item.cookingRecipeItem.name,
+      image: item.cookingRecipeItem.image,
+      href: linkFor(item.cookingRecipeItem),
       value: "Recipe",
     })
   }
@@ -426,13 +237,18 @@ interface CookingReverseListProps {
 }
 
 const CookingReverseList = ({ item }: CookingReverseListProps) => {
-  const listItems: ListItem[] = item.cookingRecipeItems
+  const listItems: ListItem[] = item.recipeIngredientItems
     .slice()
-    .sort((a, b) => a.recipe.level - b.recipe.level)
+    .filter((i) => i.item.canCook)
+    .sort((a, b) =>
+      a.item.cookingLevel === b.item.cookingLevel
+        ? a.item.name.localeCompare(b.item.name)
+        : (a.item.cookingLevel || 0) - (b.item.cookingLevel || 0)
+    )
     .map((i) => ({
-      lineOne: i.recipe.item.name,
-      image: i.recipe.item.image,
-      href: i.recipe.item.fields.path,
+      lineOne: i.item.name,
+      image: i.item.image,
+      href: linkFor(i.item),
       value: i.quantity.toLocaleString(),
     }))
   return <List label="Used In Cooking" items={listItems} bigLine={true} />
@@ -441,55 +257,33 @@ const CookingReverseList = ({ item }: CookingReverseListProps) => {
 interface ItemListProps {
   item: Item
   drops: DropRates
-  level1Pets: Pets
-  level3Pets: Pets
-  level6Pets: Pets
-  locksmithItems: readonly LocksmithItems[]
-  wishingWell: readonly WishingWell[]
-  buildings: readonly Building[]
-  tower: readonly Tower[]
-  communityCenter: readonly CommunityCenter[]
-  passwords: readonly Password[]
   settings: Settings
 }
 
-const ItemList = ({
-  item,
-  drops,
-  level1Pets,
-  level3Pets,
-  level6Pets,
-  locksmithItems,
-  wishingWell,
-  buildings,
-  tower,
-  communityCenter,
-  passwords,
-  settings,
-}: ItemListProps) => {
+const ItemList = ({ item, drops, settings }: ItemListProps) => {
   // const dropsMap = Object.fromEntries(drops.nodes.map(n => [n.location?.name || n.locationItem?.name, n]))
-  const listItems = []
-  for (const rate of drops.nodes) {
+  const listItems: ListItem[] = []
+  for (const rate of drops.slice().sort((a, b) => a.rate - b.rate)) {
     let key: string,
       image: string,
       lineOne: string,
       href: string,
       locationType: string,
       baseDropRate: number | null
-    if (rate.location) {
+    if (rate.dropRates.location !== null) {
       // A drop from a normal location.
-      key = "l" + rate.location.jsonId
-      image = rate.location.image
-      lineOne = rate.location.name
-      locationType = rate.location.type
-      href = rate.location.fields.path
-      baseDropRate = rate.location.extra.baseDropRate
-    } else if (rate.locationItem) {
-      key = "h" + rate.locationItem.jsonId
-      image = rate.locationItem.image
-      lineOne = rate.locationItem.name
+      key = "l" + rate.dropRates.location.name
+      image = rate.dropRates.location.image
+      lineOne = rate.dropRates.location.name
+      locationType = rate.dropRates.location.type
+      href = linkFor(rate.dropRates.location)
+      baseDropRate = rate.dropRates.location.baseDropRate
+    } else if (rate.dropRates.seed !== null) {
+      key = "h" + rate.dropRates.seed.name
+      image = rate.dropRates.seed.image
+      lineOne = rate.dropRates.seed.name
       locationType = "farming"
-      href = rate.locationItem.fields.path
+      href = linkFor(rate.dropRates.seed)
       baseDropRate = null
     } else {
       console.error(`Unknown rate type`, rate)
@@ -502,216 +296,189 @@ const ItemList = ({
       item.manualFishingOnly || false,
       baseDropRate
     )
-    const listItem: SortableListItem = {
+    listItems.push({
       key: key,
       image,
       lineOne,
       lineTwo,
       href,
       value,
-      _sortValue: rate.rate,
-    }
-    if (rate.drops < 50) {
-      listItem.alert = `Low data available (${rate.drops} drops)`
-      listItem.alertIcon = rate.drops < 10 ? "error" : "warning"
-    }
-    listItems.push(listItem)
+    })
   }
-  listItems.sort((a, b) => a._sortValue - b._sortValue)
 
   // Enable some extra sources not usually present if the drop doesn't have normal sources.
+  // No location drops, no pet sources, isn't craftable.
   const unusualDropMode =
-    drops.nodes.length === 0 &&
-    level1Pets.nodes.length === 0 &&
-    level3Pets.nodes.length === 0 &&
-    level6Pets.nodes.length === 0 &&
-    item.outputRecipes.length === 0 &&
-    item.cookingRecipe === null
+    drops.length === 0 && item.petItems.length === 0 && item.recipeItems.length === 0
 
   // Items from pets.
   listItems.push(
-    ...level1Pets.nodes.map((pet) => ({
-      key: "p" + pet.id,
-      image: pet.image,
-      lineOne: pet.name,
-      lineTwo: "Pet",
-      value: "Level 1",
-      href: pet.fields.path,
-    }))
-  )
-  listItems.push(
-    ...level3Pets.nodes.map((pet) => ({
-      key: "p" + pet.id,
-      image: pet.image,
-      lineOne: pet.name,
-      lineTwo: "Pet",
-      value: "Level 3",
-      href: pet.fields.path,
-    }))
-  )
-  listItems.push(
-    ...level6Pets.nodes.map((pet) => ({
-      key: "p" + pet.id,
-      image: pet.image,
-      lineOne: pet.name,
-      lineTwo: "Pet",
-      value: "Level 6",
-      href: pet.fields.path,
-    }))
+    ...item.petItems
+      .slice()
+      .sort((a, b) =>
+        a.level === b.level ? a.pet.name.localeCompare(a.pet.name) : a.level - b.level
+      )
+      .map((pi) => ({
+        key: `p${pi.pet.name}`,
+        image: pi.pet.image,
+        lineOne: pi.pet.name,
+        lineTwo: "Pet",
+        value: `Level ${pi.level}`,
+        href: linkFor(pi.pet),
+      }))
   )
 
   // Locksmith sources.
   listItems.push(
-    ...locksmithItems
-      .slice()
-      .sort((a, b) => parseInt(a.boxItem.jsonId, 10) - parseInt(b.boxItem.jsonId, 10))
-      .map((li) => ({
-        key: "s" + li.boxItem.jsonId,
-        image: li.boxItem.image,
-        lineOne: li.boxItem.name,
-        lineTwo: "Locksmith",
-        value: formatLocksmithQuantity(li),
-        href: li.boxItem.fields.path,
-      }))
+    ...item.locksmithOutputItems.map((li) => ({
+      key: `s${li.item.name}`,
+      image: li.item.image,
+      lineOne: li.item.name,
+      lineTwo: "Locksmith",
+      value: formatLocksmithQuantity(li),
+      href: linkFor(li.item),
+    }))
   )
 
   // Wishing well sources.
   listItems.push(
-    ...wishingWell
+    ...item.wishingWellOutputItems
       .slice()
-      .sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10))
       .sort((a, b) => b.chance - a.chance)
       .map((ww) => ({
-        key: "w" + ww.item.jsonId,
-        image: ww.item.image,
-        lineOne: ww.item.name,
+        key: `w${ww.inputItem.name}`,
+        image: ww.inputItem.image,
+        lineOne: ww.inputItem.name,
         lineTwo: "Wishing Well",
         value:
           (ww.chance * 100).toLocaleString(undefined, {
             minimumFractionDigits: 0,
             maximumFractionDigits: 1,
           }) + "%",
-        href: ww.item.fields.path,
+        href: linkFor(ww.inputItem),
       }))
   )
 
-  // Building sources.
+  // Manual sources.
   listItems.push(
-    ...buildings
+    ...item.manualProductions
       .slice()
       .sort((a, b) => a.sort - b.sort)
       .map((b) => ({
-        key: "b" + b.building,
+        key: `b${b.lineOne}`,
         image: b.image,
-        lineOne: b.building,
-        lineTwo: "Building",
-        value: b.frequency,
+        lineOne: b.lineOne,
+        lineTwo: b.lineTwo,
+        value: b.value,
       }))
   )
 
   // Exchange center sources.
   listItems.push(
-    ...item.receiveTrades
+    ...item.exchangeCenterOutputs
       .filter(
-        (t) => t.lastSeenRelative <= TRADE_LAST_SEEN_THRESHOLD && (unusualDropMode || !t.oneShot)
+        (t) =>
+          DateTime.fromISO(t.lastSeen).diffNow("seconds").seconds * -1 <=
+            TRADE_LAST_SEEN_THRESHOLD &&
+          (unusualDropMode || !t.oneshot)
       )
       .map((t) => ({
-        key: `ec${t.item.jsonId}`,
-        image: t.item.image,
-        lineOne: `${t.item.name} x${t.giveQuantity}`,
-        lineTwo: `Exchange Center${t.oneShot ? " - One Shot" : ""}`,
-        value: t.receiveQuantity.toLocaleString(),
-        href: t.item.fields.path,
+        key: `ec${t.inputItem.name}`,
+        image: t.inputItem.image,
+        lineOne: `${t.inputItem.name} x${t.inputQuantity}`,
+        lineTwo: `Exchange Center${t.oneshot ? " - One Shot" : ""}`,
+        value: t.outputQuantity.toLocaleString(),
+        href: linkFor(t.inputItem),
       }))
   )
 
   // Quiz sources.
   listItems.push(
-    ...item.quizRewards
-      .slice()
-      .sort((a, b) => a.quiz.jsonId - b.quiz.jsonId)
-      .map((q) => ({
-        key: `qz${q.quiz.jsonId}`,
-        image: "/img/items/schoolhouse.png",
-        lineOne: `${q.quiz.name} Quiz`,
-        lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
-        value: q.amount.toLocaleString(),
-        href: q.quiz.fields.path,
-      }))
+    ...item.quizRewards.map((q) => ({
+      key: `qz${q.quiz.name}`,
+      image: "/img/items/schoolhouse.png",
+      lineOne: `${q.quiz.name} Quiz`,
+      lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
+      value: q.quantity.toLocaleString(),
+      href: linkFor(q.quiz),
+    }))
   )
 
   // Passwords sources.
   listItems.push(
-    ...passwords
+    ...item.passwordItems
       .slice()
-      .sort((a, b) => a.password.jsonId - b.password.jsonId)
+      .sort((a, b) => a.password.id - b.password.id)
       .map((pw) => ({
-        key: `p${pw.password.jsonId}`,
+        key: `p${pw.password.id}`,
         image: "/img/items/postoffice.png",
-        lineOne: `Mailbox Password ${pw.password.jsonId}`,
+        lineOne: `Mailbox Password ${pw.password.id}`,
         lineTwo: settings.showPasswords ? `x${pw.quantity}` : "Click for password clues",
         value: settings.showPasswords ? pw.password.password : pw.quantity.toLocaleString(),
-        href: `/passwords/#${pw.password.jsonId}`,
+        href: `/passwords/#${pw.password.id}`,
       }))
   )
 
   // Tower sources.
   listItems.push(
-    ...tower
+    ...item.towerRewards
       .slice()
-      .sort((a, b) => (a.level === b.level ? a.order - b.order : a.level - b.level))
+      .sort((a, b) => a.level - b.level)
       .map((t) => ({
-        key: `t${t.level}${t.order}`,
+        key: `t${t.level}`,
         image: "/img/items/tower.png",
         lineOne: "Tower",
-        lineTwo: `x${t.quantity.toLocaleString()}`,
+        lineTwo: `x${t.itemQuantity?.toLocaleString()}`,
         value: `Level ${t.level}`,
         href: `/tower/#level${t.level}`,
       }))
   )
 
-  // Community center sources. Only shows if there's no drop sources and isn't craftable.
   if (unusualDropMode) {
+    // Community center sources. Only shows if there's no drop sources and isn't craftable.
     listItems.push(
-      ...communityCenter.map((cc) => ({
+      ...item.communityCenterOutputs.map((cc) => ({
         key: `cc${cc.date}`,
         image: "/img/items/comm.png",
         lineOne: "Community Center",
-        lineTwo: `${cc.goalItem.name} x${cc.goalQuantity.toLocaleString()}`,
+        lineTwo: `${cc.inputItem.name} x${cc.inputQuantity.toLocaleString()}`,
         value: DateTime.fromFormat(cc.date, "yyyy-MM-dd").toLocaleString(DateTime.DATE_FULL),
-        alert: cc.progress !== null && cc.progress < cc.goalQuantity ? "Mission failed" : undefined,
+        alert:
+          cc.progress !== null && cc.progress < cc.inputQuantity ? "Mission failed" : undefined,
         alertIcon: "error",
       }))
     )
 
     listItems.push(
-      ...item.npcLevelRewards
+      ...item.npcRewards
         .slice()
-        .sort((a, b) => a.level_reward.npc.name.localeCompare(b.level_reward.npc.name))
+        .sort((a, b) =>
+          a.npc.name === b.npc.name ? a.level - b.level : a.npc.name.localeCompare(b.npc.name)
+        )
         .map((i) => ({
-          key: `npcreward${i.level_reward.npc.name}-${i.level_reward.level}`,
-          image: i.level_reward.npc.image,
-          lineOne: i.level_reward.npc.name,
-          lineTwo: `Friendship Level ${i.level_reward.level}`,
+          key: `npcreward${i.npc.name}-${i.level}`,
+          image: i.npc.image,
+          lineOne: i.npc.name,
+          lineTwo: `Friendship Level ${i.level}`,
           value: i.quantity.toLocaleString(),
-          href: i.level_reward.npc.fields.path,
+          href: linkFor(i.npc),
         }))
     )
   }
 
   // Crafting.
-  if (item.outputRecipes.length !== 0) {
+  if (item.recipeItems.length !== 0 && item.canCraft) {
     listItems.push({
       image: "/img/items/workshop_sm.png",
       lineOne: "Workshop",
-      lineTwo: item.api.crafting_level ? `Requires Crafting Level ${item.api.crafting_level}` : "See below",
+      lineTwo: item.craftingLevel ? `Requires Crafting Level ${item.craftingLevel}` : "See below",
       href: "#recipe",
       value: "Craftable",
     })
   }
 
   // Cooking.
-  if (item.cookingRecipe !== null) {
+  if (item.recipeItems.length !== 0 && item.canCook) {
     listItems.push({
       image: "/img/items/2473.png",
       lineOne: "Kitchen",
@@ -721,20 +488,20 @@ const ItemList = ({
     })
   }
 
-  if (item.cookingRecipeUnlocker !== null) {
+  if (item.cookingRecipeCookable !== null) {
     listItems.push({
-      image: item.cookingRecipeUnlocker.item.image,
-      lineOne: item.cookingRecipeUnlocker.item.name,
+      image: item.cookingRecipeCookable.image,
+      lineOne: item.cookingRecipeCookable.name,
       lineTwo: "Cooking Recipe",
-      href: item.cookingRecipeUnlocker.item.fields.path,
+      href: linkFor(item.cookingRecipeCookable),
       value: "Unlocks",
     })
   }
 
   // Trading.
-  if (item.givable) {
+  if (item.canMail) {
     listItems.push({
-      jsonId: "trading",
+      key: "trading",
       image: "/img/items/2392.png",
       lineOne: "Trading",
       lineTwo: "Ask in Trade or Giveaways chat",
@@ -745,21 +512,21 @@ const ItemList = ({
   // Shop sources.
   if (item.buyPrice) {
     listItems.push({
-      jsonId: "countryStore",
+      key: "countryStore",
       image: "/img/items/store.png",
       lineOne: "Country Store",
       lineTwo: "Silver",
       value: item.buyPrice.toLocaleString(),
     })
   }
-  if (item.fleaMarket) {
+  if (item.fleaMarketPrice) {
     listItems.push({
-      jsonId: "fleaMarket",
+      key: "fleaMarket",
       image: "/img/items/streetmarket.png",
       lineOne: "Flea Market",
       lineTwo: "Gold",
-      value: item.fleaMarket.toLocaleString(),
-      alert: "Probably don't use the Flea Market",
+      value: item.fleaMarketPrice.toLocaleString(),
+      alert: "Spending gold should be done carefully",
       alertIcon: "error",
     })
   }
@@ -769,109 +536,76 @@ const ItemList = ({
 
 export default ({
   data: {
-    maybeItem,
-    normalDrops,
-    ironDepotDrops,
-    manualFishingDrops,
-    runecubeNormalDrops,
-    runecubeIronDepotDrops,
-    runecubeManualFishingDrops,
-    level1Pets,
-    level3Pets,
-    level6Pets,
-    questRequests,
-    questRewards,
-    wellInput,
-    wellOutput,
-    locksmithBox,
-    locksmithItems,
-    buildings,
-    tower,
-    communityCenter,
-    passwords,
+    farmrpg: {
+      items: [item],
+    },
   },
 }: PageProps<Queries.ItemTemplateQuery>) => {
-  // Deal with nulls.
-  const item = maybeItem!
-
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
-  const [drops, setDrops] = useState(normalDrops)
+  const [drops, setDrops] = useState(() =>
+    item.dropRatesItems.filter(
+      (dr) => !(dr.dropRates.ironDepot || dr.dropRates.manualFishing || dr.dropRates.runecube)
+    )
+  )
 
   useEffect(() => {
-    if (item.dropMode?.dropMode === "explores" && !!settings.ironDepot) {
-      setDrops(settings.runecube ? runecubeIronDepotDrops : ironDepotDrops)
-    } else if (
-      item.dropMode?.dropMode === "fishes" &&
-      (!!settings.manualFishing || item.manualFishingOnly)
-    ) {
-      setDrops(settings.runecube ? runecubeManualFishingDrops : manualFishingDrops)
-    } else if (settings.runecube) {
-      // setDrops(runecubeNormalDrops)
-      // I have no non-iron-depot data for Runecube, sorry.
-      setDrops(
-        item.dropMode?.dropMode === "explores" ? runecubeIronDepotDrops : runecubeNormalDrops
-      )
-    } else {
-      setDrops(normalDrops)
-    }
+    const drops = item.dropRatesItems.filter(
+      (dr) =>
+        !!dr.dropRates.runecube === !!settings.runecube &&
+        (dr.dropRates.ironDepot === null || !!dr.dropRates.ironDepot === !!settings.ironDepot) &&
+        (dr.dropRates.manualFishing === null ||
+          !!dr.dropRates.manualFishing === (!!settings.manualFishing || item.manualFishingOnly))
+    )
+    setDrops(drops)
   }, [
-    item.dropMode?.dropMode,
+    item.dropRatesItems,
     ctx.settings.ironDepot,
     ctx.settings.manualFishing,
     ctx.settings.runecube,
   ])
+
+  let dropMode = "harvests"
+  if (drops.find((dr) => dr.dropRates.location?.type === "explore")) {
+    dropMode = "explores"
+  } else if (drops.find((dr) => dr.dropRates.location?.type === "fishing")) {
+    dropMode = "fishes"
+  }
 
   return (
     <Layout
       headerFrom={item}
       headerImageCopy={item.name.endsWith(")") ? `((${item.name} ))` : `((${item.name}))`}
       headerRight={
-        <QuickSettings
-          dropMode={item.dropMode?.dropMode}
-          manualFishingOnly={item.manualFishingOnly || false}
-        />
+        <QuickSettings dropMode={dropMode} manualFishingOnly={item.manualFishingOnly || false} />
       }
     >
-      {item.cookingRecipe !== null && <p>{item.api.description}</p>}
-      <ItemList
-        item={item}
-        drops={drops}
-        level1Pets={level1Pets}
-        level3Pets={level3Pets}
-        level6Pets={level6Pets}
-        locksmithItems={locksmithItems.nodes}
-        wishingWell={wellOutput.nodes}
-        buildings={buildings.nodes}
-        tower={tower.nodes}
-        communityCenter={communityCenter.nodes}
-        passwords={passwords.nodes}
-        settings={settings}
+      {item.type === "meal" && item.description.split(/<br\/?>/).map((d) => <p>{d}</p>)}
+      <ItemList item={item} drops={drops} settings={settings} />
+      {item.canCraft && (
+        <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.recipeItems} />
+      )}
+      <RecipeList
+        label="Used In"
+        labelAnchor={undefined}
+        recipeItems={item.recipeIngredientItems.filter((i) => i.item.canCraft)}
       />
-      <RecipeList label="Recipe" labelAnchor="recipe" recipeItems={item.outputRecipes} />
-      <RecipeList label="Used In" labelAnchor={undefined} recipeItems={item.inputRecipes} />
       <CookingRecipeList item={item} />
       <CookingReverseList item={item} />
       <LocksmithList
-        label={
-          locksmithBox?.mode === "single"
-            ? "Open At Locksmith For (One Of)"
-            : "Open At Locksmith For"
-        }
-        box={locksmithBox}
+        label={item.locksmithGrabBag ? "Open At Locksmith For (One Of)" : "Open At Locksmith For"}
+        item={item}
       />
-      <WellList label="Throw In The Wishing Well For" items={wellInput.nodes} />
+      <WellList label="Throw In The Wishing Well For" item={item} />
       <TradeList item={item} />
       <QuestList
         label="Needed For Quests"
-        item={item.name}
-        quests={questRequests.nodes}
+        quests={item.requiredForQuests}
         oldQuests={!!settings.oldQuests}
       />
       <QuestList
         label="Received From Quests"
-        item={item.name}
-        quests={questRewards.nodes}
+        quests={item.rewardForQuests}
         oldQuests={!!settings.oldQuests}
       />
       <NPCList item={item} />
@@ -880,375 +614,215 @@ export default ({
 }
 
 export const pageQuery = graphql`
-  fragment ItemTemplateItem on ItemsJson {
-    jsonId
+  fragment ItemTemplateItem on FarmRPG_Item {
+    __typename
+    id
     name
     image
-    fields {
-      path
-    }
   }
 
-  fragment ItemTemplateDrops on DropRatesGqlJsonConnection {
-    nodes {
-      location {
-        jsonId
-        name
-        image
-        type
-        fields {
-          path
-        }
-        extra {
-          baseDropRate
-        }
-      }
-      locationItem {
+  query ItemTemplate($id: ID!) {
+    farmrpg {
+      items(filters: { id: $id }) {
         ...ItemTemplateItem
-      }
-      rate
-      mode
-      drops
-    }
-  }
-
-  query ItemTemplate($name: String!) {
-    maybeItem: itemsJson(name: { eq: $name }) {
-      ...ItemTemplateItem
-      manualFishingOnly
-      givable
-      buyPrice
-      fleaMarket
-      dropMode {
-        dropMode
-      }
-      api {
-        crafting_level
+        type
         description
-      }
-      # This is not used right now, it's backup for future corruption debugging because I'm seeing data desync.
-      # Also I should probably do more of this using this kind of query, sigh.
-      locksmithItems {
-        quantityLow
-        quantityHigh
-        boxItem {
-          ...ItemTemplateItem
-        }
-      }
-
-      # Recipes.
-      inputRecipes {
-        item: output {
-          ...ItemTemplateItem
-        }
-        quantity
-      }
-      outputRecipes {
-        item: input {
-          ...ItemTemplateItem
-        }
-        quantity
-      }
-
-      # Exchange Center Trades.
-      giveTrades {
-        item: receiveItem {
-          ...ItemTemplateItem
-        }
-        giveQuantity
-        receiveQuantity
-        lastSeenRelative
-        oneShot
-      }
-      receiveTrades {
-        item: giveItem {
-          ...ItemTemplateItem
-        }
-        giveQuantity
-        receiveQuantity
-        lastSeenRelative
-        oneShot
-      }
-
-      # Quizzes.
-      quizRewards {
-        amount
-        score
-        quiz {
-          jsonId
-          name
-          fields {
-            path
+        manualFishingOnly
+        canMail
+        canCraft
+        canCook
+        craftingLevel
+        cookingLevel
+        buyPrice
+        fleaMarketPrice
+        baseYieldMinutes
+        locksmithGrabBag
+        locksmithGold
+        requiredForQuests {
+          quantity
+          quest {
+            __typename
+            id
+            name: title
+            image: npcImg
+            endDate
           }
         }
-      }
-
-      # Townsfolk.
-      npcs {
-        adjective
-        npc {
-          name
-          image
-          fields {
-            path
+        rewardForQuests {
+          quantity
+          quest {
+            __typename
+            id
+            name: title
+            image: npcImg
+            endDate
           }
         }
-      }
-
-      npcLevelRewards {
-        quantity
-        level_reward {
+        petItems {
           level
-          npc {
+          pet {
+            __typename
             name
             image
-            fields {
-              path
+          }
+        }
+        dropRates {
+          runecube
+          items {
+            item {
+              ...ItemTemplateItem
+            }
+            rate
+          }
+        }
+        dropRatesItems {
+          rate
+          dropRates {
+            ironDepot
+            manualFishing
+            runecube
+            location {
+              __typename
+              name
+              image
+              type
+              baseDropRate
+            }
+            seed {
+              __typename
+              name
+              image
             }
           }
         }
-      }
-
-      # Cooking
-      cookingRecipe {
-        level
-        time
-        recipe_item {
-          ...ItemTemplateItem
-        }
-        inputs {
-          order
+        quizRewards {
           quantity
-          input {
-            ...ItemTemplateItem
+          score
+          quiz {
+            __typename
+            name
           }
         }
-      }
-
-      cookingRecipeUnlocker {
-        item {
-          ...ItemTemplateItem
+        npcItems {
+          relationship
+          npc {
+            __typename
+            name
+            image
+          }
         }
-      }
-
-      cookingRecipeItems {
-        quantity
-        recipe {
+        npcRewards {
           level
+          quantity
+          npc {
+            __typename
+            name
+            image
+          }
+        }
+        passwordItems {
+          quantity
+          password {
+            id
+            password
+          }
+        }
+        wishingWellInputItems {
+          chance
+          outputItem {
+            ...ItemTemplateItem
+          }
+        }
+        wishingWellOutputItems {
+          chance
+          inputItem {
+            ...ItemTemplateItem
+          }
+        }
+        recipeItems {
+          quantity
+          item: ingredientItem {
+            ...ItemTemplateItem
+          }
+        }
+        recipeIngredientItems {
+          quantity
+          item {
+            ...ItemTemplateItem
+            cookingLevel
+            canCraft
+            canCook
+          }
+        }
+        locksmithItems {
+          quantityMax
+          quantityMin
+          outputItem {
+            ...ItemTemplateItem
+          }
+        }
+        locksmithOutputItems {
+          quantityMax
+          quantityMin
           item {
             ...ItemTemplateItem
           }
         }
-      }
-    }
-
-    # Item drops stuff.
-    normalDrops: allDropRatesGqlJson(
-      filter: {
-        item: { name: { eq: $name } }
-        rate_type: { eq: "normal" }
-        runecube: { eq: false }
-      }
-    ) {
-      ...ItemTemplateDrops
-    }
-    ironDepotDrops: allDropRatesGqlJson(
-      filter: {
-        item: { name: { eq: $name } }
-        rate_type: { eq: "iron_depot" }
-        runecube: { eq: false }
-      }
-    ) {
-      ...ItemTemplateDrops
-    }
-    manualFishingDrops: allDropRatesGqlJson(
-      filter: {
-        item: { name: { eq: $name } }
-        rate_type: { eq: "manual_fishing" }
-        runecube: { eq: false }
-      }
-    ) {
-      ...ItemTemplateDrops
-    }
-    runecubeNormalDrops: allDropRatesGqlJson(
-      filter: { item: { name: { eq: $name } }, rate_type: { eq: "normal" }, runecube: { eq: true } }
-    ) {
-      ...ItemTemplateDrops
-    }
-    runecubeIronDepotDrops: allDropRatesGqlJson(
-      filter: {
-        item: { name: { eq: $name } }
-        rate_type: { eq: "iron_depot" }
-        runecube: { eq: true }
-      }
-    ) {
-      ...ItemTemplateDrops
-    }
-    runecubeManualFishingDrops: allDropRatesGqlJson(
-      filter: {
-        item: { name: { eq: $name } }
-        rate_type: { eq: "manual_fishing" }
-        runecube: { eq: true }
-      }
-    ) {
-      ...ItemTemplateDrops
-    }
-
-    # Check each level of pet items, since Gatsby appears to lack an "or" query mode.
-    level1Pets: allPetsJson(filter: { level1Items: { elemMatch: { name: { eq: $name } } } }) {
-      nodes {
-        id
-        name
-        image
-        fields {
-          path
+        cookingRecipeItem {
+          ...ItemTemplateItem
         }
-      }
-    }
-    level3Pets: allPetsJson(filter: { level3Items: { elemMatch: { name: { eq: $name } } } }) {
-      nodes {
-        id
-        name
-        image
-        fields {
-          path
+        cookingRecipeCookable {
+          ...ItemTemplateItem
         }
-      }
-    }
-    level6Pets: allPetsJson(filter: { level6Items: { elemMatch: { name: { eq: $name } } } }) {
-      nodes {
-        id
-        name
-        image
-        fields {
-          path
+        locksmithKey {
+          ...ItemTemplateItem
         }
-      }
-    }
-
-    # Quest requests and rewards. Separate again because no OR.
-    questRequests: allQuestsJson(
-      filter: { itemRequests: { elemMatch: { item: { name: { eq: $name } } } } }
-    ) {
-      nodes {
-        jsonId
-        name
-        fromImage
-        fields {
-          path
+        locksmithKeyItems {
+          ...ItemTemplateItem
         }
-        items: itemRequests {
-          quantity
-          item {
-            name
+        manualProductions {
+          image
+          lineOne
+          lineTwo
+          value
+          sort
+        }
+        exchangeCenterInputs {
+          lastSeen
+          oneshot
+          inputQuantity
+          outputQuantity
+          outputItem {
+            ...ItemTemplateItem
           }
         }
-        extra {
-          availableTo
-        }
-      }
-    }
-    questRewards: allQuestsJson(
-      filter: { itemRewards: { elemMatch: { item: { name: { eq: $name } } } } }
-    ) {
-      nodes {
-        jsonId
-        name
-        fromImage
-        fields {
-          path
-        }
-        items: itemRewards {
-          quantity
-          item {
-            name
+        exchangeCenterOutputs {
+          lastSeen
+          oneshot
+          inputQuantity
+          outputQuantity
+          inputItem {
+            ...ItemTemplateItem
           }
         }
-        extra {
-          availableTo
+        towerRewards {
+          level
+          itemQuantity
         }
-      }
-    }
-
-    # Wishing well, both sides.
-    wellInput: allWishingWellJson(filter: { input: { name: { eq: $name } } }) {
-      nodes {
-        chance
-        item: output {
-          ...ItemTemplateItem
+        skillLevelRewards {
+          skill
+          level
+          itemQuantity
         }
-      }
-    }
-    wellOutput: allWishingWellJson(filter: { output: { name: { eq: $name } } }) {
-      nodes {
-        chance
-        item: input {
-          ...ItemTemplateItem
+        communityCenterOutputs(order: { date: DESC }, pagination: { limit: 5 }) {
+          date
+          inputItem {
+            ...ItemTemplateItem
+          }
+          inputQuantity
+          progress
+          outputQuantity
         }
-      }
-    }
-
-    # Locksmith, again input and output sides.
-    locksmithBox: locksmithBoxesJson(box: { name: { eq: $name } }) {
-      gold
-      mode
-      items {
-        quantityLow
-        quantityHigh
-        item {
-          ...ItemTemplateItem
-        }
-      }
-    }
-    locksmithItems: allLocksmithItemsJson(filter: { item: { name: { eq: $name } } }) {
-      nodes {
-        quantityLow
-        quantityHigh
-        boxItem {
-          ...ItemTemplateItem
-        }
-      }
-    }
-
-    # Production from buildings.
-    buildings: allBuildingProductionJson(filter: { item: { name: { eq: $name } } }) {
-      nodes {
-        building
-        image
-        frequency
-        sort
-      }
-    }
-
-    # The Tower.
-    tower: allTowerJson(filter: { item: { name: { eq: $name } } }) {
-      nodes {
-        level
-        order
-        quantity
-      }
-    }
-
-    # Community center (reward items).
-    communityCenter: allCommunityCenterJson(filter: { rewardItem: { name: { eq: $name } } }) {
-      nodes {
-        date
-        goalItem {
-          name
-        }
-        goalQuantity
-        progress
-      }
-    }
-
-    # Mailbox passwords.
-    passwords: allPasswordItemsJson(filter: { item: { name: { eq: $name } } }) {
-      nodes {
-        password {
-          jsonId
-          password
-        }
-        quantity
       }
     }
   }

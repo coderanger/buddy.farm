@@ -1,31 +1,19 @@
-import { graphql, useStaticQuery } from "gatsby"
+import { graphql, PageProps } from "gatsby"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 
 import { Input } from "../components/input"
 import Layout from "../components/layout"
 
-interface Item {
-  name: string
-  event: boolean
-  api: {
-    type: string
-  }
-}
-
-interface WikiGenQuery {
-  items: {
-    nodes: Item[]
-  }
-}
+type Item = Queries.WikigenPageQuery["farmrpg"]["items"][0]
 
 const UNAVAILABLE_ITEMS = ["Meerif Crest", "Peculiar Gem", "Wishbone Necklace"]
 
 const wikiLink = (item: Item) => `((${item.name}${item.name.endsWith(")") ? " " : ""}))`
 
-const genMuseumCompletion = (items: Item[]) => {
-  const itemCount = items.filter((it) => !it.event).length
-  const eventCount = items.filter((it) => it.event).length
+const genMuseumCompletion = (items: readonly Item[]) => {
+  const itemCount = items.filter((it) => !it.fromEvent).length
+  const eventCount = items.filter((it) => it.fromEvent).length
   const sections = [
     { type: "crop", label: "Crops" },
     { type: "fish", label: "Fish" },
@@ -45,7 +33,7 @@ const genMuseumCompletion = (items: Item[]) => {
 
   for (const section of sections) {
     const sectionItems = items
-      .filter((it) => (section.event ? it.event : !it.event && it.api.type === section.type))
+      .filter((it) => (section.event ? it.fromEvent : !it.fromEvent && it.type === section.type))
       .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }))
     museumString += `
 
@@ -64,26 +52,17 @@ const genMuseumCompletion = (items: Item[]) => {
   return museumString
 }
 
-export default () => {
+const WikigenPage = ({
+  data: {
+    farmrpg: { items },
+  },
+}: PageProps<Queries.WikigenPageQuery>) => {
   const [page, setPage] = useState("museumCompletion")
-  const { items }: WikiGenQuery = useStaticQuery(graphql`
-    query {
-      items: allItemsJson {
-        nodes {
-          name
-          event
-          api {
-            type
-          }
-        }
-      }
-    }
-  `)
 
   let pageText = ""
   switch (page) {
     case "museumCompletion":
-      pageText = genMuseumCompletion(items.nodes)
+      pageText = genMuseumCompletion(items)
       break
   }
 
@@ -105,3 +84,17 @@ export default () => {
     </Layout>
   )
 }
+
+export default WikigenPage
+
+export const query = graphql`
+  query WikigenPage {
+    farmrpg {
+      items {
+        name
+        type
+        fromEvent
+      }
+    }
+  }
+`

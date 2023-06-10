@@ -1,15 +1,15 @@
 import { graphql, PageProps } from "gatsby"
-import { useContext, useState } from "react"
+import { useState } from "react"
 
-import { CopyButton } from "../components/clipboard"
 import { Input } from "../components/input"
 import Layout from "../components/layout"
 import List from "../components/list"
-import { GlobalContext } from "../utils/context"
 
 import { QuestItemList } from "./quest"
+import linkFor from "../utils/links"
 
-type Quest = NonNullable<Queries.QuestlineTemplateQuery["questline"]>["quests"][number]
+type Quest =
+  Queries.QuestlineTemplateQuery["farmrpg"]["questlines"][number]["steps"][number]["quest"]
 
 const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   if (!showText && !showLevels) {
@@ -18,47 +18,53 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
   const text = []
   if (showLevels) {
     const levelsText: JSX.Element[] = []
-    if (q.requiresFarming) {
+    if (q.requiredFarmingLevel) {
       levelsText.push(
         <span className="me-2">
           <b className="me-1">Farming:</b>
-          {q.requiresFarming}
+          {q.requiredFarmingLevel}
         </span>
       )
     }
-    if (q.requiresFishing) {
+    if (q.requiredFishingLevel) {
       levelsText.push(
         <span className="me-2">
           <b className="me-1">Fishing:</b>
-          {q.requiresFishing}
+          {q.requiredFishingLevel}
         </span>
       )
     }
-    if (q.requiresCrafting) {
+    if (q.requiredCraftingLevel) {
       levelsText.push(
         <span className="me-2">
           <b className="me-1">Crafting:</b>
-          {q.requiresCrafting}
+          {q.requiredCraftingLevel}
         </span>
       )
     }
-    if (q.requiresExploring) {
+    if (q.requiredExploringLevel) {
       levelsText.push(
         <span className="me-2">
           <b className="me-1">Exploring:</b>
-          {q.requiresExploring}
+          {q.requiredExploringLevel}
         </span>
       )
     }
     text.push(<div>{levelsText}</div>)
   }
-  if (showText) {
-    text.push(<div>{q.text}</div>)
+  if (showText && !q.isHidden) {
+    text.push(<div>{q.description}</div>)
   }
   return text
 }
 
-export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuery>) => {
+export default ({
+  data: {
+    farmrpg: {
+      questlines: [questline],
+    },
+  },
+}: PageProps<Queries.QuestlineTemplateQuery>) => {
   // const ctx = useContext(GlobalContext)
   const [showText, setShowText] = useState(false)
   const [showLevels, setShowLevels] = useState(false)
@@ -67,40 +73,47 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
   }
 
   // Collect info on line-wide requests and rewards. Negative rolling count is a request, positive is a reward.
-  const itemCounts: { [itemId: string]: number } = {}
-  const items: { [itemId: string]: Quest["itemRequests"][0]["item"] } = {}
+  const itemCounts: { [name: string]: number } = {}
+  const items: { [name: string]: Queries.QuestTemplateRequiredItemFragment["item"] } = {}
   let silverCount = 0
   let goldCount = 0
-  for (const quest of questline.quests) {
-    silverCount -= quest.silverRequest || 0
-    silverCount += quest.silverReward || 0
-    goldCount += quest.goldReward || 0
-    for (const iq of quest.itemRequests) {
-      items[iq.item.jsonId] = iq.item
-      itemCounts[iq.item.jsonId] = (itemCounts[iq.item.jsonId] || 0) - iq.quantity
+  for (const step of questline.steps) {
+    if (step.quest.isHidden) {
+      continue
     }
-    for (const iq of quest.itemRewards) {
-      items[iq.item.jsonId] = iq.item
-      itemCounts[iq.item.jsonId] = (itemCounts[iq.item.jsonId] || 0) + iq.quantity
+    silverCount -= step.quest.requiredSilver || 0
+    silverCount += step.quest.rewardSilver || 0
+    goldCount += step.quest.rewardGold || 0
+    for (const iq of step.quest.requiredItems) {
+      items[iq.item.name] = iq.item
+      itemCounts[iq.item.name] = (itemCounts[iq.item.name] || 0) - iq.quantity
+    }
+    for (const iq of step.quest.rewardItems) {
+      items[iq.item.name] = iq.item
+      itemCounts[iq.item.name] = (itemCounts[iq.item.name] || 0) + iq.quantity
     }
   }
 
   // Build up the lists based on the totals.
-  const lineRequestItems: Quest["itemRequests"][0][] = []
-  const lineRewardItems: Quest["itemRewards"][0][] = []
-  for (const itemId in itemCounts) {
-    const quantity = itemCounts[itemId]
+  const lineRequestItems: Queries.QuestTemplateRequiredItemFragment[] = []
+  const lineRewardItems: Queries.QuestTemplateRewardItemFragment[] = []
+  for (const name in itemCounts) {
+    const quantity = itemCounts[name]
     if (quantity === 0) {
       continue
     }
-    ;(quantity > 0 ? lineRewardItems : lineRequestItems).push({
-      item: items[itemId],
+    const itemList = quantity > 0 ? lineRewardItems : lineRequestItems
+    itemList.push({
+      item: items[name],
       quantity: Math.abs(quantity),
     })
   }
 
   // Sort the two item lists, first on rarity then quantity, then alpha.
-  const sortItems = (a: Quest["itemRequests"][0], b: Quest["itemRequests"][0]) => {
+  const sortItems = (
+    a: Queries.QuestTemplateRequiredItemFragment | Queries.QuestTemplateRewardItemFragment,
+    b: Queries.QuestTemplateRequiredItemFragment | Queries.QuestTemplateRewardItemFragment
+  ) => {
     if (a.quantity !== b.quantity) {
       return b.quantity - a.quantity
     }
@@ -127,12 +140,15 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
       </p>
       <List
         key="quests"
-        items={questline.quests.map((q) => ({
-          image: q.fromImage,
-          lineOne: q.name,
-          lineTwo: questText(q, showText, showLevels),
-          href: q.fields.path,
-        }))}
+        items={questline.steps
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((q) => ({
+            image: q.quest.image,
+            lineOne: q.quest.name,
+            lineTwo: questText(q.quest, showText, showLevels),
+            href: linkFor(q.quest),
+          }))}
         bigLine={true}
       />
       <QuestItemList
@@ -140,6 +156,7 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
         label="Total Request"
         silver={silverCount < 0 ? -silverCount : null}
         items={lineRequestItems}
+        isHidden={false}
       />
       <QuestItemList
         key="rewards"
@@ -147,6 +164,7 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
         silver={silverCount > 0 ? silverCount : null}
         gold={goldCount > 0 ? goldCount : null}
         items={lineRewardItems}
+        isHidden={false}
       />
     </Layout>
   )
@@ -154,48 +172,41 @@ export default ({ data: { questline } }: PageProps<Queries.QuestlineTemplateQuer
 
 export const pageQuery = graphql`
   query QuestlineTemplate($name: String!) {
-    questline: questlinesJson(name: { eq: $name }) {
-      name
-      image
-      quests {
-        name
-        fromImage
-        requiresFarming
-        requiresFishing
-        requiresCrafting
-        requiresExploring
-        text
-        fields {
-          path
-        }
-        silverRequest
-        itemRequests {
-          quantity
-          item {
-            jsonId
-            name
-            image
-            fields {
-              path
+    farmrpg {
+      questlines(filters: { title: $name }) {
+        __typename
+        name: title
+        image
+        steps {
+          order
+          quest {
+            __typename
+            name: title
+            image: npcImg
+            description
+            isHidden
+
+            requiredFarmingLevel
+            requiredFishingLevel
+            requiredCraftingLevel
+            requiredExploringLevel
+            requiredCookingLevel
+            requiredTowerLevel
+            requiredNpcId
+            requiredNpcLevel
+
+            requiredSilver
+            requiredItems {
+              ...QuestTemplateRequiredItem
+            }
+
+            rewardSilver
+            rewardGold
+            rewardItems {
+              ...QuestTemplateRewardItem
             }
           }
         }
-        silverReward
-        goldReward
-        itemRewards {
-          quantity
-          item {
-            jsonId
-            name
-            image
-            fields {
-              path
-            }
-          }
-        }
-      }
-      fields {
-        path
       }
     }
   }

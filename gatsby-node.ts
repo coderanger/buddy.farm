@@ -3,6 +3,7 @@ import path from "path"
 
 import type { GatsbyNode } from "gatsby"
 import type { Searchable } from "./src/utils/context"
+import linkFor from "./src/utils/links"
 
 export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] = ({ actions }) => {
   const { createTypes } = actions
@@ -324,6 +325,11 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       recipe: CookingRecipesJson! @link(by: "item_name", from: "recipe_name")
       input: ItemsJson! @link(by: "name", from: "input_name")
     }
+
+    type XpJson implements Node {
+      level: Int!
+      xp: Int!
+    }
   `
   createTypes(typeDefs)
 }
@@ -473,126 +479,106 @@ const STATIC_SEARCHABLES: Searchable[] = [
 export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql }) => {
   const { data } = await graphql<Queries.GatsbyNodeCreatePagesQuery>(`
     query GatsbyNodeCreatePages {
-      locations: allLocationsJson {
-        nodes {
+      farmrpg {
+        items {
+          __typename
+          id
           name
           image
-          fields {
-            path
-          }
         }
-      }
-      items: allItemsJson {
-        nodes {
+        locations {
+          __typename
+          id
           name
           image
-          fields {
-            path
-          }
         }
-      }
-      pets: allPetsJson {
-        nodes {
+        quests {
+          __typename
+          id
+          name: title
+          image: npcImg
+        }
+        questlines {
+          __typename
+          id
+          name: title
+          image
+        }
+        pets {
+          __typename
+          id
           name
           image
-          fields {
-            path
-          }
         }
-      }
-      quests: allQuestsJson {
-        nodes {
+        quizzes {
+          __typename
+          id
           name
-          image: fromImage
-          fields {
-            path
-          }
         }
-      }
-      questlines: allQuestlinesJson {
-        nodes {
+        npcs {
+          __typename
+          id
           name
           image
-          fields {
-            path
-          }
-        }
-      }
-      quizzes: allQuizzesJson {
-        nodes {
-          name
-          fields {
-            path
-          }
-        }
-      }
-      npcs: allNpcsJson {
-        nodes {
-          name
-          image
-          fields {
-            path
-          }
         }
       }
     }
   `)
   const types = [
     {
-      nodes: data!.items,
+      nodes: data!.farmrpg.items,
       template: "item",
     },
     {
-      nodes: data!.locations,
+      nodes: data!.farmrpg.locations,
       template: "location",
     },
     {
-      nodes: data!.pets,
+      nodes: data!.farmrpg.pets,
       template: "pet",
     },
     {
-      nodes: data!.quests,
+      nodes: data!.farmrpg.quests,
       template: "quest",
     },
     {
-      nodes: data!.questlines,
+      nodes: data!.farmrpg.questlines,
       template: "questline",
       searchType: "Questline",
     },
     {
-      nodes: data!.quizzes,
+      nodes: data!.farmrpg.quizzes,
       template: "quiz",
       image: "/img/items/schoolhouse.png",
       searchType: "Schoolhouse Quiz",
+      remote: true,
     },
     {
-      nodes: data!.npcs,
+      nodes: data!.farmrpg.npcs,
       template: "npc",
       searchType: "Townsfolk",
     },
   ]
   for (const typeData of types) {
-    for (const node of typeData.nodes.nodes) {
-      for (const nodePath of [node.fields.path]) {
-        actions.createPage({
-          path: nodePath,
-          component: path.resolve(`src/templates/${typeData.template}.tsx`),
-          context: { name: node.name },
-        })
-      }
+    for (const node of typeData.nodes) {
+      actions.createPage({
+        path: linkFor(node),
+        component: path.resolve(`src/templates/${typeData.template}.tsx`),
+        context: { id: node.id, name: node.name },
+      })
     }
   }
 
   const searchables: Searchable[] = []
   searchables.push(...STATIC_SEARCHABLES)
   for (const typeData of types) {
-    for (const node of typeData.nodes.nodes) {
+    for (const node of typeData.nodes) {
       const searchName = node.name.toLowerCase()
       searchables.push({
         name: node.name,
-        image: node.image || typeData.image,
+        image: "image" in node ? node.image : typeData.image!,
         searchText: searchName,
-        href: node.fields.path,
+        href: linkFor(node),
         type: typeData.searchType || null,
       })
     }

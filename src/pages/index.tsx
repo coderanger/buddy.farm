@@ -1,4 +1,4 @@
-import { graphql, Link, useStaticQuery } from "gatsby"
+import { graphql, Link, PageProps } from "gatsby"
 import { DateTime } from "luxon"
 import React from "react"
 import Col from "react-bootstrap/Col"
@@ -8,14 +8,12 @@ import SunCalc from "suncalc"
 
 import Layout from "../components/layout"
 import { useServerTime } from "../hooks/servertime"
+import linkFor from "../utils/links"
 
-interface ListItem {
-  name: string
-  image: string
-  fields: {
-    path: string
-  }
-}
+type ListItem =
+  | Queries.IndexPageQuery["farmrpg"]["items"][0]
+  | Queries.IndexPageQuery["farmrpg"]["quests"][0]
+  | { name: string; image: string; href: string }
 
 // These are close but not quite to (x+0.5)/8 thresholds.
 // The game must have a very slightly different moon phase computation
@@ -72,7 +70,7 @@ const SteakMarketForecast = () => (
 
 interface MiniListProps {
   label: string
-  items: ListItem[]
+  items: readonly ListItem[]
 }
 
 const MiniList = ({ label, items }: MiniListProps) => (
@@ -80,9 +78,9 @@ const MiniList = ({ label, items }: MiniListProps) => (
     <h5 className="mb-1">{label}</h5>
     <ListGroup variant="flush">
       {items.map((it) => (
-        <ListGroup.Item className="px-0" key={it.fields.path}>
+        <ListGroup.Item className="px-0" key={it.name}>
           <Link
-            to={it.fields.path}
+            to={"href" in it ? it.href : linkFor(it)}
             css={{
               color: "inherit",
               textDecoration: "inherit",
@@ -122,43 +120,11 @@ const ServerTime = () => {
   )
 }
 
-interface IndexQuery {
-  quests: {
-    nodes: ListItem[]
-  }
-  items: {
-    nodes: ListItem[]
-  }
-}
-
-export default () => {
-  const { quests, items }: IndexQuery = useStaticQuery(graphql`
-    query {
-      quests: allQuestsJson(sort: { fields: firstSeen, order: DESC }, limit: 5) {
-        nodes {
-          name
-          image: fromImage
-          fields {
-            path
-          }
-        }
-      }
-      items: allItemsJson(
-        sort: { fields: firstSeen, order: DESC }
-        limit: 5
-        filter: { firstSeen: { ne: null } }
-      ) {
-        nodes {
-          name
-          image
-          fields {
-            path
-          }
-        }
-      }
-    }
-  `)
-
+const IndexPage = ({
+  data: {
+    farmrpg: { items, quests },
+  },
+}: PageProps<Queries.IndexPageQuery>) => {
   return (
     <Layout pageTitle="Buddy's Almanac">
       <h1>Welcome to Buddy's Almanac</h1>
@@ -186,56 +152,58 @@ export default () => {
                 {
                   name: "Townsfolk",
                   image: "/img/items/town_sm.png",
-                  fields: { path: "/townsfolk/" },
+                  href: "/townsfolk/",
                 },
                 {
                   name: "Schoolhouse Quizzes",
                   image: "/img/items/schoolhouse.png",
-                  fields: { path: "/quizzes/" },
+                  href: "/quizzes/",
                 },
-                { name: "The Tower", image: "/img/items/tower.png", fields: { path: "/tower/" } },
+                { name: "The Tower", image: "/img/items/tower.png", href: "/tower/" },
                 {
                   name: "Level Rewards",
                   image: "/img/items/7447.png",
-                  fields: { path: "/level-rewards/" },
+                  href: "/level-rewards/",
                 },
                 {
                   name: "Exploring",
                   image: "/img/items/6075.png",
-                  fields: { path: "/exploring/" },
+                  href: "/exploring/",
                 },
-                { name: "Fishing", image: "/img/items/7783.png", fields: { path: "/fishing/" } },
+                { name: "Fishing", image: "/img/items/7783.png", href: "/fishing/" },
                 {
                   name: "Calculators",
                   image: "/img/items/7210.png",
-                  fields: { path: "/calculators/" },
+                  href: "/calculators/",
                 },
                 {
                   name: "Profile Backgrounds",
                   image: "/img/emblems/def.png",
-                  fields: { path: "/backgrounds/" },
+                  href: "/backgrounds/",
                 },
                 {
                   name: "Mailbox Passwords",
                   image: "/img/items/postoffice.png",
-                  fields: { path: "/passwords/" },
+                  href: "/passwords/",
                 },
                 {
                   name: "Exchange Center",
                   image: "/img/items/exchange.png?1",
-                  fields: { path: "/exchange-center/" },
+                  href: "/exchange-center/",
                 },
-                { name: "Random", image: "/img/items/buddy.png", fields: { path: "/random/" } },
+                { name: "Random", image: "/img/items/buddy.png", href: "/random/" },
               ]}
             />
           </div>
         </Col>
         <Col sm>
-          <MiniList label="New Quests" items={quests.nodes} />
-          <div className="mt-2"><ServerTime /></div>
+          <MiniList label="New Quests" items={quests} />
+          <div className="mt-2">
+            <ServerTime />
+          </div>
         </Col>
         <Col sm>
-          <MiniList label="New Items" items={items.nodes} />
+          <MiniList label="New Items" items={items} />
         </Col>
       </Row>
       <div className="mt-5">
@@ -244,3 +212,23 @@ export default () => {
     </Layout>
   )
 }
+
+export default IndexPage
+
+export const query = graphql`
+  query IndexPage {
+    farmrpg {
+      items(order: { createdAt: DESC }, pagination: { limit: 5 }) {
+        __typename
+        name
+        image
+      }
+
+      quests(order: { createdAt: DESC }, pagination: { limit: 5 }) {
+        __typename
+        name: title
+        image: npcImg
+      }
+    }
+  }
+`

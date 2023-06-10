@@ -1,21 +1,27 @@
 import { graphql, PageProps, Link } from "gatsby"
+
 import Layout from "../components/layout"
 import List from "../components/list"
+import linkFor from "../utils/links"
 
-const TownsfolkPage = ({ data: { npcs } }: PageProps<Queries.TownsfolkPageQuery>) => {
+const TownsfolkPage = ({
+  data: {
+    farmrpg: { npcs },
+  },
+}: PageProps<Queries.TownsfolkPageQuery>) => {
   return (
     <Layout title="Townsfolk">
       <p className="mb-2">
         <Link to="/townsfolk-grid/">View all info as a grid.</Link>
       </p>
       <List
-        items={npcs.nodes
+        items={npcs
           .slice()
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((n) => ({
             image: n.image,
             lineOne: n.name,
-            href: n.fields.path,
+            href: linkFor(n),
           }))}
         bigLine={true}
       />
@@ -27,13 +33,11 @@ export default TownsfolkPage
 
 export const query = graphql`
   query TownsfolkPage {
-    npcs: allNpcsJson {
-      nodes {
+    farmrpg {
+      npcs {
+        __typename
         name
         image
-        fields {
-          path
-        }
       }
     }
   }

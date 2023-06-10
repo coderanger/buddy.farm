@@ -1,16 +1,17 @@
-import { graphql, useStaticQuery } from 'gatsby'
-import React, { useContext } from 'react'
-import Accordion from 'react-bootstrap/Accordion'
-import Button from 'react-bootstrap/Button'
+import { graphql, PageProps } from "gatsby"
+import React, { useContext } from "react"
+import Accordion from "react-bootstrap/Accordion"
+import Button from "react-bootstrap/Button"
 
-import { css } from '@emotion/react'
+import { css } from "@emotion/react"
 
-import { CopyButton } from '../components/clipboard'
-import Layout from '../components/layout'
-import List from '../components/list'
-import { useDebounceAfter } from '../hooks/debounce'
-import { useSettings } from '../hooks/settings'
-import { GlobalContext } from '../utils/context'
+import { CopyButton } from "../components/clipboard"
+import Layout from "../components/layout"
+import List from "../components/list"
+import { useDebounceAfter } from "../hooks/debounce"
+import { useSettings } from "../hooks/settings"
+import { GlobalContext } from "../utils/context"
+import linkFor from "../utils/links"
 
 const SPECIAL_IMAGES: { [key: string]: string } = {
   Silver: "/img/items/silver.png",
@@ -18,33 +19,13 @@ const SPECIAL_IMAGES: { [key: string]: string } = {
   Masked: "/img/items/item.png",
 }
 
-interface Password {
-  jsonId: number
-  group: string
-  password: string
-  clue1: string
-  clue2: string
-  clue3: string
-  silver: number | null
-  gold: number | null
-  items: {
-    quantity: number
-    item: {
-      jsonId: string
-      name: string
-      image: string
-      fields: {
-        path: string
-      }
-    }
-  }[]
-}
+type Password = Queries.PasswordsPageQuery["farmrpg"]["passwords"][0]
 
 interface MaskedStringProps {
   show: boolean
   copyButton?: boolean
   value?: boolean
-  children: string
+  children: React.ReactNode
 }
 
 const maskedStringStyle = css({
@@ -56,7 +37,7 @@ const maskedStringStyle = css({
     fontSize: 16,
     // lineHeight: "24px",
     // No bold for the small screen value, it reads better here IMO.
-  }
+  },
 })
 
 const maskedStringStyleMasked = css({
@@ -75,7 +56,7 @@ const maskedStringStyleMasked = css({
 const maskedStringStyleMultiline = css(maskedStringStyle, {
   "@media (max-width: 768px)": {
     lineHeight: "24px",
-  }
+  },
 })
 
 const MaskedString = ({ show, copyButton, value, children }: MaskedStringProps) => {
@@ -95,14 +76,16 @@ const MaskedString = ({ show, copyButton, value, children }: MaskedStringProps) 
     const valueWidth = vw - 171
     const valueChars = valueWidth / 8 // 1ch on this font is ~10px
     // console.log("HACKS", children, vw, valueWidth, valueChars, children.length)
-    if (children.length >= valueChars) {
+    if (typeof children === "string" && children.length >= valueChars) {
       cssToUse.push(maskedStringStyleMultiline)
     }
   }
-  return <span key={`${children}-${show}`} css={cssToUse}>
-    {children}
-    {copyButton && <CopyButton text={children} />}
-  </span>
+  return (
+    <span key={`${children}-${show}`} css={cssToUse}>
+      {children}
+      {copyButton && typeof children === "string" && <CopyButton text={children} />}
+    </span>
+  )
 }
 
 interface PasswordListProps {
@@ -119,38 +102,83 @@ const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => 
 
   if (!showDefault) {
     listItems.push(
-      { lineOne: "Clue 1", value: <MaskedString show={used >= 1} value={true}>{pw.clue1}</MaskedString> },
-      { lineOne: "Clue 2", value: <MaskedString show={used >= 2} value={true}>{pw.clue2}</MaskedString> },
-      { lineOne: "Clue 3", value: <MaskedString show={used >= 3} value={true}>{pw.clue3}</MaskedString> },
+      {
+        lineOne: "Clue 1",
+        value: (
+          <MaskedString show={used >= 1} value={true}>
+            {pw.clue1}
+          </MaskedString>
+        ),
+      },
+      {
+        lineOne: "Clue 2",
+        value: (
+          <MaskedString show={used >= 2} value={true}>
+            {pw.clue2}
+          </MaskedString>
+        ),
+      },
+      {
+        lineOne: "Clue 3",
+        value: (
+          <MaskedString show={used >= 3} value={true}>
+            {pw.clue3}
+          </MaskedString>
+        ),
+      }
     )
   }
 
   const showPw = used >= 4 || !!showDefault
 
-  listItems.push(
-    {
-      lineOne: "Password",
-      value: <MaskedString show={showPw} copyButton={true} value={true}>{pw.password}</MaskedString>,
-      copyText: showPw ? pw.password : undefined
-    },
-  )
+  listItems.push({
+    lineOne: "Password",
+    value: (
+      <MaskedString show={showPw} copyButton={true} value={true}>
+        {pw.password}
+      </MaskedString>
+    ),
+    copyText: showPw ? pw.password : undefined,
+  })
 
-  if (pw.silver) {
-    listItems.push(
-      { image: showPw ? SPECIAL_IMAGES.Silver : SPECIAL_IMAGES.Masked, key: "silver", lineOne: <MaskedString show={showPw}>Silver</MaskedString>, value: <MaskedString show={showPw} value={true}>{pw.silver.toLocaleString()}</MaskedString> }
-    )
+  if (pw.rewardSilver) {
+    listItems.push({
+      image: showPw ? SPECIAL_IMAGES.Silver : SPECIAL_IMAGES.Masked,
+      key: "silver",
+      lineOne: <MaskedString show={showPw}>Silver</MaskedString>,
+      value: (
+        <MaskedString show={showPw} value={true}>
+          {pw.rewardSilver.toLocaleString()}
+        </MaskedString>
+      ),
+    })
   }
 
-  if (pw.gold) {
-    listItems.push(
-      { image: showPw ? SPECIAL_IMAGES.Gold : SPECIAL_IMAGES.Masked, key: "gold", lineOne: <MaskedString show={showPw}>Gold</MaskedString>, value: <MaskedString show={showPw} value={true}>{pw.gold.toLocaleString()}</MaskedString> }
-    )
+  if (pw.rewardGold) {
+    listItems.push({
+      image: showPw ? SPECIAL_IMAGES.Gold : SPECIAL_IMAGES.Masked,
+      key: "gold",
+      lineOne: <MaskedString show={showPw}>Gold</MaskedString>,
+      value: (
+        <MaskedString show={showPw} value={true}>
+          {pw.rewardGold.toLocaleString()}
+        </MaskedString>
+      ),
+    })
   }
 
-  for (const it of pw.items.sort((a, b) => parseInt(a.item.jsonId, 10) - parseInt(b.item.jsonId, 10))) {
-    listItems.push(
-      { image: showPw ? it.item.image : SPECIAL_IMAGES.Masked, key: it.item.name, lineOne: <MaskedString show={showPw}>{it.item.name}</MaskedString>, value: <MaskedString show={showPw} value={true}>{it.quantity.toLocaleString()}</MaskedString>, href: showPw ? it.item.fields.path : undefined }
-    )
+  for (const it of pw.rewardItems.slice().sort((a, b) => a.item.id - b.item.id)) {
+    listItems.push({
+      image: showPw ? it.item.image : SPECIAL_IMAGES.Masked,
+      key: it.item.name,
+      lineOne: <MaskedString show={showPw}>{it.item.name}</MaskedString>,
+      value: (
+        <MaskedString show={showPw} value={true}>
+          {it.quantity.toLocaleString()}
+        </MaskedString>
+      ),
+      href: showPw ? linkFor(it.item) : undefined,
+    })
   }
 
   let buttonText: string | undefined = "Next Clue"
@@ -162,57 +190,35 @@ const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => 
     buttonText = undefined
   }
 
-  return <div className="mb-4">
-    <div className="d-flex justify-content-between mb-1">
-      <h3 id={pw.jsonId.toString()}>Password {pw.jsonId}</h3>
-      {buttonText && <Button onClick={onClick}>{buttonText}</Button>}
+  return (
+    <div className="mb-4">
+      <div className="d-flex justify-content-between mb-1">
+        <h3 id={pw.id.toString()}>Password {pw.id}</h3>
+        {buttonText && <Button onClick={onClick}>{buttonText}</Button>}
+      </div>
+      <List
+        items={listItems}
+        bigLine={true}
+        shrink="value"
+        css={{ "& .bf-list-line-one": maskedStringStyle }}
+      />
     </div>
-    <List items={listItems} bigLine={true} shrink="value" css={{ "& .bf-list-line-one": maskedStringStyle }} />
-  </div>
+  )
 }
 
-interface PasswordsQuery {
-  passwords: {
-    nodes: Password[]
-  }
-}
-
-export default () => {
-  const { passwords }: PasswordsQuery = useStaticQuery(graphql`
-    query {
-      passwords: allPasswordsJson(sort: {fields: jsonId}) {
-        nodes {
-          jsonId
-          group
-          password
-          clue1
-          clue2
-          clue3
-          silver
-          gold
-          items {
-            quantity
-            item {
-              jsonId
-              name
-              image
-              fields {
-                path
-              }
-            }
-          }
-        }
-      }
-    }
-  `)
+const PasswordsPage = ({
+  data: {
+    farmrpg: { passwords },
+  },
+}: PageProps<Queries.PasswordsPageQuery>) => {
   const [used, setAllUsed, setUsed] = useSettings("buddyFarmPasswords")
   const ctx = useContext(GlobalContext)
 
   const passwordsByGroup: { [key: string]: Password[] } = {}
   const pwIdToGroup: { [key: string]: string } = {}
   const groups: string[] = []
-  for (const pw of passwords.nodes) {
-    const group = used[pw.jsonId] > 4 ? "Done" : pw.group
+  for (const pw of passwords) {
+    const group = used[pw.id] > 4 ? "Done" : pw.group.name
     if (passwordsByGroup[group] === undefined) {
       if (group !== "Done") {
         groups.push(group)
@@ -220,7 +226,7 @@ export default () => {
       passwordsByGroup[group] = []
     }
     passwordsByGroup[group].push(pw)
-    pwIdToGroup[pw.jsonId] = group
+    pwIdToGroup[pw.id] = group
   }
   if (passwordsByGroup["Done"]) {
     groups.push("Done")
@@ -230,34 +236,79 @@ export default () => {
   const locationGroup = pwIdToGroup[locationId]
   const defaultGroup = locationGroup || groups[0]
 
-  const content = <Accordion defaultActiveKey={defaultGroup} className="mb-3">
-    {groups.map(group => (
-      <Accordion.Item eventKey={group} key={group}>
-        <Accordion.Header>{group}</Accordion.Header>
-        <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>
-          {group === "Done" ? <Button className="mb-3" onClick={() => setAllUsed({})}>Reset Finished Passwords</Button> : undefined}
-          {(passwordsByGroup[group] || []).map(pw => (
-            <PasswordList key={pw.jsonId} pw={pw} used={used[pw.jsonId] || 0} setUsed={(val: number) => setUsed(pw.jsonId.toString(), val)} showDefault={ctx.settings.showPasswords} />
-          ))}
-        </Accordion.Body>
-      </Accordion.Item>
+  const content = (
+    <Accordion defaultActiveKey={defaultGroup} className="mb-3">
+      {groups.map((group) => (
+        <Accordion.Item eventKey={group} key={group}>
+          <Accordion.Header>{group}</Accordion.Header>
+          <Accordion.Body css={{ "& *:last-child": { marginBottom: "0 !important" } }}>
+            {group === "Done" ? (
+              <Button className="mb-3" onClick={() => setAllUsed({})}>
+                Reset Finished Passwords
+              </Button>
+            ) : undefined}
+            {(passwordsByGroup[group] || []).map((pw) => (
+              <PasswordList
+                key={pw.id}
+                pw={pw}
+                used={used[pw.id] || 0}
+                setUsed={(val: number) => setUsed(pw.id.toString(), val)}
+                showDefault={ctx.settings.showPasswords}
+              />
+            ))}
+          </Accordion.Body>
+        </Accordion.Item>
+      ))}
+    </Accordion>
+  )
 
-    ))}
-  </Accordion>
-
-  const showAllButton = ctx.settings.showPasswords ?
-    <Button variant="secondary" onClick={() => ctx.setSetting("showPasswords", false)}>Bring back the clues</Button>
-    : <Button onClick={() => ctx.setSetting("showPasswords", true)}>Not interested in the puzzle, just show me the passwords</Button>
+  const showAllButton = ctx.settings.showPasswords ? (
+    <Button variant="secondary" onClick={() => ctx.setSetting("showPasswords", false)}>
+      Bring back the clues
+    </Button>
+  ) : (
+    <Button onClick={() => ctx.setSetting("showPasswords", true)}>
+      Not interested in the puzzle, just show me the passwords
+    </Button>
+  )
 
   // A wrapper to functionally disable SSR.
-  const allContent = <>
-    <div className="mb-4 d-flex gap-3">
-      {showAllButton}
-    </div>
-    {content}
-  </>
+  const allContent = (
+    <>
+      <div className="mb-4 d-flex gap-3">{showAllButton}</div>
+      {content}
+    </>
+  )
 
-  return <Layout title="Mailbox Passwords">
-    {typeof document !== 'undefined' && allContent}
-  </Layout>
+  return <Layout title="Mailbox Passwords">{typeof document !== "undefined" && allContent}</Layout>
 }
+
+export default PasswordsPage
+
+export const query = graphql`
+  query PasswordsPage {
+    farmrpg {
+      passwords(filters: { hasClues: true }) {
+        id
+        group {
+          name
+        }
+        password
+        clue1
+        clue2
+        clue3
+        rewardSilver
+        rewardGold
+        rewardItems {
+          quantity
+          item {
+            __typename
+            id
+            name
+            image
+          }
+        }
+      }
+    }
+  }
+`

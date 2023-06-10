@@ -19,14 +19,23 @@ import { FaHome } from "@react-icons/all-files/fa/FaHome"
 import { CopyButton } from "../components/clipboard"
 import { useDebounce } from "../hooks/debounce"
 import { GlobalContext } from "../utils/context"
+import { linkFor } from "../utils/links"
 
-interface HeaderFromable {
+interface HeaderFromableOld {
   name: string
   image: string
   fields: {
     path: string
   }
 }
+
+interface HeaderFromableNew {
+  __typename: string
+  name: string
+  image: string
+}
+
+type HeaderFromable = HeaderFromableOld | HeaderFromableNew
 
 interface LayoutProps {
   title?: string
@@ -123,7 +132,11 @@ const Layout = ({
           ))}
         </ToastContainer>
       </div>
-      <Navbar bg={ctx.settings.darkMode ? "dark" : "light"} expand="lg" css={{ "html.iframe &": { display: "none" } }}>
+      <Navbar
+        bg={ctx.settings.darkMode ? "dark" : "light"}
+        expand="lg"
+        css={{ "html.iframe &": { display: "none" } }}
+      >
         <Container>
           <Link className="navbar-brand" to="/">
             <span className="d-none d-sm-inline">Buddy's Almanac</span>
@@ -182,7 +195,7 @@ const Layout = ({
               )}
               {title || headerFrom?.name}
               {(headerCopy || headerFrom) && (
-                <CopyButton path={headerCopy || headerFrom?.fields.path} />
+                <CopyButton path={headerCopy || linkFor(headerFrom!)} />
               )}
             </h1>
           )}

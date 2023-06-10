@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useState } from "react"
-
 import { Calculator } from "../components/calculator"
 import { Input } from "../components/input"
-import { useLocations } from "../hooks/locations"
 
 interface WineData {
   farmLevel: number

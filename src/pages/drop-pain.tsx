@@ -97,27 +97,29 @@ const useImage = () => {
 }
 
 const DropPainPage = ({
-  data: { items, locations, npcs },
+  data: {
+    farmrpg: { items, locations, npcs },
+  },
 }: PageProps<Queries.DropPainPageQuery>) => {
   const canvasElm = useRef<HTMLCanvasElement | null>(null)
   const downloadElm = useRef<HTMLAnchorElement | null>(null)
   const badgeOptions = useMemo(() => {
     const options: { name: string; image: string; id: string }[] = []
-    for (const o of items.nodes) {
+    for (const o of items) {
       options.push({
         name: o.name,
         image: o.image,
         id: `i${o.id}`,
       })
     }
-    for (const o of locations.nodes) {
+    for (const o of locations) {
       options.push({
         name: o.name,
         image: o.image,
-        id: `l${o.id}`,
+        id: `l${o.type[0]}${o.id}`,
       })
     }
-    for (const o of npcs.nodes) {
+    for (const o of npcs) {
       options.push({
         name: o.name,
         image: o.image,
@@ -126,7 +128,10 @@ const DropPainPage = ({
     }
     return options.sort((a, b) => a.name.localeCompare(b.name))
   }, [items, locations, npcs])
-  const itemOptions = useMemo(() => items.nodes.slice(), [items.nodes])
+  const itemOptions = useMemo(
+    () => items.slice().map((i) => ({ id: i.id.toString(), name: i.name, image: i.image })),
+    [items]
+  )
   const [title, setTitle] = useState("")
   const [titleImg, titleImgSel, titleImgLoading, setTitleImg] = useImage()
   const [itemOne, itemOneSel, itemOneLoading, setItemOne] = useImage()
@@ -152,12 +157,12 @@ const DropPainPage = ({
     ] = document.location.hash.substring(1).split(";")
     setTitle(inTitle)
     setTitleImg(badgeOptions.find((o) => o.id === inTitleImg))
-    setItemOne(items.nodes.find((o) => o.id === inItemOne))
-    setItemTwo(items.nodes.find((o) => o.id === inItemTwo))
-    setItemThree(items.nodes.find((o) => o.id === inItemThree))
-    setItemFour(items.nodes.find((o) => o.id === inItemFour))
-    setItemFive(items.nodes.find((o) => o.id === inItemFive))
-    setItemSix(items.nodes.find((o) => o.id === inItemSix))
+    setItemOne(itemOptions.find((o) => o.id === inItemOne))
+    setItemTwo(itemOptions.find((o) => o.id === inItemTwo))
+    setItemThree(itemOptions.find((o) => o.id === inItemThree))
+    setItemFour(itemOptions.find((o) => o.id === inItemFour))
+    setItemFive(itemOptions.find((o) => o.id === inItemFive))
+    setItemSix(itemOptions.find((o) => o.id === inItemSix))
   }, [])
 
   useEffect(() => {
@@ -407,24 +412,21 @@ export default DropPainPage
 
 export const query = graphql`
   query DropPainPage {
-    items: allItemsJson(sort: { fields: name }) {
-      nodes {
-        id: jsonId
+    farmrpg {
+      items(order: { name: ASC }) {
+        id
         name
         image
       }
-    }
 
-    locations: allLocationsJson {
-      nodes {
-        id: jsonId
+      locations {
+        id
+        type
         name
         image
       }
-    }
 
-    npcs: allNpcsJson {
-      nodes {
+      npcs {
         name
         image
       }

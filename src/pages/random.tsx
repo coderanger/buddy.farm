@@ -1,31 +1,25 @@
-import { graphql, navigate, useStaticQuery } from 'gatsby'
-import { useEffect } from 'react'
+import { graphql, navigate, PageProps } from "gatsby"
+import { useEffect } from "react"
 
-interface RandomQuery {
-  pages: {
-    nodes: {
-      path: string
-    }[]
-  }
-}
-
-export default () => {
-  const { pages }: RandomQuery = useStaticQuery(graphql`
-    query {
-      pages: allSitePage(
-        filter: {component: {regex: "/.*/src/templates/.*/"}, path: {regex: "//.*/.*//"}}
-      ) {
-        nodes {
-          path
-        }
-      }
-    }
-  `)
-
+const RandomPage = ({ data: { pages } }: PageProps<Queries.RandomPageQuery>) => {
   useEffect(() => {
     const pick = pages.nodes[Math.floor(Math.random() * pages.nodes.length)]
-    navigate(pick.path, { replace: true })
+    void navigate(pick.path, { replace: true })
   }, [])
 
   return []
 }
+
+export default RandomPage
+
+export const query = graphql`
+  query RandomPage {
+    pages: allSitePage(
+      filter: { component: { regex: "/.*/src/templates/.*/" }, path: { regex: "//.*/.*//" } }
+    ) {
+      nodes {
+        path
+      }
+    }
+  }
+`

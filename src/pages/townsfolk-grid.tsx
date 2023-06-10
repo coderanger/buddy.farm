@@ -1,12 +1,15 @@
 import { graphql, PageProps, Link } from "gatsby"
-import Layout from "../components/layout"
 import Table from "react-bootstrap/Table"
 import { useState, useContext } from "react"
 import Form from "react-bootstrap/Form"
 import { css } from "@emotion/react"
-import { GlobalContext } from "../utils/context"
 
-type Item = Queries.TownsfolkGridPageQuery["items"]["nodes"][0]["item"]
+import Layout from "../components/layout"
+import { GlobalContext } from "../utils/context"
+import linkFor from "../utils/links"
+
+type NPCItem = Queries.TownsfolkGridPageNPCItemFragment
+type Item = NPCItem["item"]
 
 const cellStyleByAdj = {
   loves: {
@@ -20,7 +23,7 @@ const cellStyleByAdj = {
   },
 }
 
-const emojiByAdj = {
+const emojiByRel = {
   loves: "❤️",
   likes: "✅",
   hates: "❌",
@@ -32,7 +35,9 @@ const stickyHeaderStyle = css({
 })
 
 const TownsfolkGridPage = ({
-  data: { npcs, items },
+  data: {
+    farmrpg: { npcs },
+  },
 }: PageProps<Queries.TownsfolkGridPageQuery>) => {
   const [showLoves, setShowLoves] = useState(true)
   const [showLikes, setShowLikes] = useState(true)
@@ -41,26 +46,28 @@ const TownsfolkGridPage = ({
 
   const allItems: string[] = []
   const itemsByName: Record<string, Item> = {}
-  const adjByNpc = npcs.nodes.reduce((p, c) => {
+  const relByNpc = npcs.reduce((p, c) => {
     p[c.name] = {}
     return p
   }, {} as Record<string, Record<string, "loves" | "likes" | "hates">>)
 
-  for (const item of items.nodes) {
-    if (
-      (item.adjective === "loves" && !showLoves) ||
-      (item.adjective === "likes" && !showLikes) ||
-      (item.adjective === "hates" && !showHates)
-    ) {
-      continue
-    }
+  for (const npc of npcs) {
+    for (const ni of npc.npcItems) {
+      if (
+        (ni.relationship === "loves" && !showLoves) ||
+        (ni.relationship === "likes" && !showLikes) ||
+        (ni.relationship === "hates" && !showHates)
+      ) {
+        continue
+      }
 
-    if (itemsByName[item.item.name] === undefined) {
-      allItems.push(item.item.name)
-      itemsByName[item.item.name] = item.item
-    }
+      if (itemsByName[ni.item.name] === undefined) {
+        allItems.push(ni.item.name)
+        itemsByName[ni.item.name] = ni.item
+      }
 
-    adjByNpc[item.npc_name][item.item.name] = item.adjective as "loves" | "likes" | "hates"
+      relByNpc[npc.name][ni.item.name] = ni.relationship as "loves" | "likes" | "hates"
+    }
   }
 
   return (
@@ -72,7 +79,7 @@ const TownsfolkGridPage = ({
           className="me-5"
           type="switch"
           id="show-loves"
-          label={`Show Loves (${emojiByAdj.loves})`}
+          label={`Show Loves (${emojiByRel.loves})`}
           defaultChecked={showLoves}
           onChange={(e) => setShowLoves(e.target.checked)}
         />
@@ -81,7 +88,7 @@ const TownsfolkGridPage = ({
           className="me-5"
           type="switch"
           id="show-likes"
-          label={`Show Likes (${emojiByAdj.likes})`}
+          label={`Show Likes (${emojiByRel.likes})`}
           defaultChecked={showLikes}
           onChange={(e) => setShowLikes(e.target.checked)}
         />
@@ -89,7 +96,7 @@ const TownsfolkGridPage = ({
           inline
           type="switch"
           id="show-hates"
-          label={`Show Hates (${emojiByAdj.hates})`}
+          label={`Show Hates (${emojiByRel.hates})`}
           defaultChecked={showHates}
           onChange={(e) => setShowHates(e.target.checked)}
         />
@@ -102,9 +109,9 @@ const TownsfolkGridPage = ({
           <thead className={ctx.settings.darkMode ? "table-dark" : "table-light"}>
             <tr>
               <th css={stickyHeaderStyle}>Item</th>
-              {npcs.nodes.map((n) => (
+              {npcs.map((n) => (
                 <th key={n.name} css={[{ width: 64 }, stickyHeaderStyle]}>
-                  <Link to={n.fields.path} className="text-body text-decoration-none text-center">
+                  <Link to={linkFor(n)} className="text-body text-decoration-none text-center">
                     <div css={{ marginTop: 5 }}>
                       <img
                         src={`https://farmrpg.com${n.image}`}
@@ -112,7 +119,7 @@ const TownsfolkGridPage = ({
                         css={{ width: 40 }}
                       />
                     </div>
-                    <div css={{ fontSize: "70%" }}>{(n.short_name || n.name).split(" ")[0]}</div>
+                    <div css={{ fontSize: "70%" }}>{(n.shortName || n.name).split(" ")[0]}</div>
                   </Link>
                 </th>
               ))}
@@ -123,7 +130,7 @@ const TownsfolkGridPage = ({
               <tr key={i}>
                 <td>
                   <Link
-                    to={itemsByName[i].fields.path}
+                    to={linkFor(itemsByName[i])}
                     className="text-body text-decoration-none text-center"
                   >
                     <div css={{ marginTop: 5 }}>
@@ -136,16 +143,16 @@ const TownsfolkGridPage = ({
                     <div css={{ fontSize: "70%" }}>{i}</div>
                   </Link>
                 </td>
-                {npcs.nodes.map((n) => (
+                {npcs.map((n) => (
                   <td
                     key={n.name}
                     css={{
                       textAlign: "center",
                       verticalAlign: "middle",
-                      ...cellStyleByAdj[adjByNpc[n.name][i]],
+                      ...cellStyleByAdj[relByNpc[n.name][i]],
                     }}
                   >
-                    {emojiByAdj[adjByNpc[n.name][i]]}
+                    {emojiByRel[relByNpc[n.name][i]]}
                   </td>
                 ))}
               </tr>
@@ -160,28 +167,25 @@ const TownsfolkGridPage = ({
 export default TownsfolkGridPage
 
 export const query = graphql`
-  query TownsfolkGridPage {
-    npcs: allNpcsJson(sort: { fields: name }) {
-      nodes {
-        name
-        short_name
-        image
-        fields {
-          path
-        }
-      }
+  fragment TownsfolkGridPageNPCItem on FarmRPG_NPCItem {
+    relationship
+    item {
+      __typename
+      name
+      image
     }
+  }
 
-    items: allNpcItemsJson(sort: { fields: item___name }) {
-      nodes {
-        adjective
-        npc_name
-        item {
-          name
-          image
-          fields {
-            path
-          }
+  query TownsfolkGridPage {
+    farmrpg {
+      npcs(order: { name: ASC }) {
+        __typename
+        name
+        shortName
+        image
+
+        npcItems {
+          ...TownsfolkGridPageNPCItem
         }
       }
     }

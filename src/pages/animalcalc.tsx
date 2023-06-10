@@ -257,7 +257,7 @@ interface AnimalCalcQuery {
 export default () => {
   const { xpCurve }: AnimalCalcQuery = useStaticQuery(graphql`
     query {
-      xpCurve: allXpJson(sort: { fields: level }, limit: 15) {
+      xpCurve: allXpJson(sort: { level: ASC }, limit: 15) {
         nodes {
           xp
         }

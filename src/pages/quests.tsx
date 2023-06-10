@@ -1,141 +1,156 @@
-import { graphql, useStaticQuery } from 'gatsby'
-import { useState } from 'react'
-import ListGroup from 'react-bootstrap/ListGroup'
+import { graphql, PageProps, Link } from "gatsby"
+import { useState } from "react"
+import ListGroup from "react-bootstrap/ListGroup"
 import Form from "react-bootstrap/Form"
 
-import Layout from '../components/layout'
+import Layout from "../components/layout"
+import linkFor from "../utils/links"
 
-interface Quest {
-  jsonId: string
-  name: string
-  from: string
-  fromImage: string
-  requiresFarming: number | null
-  requiresFishing: number | null
-  requiresCrafting: number | null
-  requiresExploring: number | null
-  text: string
-  fields: {
-    path: string
-  }
-  extra: {
-    questlines: string[]
-    availableFrom: number | null
-    availableTo: number | null
-  }
-}
-
-interface QuestsQuery {
-  quests: {
-    nodes: Quest[]
-  }
-  questlines: {
-    nodes: {
-      name: string
-    }[]
-  }
-}
-
-export default () => {
-  let data: QuestsQuery = useStaticQuery(graphql`
-    query {
-      quests: allQuestsJson {
-        nodes {
-          jsonId
-          name
-          from
-          fromImage
-          requiresFarming
-          requiresFishing
-          requiresCrafting
-          requiresExploring
-          text
-          fields {
-            path
-          }
-          extra {
-            questlines
-            availableFrom
-            availableTo
-          }
-        }
-      }
-
-      questlines: allQuestlinesJson {
-        nodes {
-          name
-        }
-      }
-    }
-  `)
-
+const QuestsPage = ({
+  data: {
+    farmrpg: { quests, questlines },
+  },
+}: PageProps<Queries.QuestsPageQuery>) => {
   // Filter states.
   const [filterFrom, setFilterFrom] = useState<string>("")
   const [filterQuestline, setFilterQuestline] = useState<string>("")
 
   // Do the filtering.
-  let quests = data.quests.nodes
+  let filteredQuests = quests
   if (filterFrom !== "") {
-    quests = quests.filter(q => q.from == filterFrom)
+    filteredQuests = filteredQuests.filter((q) => q.npc === filterFrom)
   }
   if (filterQuestline !== "") {
-    quests = quests.filter(q => q.extra.questlines.includes(filterQuestline))
+    filteredQuests = filteredQuests.filter(
+      (q) => q.questlines.find((ql) => ql.questline.title === filterQuestline) !== undefined
+    )
   }
-  quests = quests.sort((a, b) => parseInt(a.jsonId, 10) - parseInt(b.jsonId, 10))
 
   // Filter options.
   const fromOptions: { [key: string]: boolean } = {}
-  for (const quest of data.quests.nodes) {
-    fromOptions[quest.from] = true
+  for (const quest of quests) {
+    fromOptions[quest.npc] = true
   }
 
-  return <Layout title={`Quests (${quests.length})`} pageTitle="Quests">
-    <div className="d-flex">
-      <Form.Select onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterFrom(evt.target.value)} className="mx-2">
-        <option value="">From</option>
-        {Object.keys(fromOptions).map(from => (
-          <option value={from}>{from}</option>
+  return (
+    <Layout title={`Quests (${quests.length})`} pageTitle="Quests">
+      <div className="d-flex">
+        <Form.Select
+          onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterFrom(evt.target.value)}
+          className="mx-2"
+        >
+          <option value="">From</option>
+          {Object.keys(fromOptions).map((from) => (
+            <option value={from}>{from}</option>
+          ))}
+        </Form.Select>
+        <Form.Select
+          onChange={(evt: React.ChangeEvent<HTMLSelectElement>) =>
+            setFilterQuestline(evt.target.value)
+          }
+          className="mx-2"
+        >
+          <option value="">Questline</option>
+          {questlines.map((ql) => (
+            <option value={ql.title}>{ql.title}</option>
+          ))}
+        </Form.Select>
+      </div>
+      <ListGroup variant="flush">
+        {filteredQuests.map((q) => (
+          <ListGroup.Item key={q.id}>
+            <div className="mb-2 fs-3">
+              <Link to={linkFor(q)}>
+                <img
+                  src={"https://farmrpg.com" + q.image}
+                  width="34"
+                  height="34"
+                  className="d-inline-block align-text-top me-1"
+                />
+                <span>{q.name}</span>
+              </Link>
+            </div>
+            {q.requiredFarmingLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Farming:</span>
+                {q.requiredFarmingLevel}
+              </div>
+            )}
+            {q.requiredFishingLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Fishing:</span>
+                {q.requiredFishingLevel}
+              </div>
+            )}
+            {q.requiredCraftingLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Crafting:</span>
+                {q.requiredCraftingLevel}
+              </div>
+            )}
+            {q.requiredExploringLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Exploring:</span>
+                {q.requiredExploringLevel}
+              </div>
+            )}
+            {q.requiredCookingLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Cooking:</span>
+                {q.requiredCookingLevel}
+              </div>
+            )}
+            {q.requiredTowerLevel !== 0 && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">Tower:</span>
+                {q.requiredTowerLevel}
+              </div>
+            )}
+            <div className="mb-2">
+              <span className="fw-bold me-1">From:</span>
+              {q.npc}
+            </div>
+            {!q.isHidden && <div className="mb-2">{q.description}</div>}
+          </ListGroup.Item>
         ))}
-      </Form.Select>
-      <Form.Select onChange={(evt: React.ChangeEvent<HTMLSelectElement>) => setFilterQuestline(evt.target.value)} className="mx-2">
-        <option value="">Questline</option>
-        {data.questlines.nodes.map(ql => (
-          <option value={ql.name}>{ql.name}</option>
-        ))}
-      </Form.Select>
-    </div>
-    <ListGroup variant="flush">
-      {quests.map(q => (
-        <ListGroup.Item key={q.jsonId}>
-          <div className="mb-2 fs-3">
-            <img src={"https://farmrpg.com" + q.fromImage} width="34" height="34" className="d-inline-block align-text-top me-1" />
-            <span>{q.name}</span>
-          </div>
-          {q.requiresFarming && <div className="mb-2">
-            <span className="fw-bold me-1">Farming:</span>
-            {q.requiresFarming}
-          </div>}
-          {q.requiresFishing && <div className="mb-2">
-            <span className="fw-bold me-1">Fishing:</span>
-            {q.requiresFishing}
-          </div>}
-          {q.requiresCrafting && <div className="mb-2">
-            <span className="fw-bold me-1">Crafting:</span>
-            {q.requiresCrafting}
-          </div>}
-          {q.requiresExploring && <div className="mb-2">
-            <span className="fw-bold me-1">Exploring:</span>
-            {q.requiresExploring}
-          </div>}
-          <div className="mb-2">
-            <span className="fw-bold me-1">From:</span>
-            {q.from}
-          </div>
-          <div className="mb-2">
-            {q.text}
-          </div>
-        </ListGroup.Item>
-      ))}
-    </ListGroup>
-  </Layout>
+      </ListGroup>
+    </Layout>
+  )
 }
+
+export default QuestsPage
+
+export const query = graphql`
+  query QuestsPage {
+    farmrpg {
+      quests(order: { id: ASC }) {
+        __typename
+        id
+        name: title
+        image: npcImg
+        npc
+        requiredFarmingLevel
+        requiredFishingLevel
+        requiredCraftingLevel
+        requiredExploringLevel
+        requiredCookingLevel
+        requiredTowerLevel
+        requiredNpcId
+        requiredNpcLevel
+        description
+        startDate
+        endDate
+        isHidden
+        questlines {
+          questline {
+            title
+          }
+        }
+      }
+
+      questlines(order: { title: ASC }) {
+        title
+      }
+    }
+  }
+`
