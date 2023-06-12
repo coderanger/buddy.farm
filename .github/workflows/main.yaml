@@ -26,7 +26,7 @@ jobs:
         run: make build
 
       - name: Publish
-        uses: cloudflare/wrangler-action@v2
+        uses: cloudflare/wrangler-action@2.0.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
