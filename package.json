@@ -15,7 +15,7 @@
     "clean": "gatsby clean",
     "typecheck": "tsc --noEmit",
     "deploy": "gatsby-plugin-s3 deploy",
-    "wranger-deploy": "wrangler pages deploy public/"
+    "wrangler-deploy": "wrangler pages deploy public/"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
