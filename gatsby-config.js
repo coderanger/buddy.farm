@@ -56,7 +56,7 @@ module.exports = {
       options: {
         typeName: "FarmRPG",
         fieldName: "farmrpg",
-        url: "https://api.buddy.farm/graphql",
+        url: process.env.GRAPHQL_SERVER || "https://api.buddy.farm/graphql",
         batch: true,
         dataLoaderOptions: {
           maxBatchSize: 10,
