@@ -170,7 +170,7 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
         }
         locations {
           __typename
-          id
+          id: gameId
           name
           image
         }
@@ -206,37 +206,39 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
       }
     }
   `)
+  if (data === undefined) {
+    throw `gatsby-node query failed`
+  }
   const types = [
     {
-      nodes: data!.farmrpg.items,
+      nodes: data.farmrpg.items,
       template: "item",
     },
     {
-      nodes: data!.farmrpg.locations,
+      nodes: data.farmrpg.locations,
       template: "location",
     },
     {
-      nodes: data!.farmrpg.pets,
+      nodes: data.farmrpg.pets,
       template: "pet",
     },
     {
-      nodes: data!.farmrpg.quests,
+      nodes: data.farmrpg.quests,
       template: "quest",
     },
     {
-      nodes: data!.farmrpg.questlines,
+      nodes: data.farmrpg.questlines,
       template: "questline",
       searchType: "Questline",
     },
     {
-      nodes: data!.farmrpg.quizzes,
+      nodes: data.farmrpg.quizzes,
       template: "quiz",
       image: "/img/items/schoolhouse.png",
       searchType: "Schoolhouse Quiz",
-      remote: true,
     },
     {
-      nodes: data!.farmrpg.npcs,
+      nodes: data.farmrpg.npcs,
       template: "npc",
       searchType: "Townsfolk",
     },

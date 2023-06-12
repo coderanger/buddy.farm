@@ -9,7 +9,7 @@ export const useLocations = (type: string | undefined) => {
         farmrpg {
           locations(order: { gameId: ASC }) {
             __typename
-            id
+            id: gameId
             type
             name
             image

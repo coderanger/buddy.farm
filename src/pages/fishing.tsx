@@ -33,7 +33,7 @@ export const query = graphql`
     farmrpg {
       locations(filters: { type: "fishing" }) {
         __typename
-        id
+        id: gameId
         name
         image
       }

@@ -420,7 +420,7 @@ export const query = graphql`
       }
 
       locations {
-        id
+        id: gameId
         type
         name
         image

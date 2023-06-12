@@ -585,7 +585,7 @@ export default XpCalcPage
 
 export const query = graphql`
   fragment XpCalcPageLocation on FarmRPG_Location {
-    id
+    id: gameId
     name
     image
     baseDropRate
