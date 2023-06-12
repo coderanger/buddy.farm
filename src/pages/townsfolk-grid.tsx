@@ -126,37 +126,39 @@ const TownsfolkGridPage = ({
             </tr>
           </thead>
           <tbody>
-            {allItems.map((i) => (
-              <tr key={i}>
-                <td>
-                  <Link
-                    to={linkFor(itemsByName[i])}
-                    className="text-body text-decoration-none text-center"
-                  >
-                    <div css={{ marginTop: 5 }}>
-                      <img
-                        src={`https://farmrpg.com${itemsByName[i].image}`}
-                        title={itemsByName[i].name}
-                        css={{ width: 40 }}
-                      />
-                    </div>
-                    <div css={{ fontSize: "70%" }}>{i}</div>
-                  </Link>
-                </td>
-                {npcs.map((n) => (
-                  <td
-                    key={n.name}
-                    css={{
-                      textAlign: "center",
-                      verticalAlign: "middle",
-                      ...cellStyleByAdj[relByNpc[n.name][i]],
-                    }}
-                  >
-                    {emojiByRel[relByNpc[n.name][i]]}
+            {allItems
+              .sort((a, b) => a.localeCompare(b))
+              .map((i) => (
+                <tr key={i}>
+                  <td>
+                    <Link
+                      to={linkFor(itemsByName[i])}
+                      className="text-body text-decoration-none text-center"
+                    >
+                      <div css={{ marginTop: 5 }}>
+                        <img
+                          src={`https://farmrpg.com${itemsByName[i].image}`}
+                          title={itemsByName[i].name}
+                          css={{ width: 40 }}
+                        />
+                      </div>
+                      <div css={{ fontSize: "70%" }}>{i}</div>
+                    </Link>
                   </td>
-                ))}
-              </tr>
-            ))}
+                  {npcs.map((n) => (
+                    <td
+                      key={n.name}
+                      css={{
+                        textAlign: "center",
+                        verticalAlign: "middle",
+                        ...cellStyleByAdj[relByNpc[n.name][i]],
+                      }}
+                    >
+                      {emojiByRel[relByNpc[n.name][i]]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </Table>
       </div>
