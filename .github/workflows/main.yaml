@@ -27,9 +27,15 @@ jobs:
           GATSBY_CPU_COUNT: 2
         run: npm run build
 
+      # - name: Publish
+      #   uses: cloudflare/wrangler-action@2.0.0
+      #   with:
+      #     apiToken: ${{ secrets.CF_API_TOKEN }}
+      #     accountId: ${{ secrets.CF_ACCOUNT_ID }}
+      #     command: pages deploy --project-name=buddy-farm public/
+
       - name: Publish
-        uses: cloudflare/wrangler-action@2.0.0
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: pages deploy --project-name=buddy-farm public/
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: npm run wrangler-deploy -- --project=buddy-farm --branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
