@@ -178,7 +178,7 @@ export const query = graphql`
 
   query TownsfolkGridPage {
     farmrpg {
-      npcs(order: { name: ASC }) {
+      npcs(filters: { isAvailable: true }, order: { name: ASC }) {
         __typename
         name
         shortName

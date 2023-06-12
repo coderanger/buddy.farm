@@ -34,7 +34,7 @@ export default TownsfolkPage
 export const query = graphql`
   query TownsfolkPage {
     farmrpg {
-      npcs {
+      npcs(filters: {isAvailable: true}) {
         __typename
         name
         image
