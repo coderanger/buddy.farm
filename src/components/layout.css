@@ -2,6 +2,6 @@ html.iframe body {
     background-color: transparent !important;
 }
 
-html.dark .list-group-item a {
+html.dark .list-group-item a, html.dark .accordion-item {
   color: #e1e1e1 !important;
 }
