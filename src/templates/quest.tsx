@@ -271,13 +271,13 @@ export const pageQuery = graphql`
         requiredNpcLevel
 
         requiredSilver
-        requiredItems {
+        requiredItems(order: { order: ASC }) {
           ...QuestTemplateRequiredItem
         }
 
         rewardSilver
         rewardGold
-        rewardItems {
+        rewardItems(order: { order: ASC }) {
           ...QuestTemplateRewardItem
         }
       }
