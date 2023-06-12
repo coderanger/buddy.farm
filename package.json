@@ -18,6 +18,7 @@
     "wrangler-deploy": "wrangler pages deploy public/"
   },
   "dependencies": {
+    "@adobe/node-fetch-retry": "^2.2.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mdx-js/mdx": "^2.3.0",

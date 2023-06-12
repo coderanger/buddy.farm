@@ -1,4 +1,5 @@
 // @ts-check
+const fetch = require("@adobe/node-fetch-retry")
 
 /** @type {import('gatsby').GatsbyConfig} */
 module.exports = {
@@ -61,6 +62,7 @@ module.exports = {
         dataLoaderOptions: {
           maxBatchSize: 10,
         },
+        fetch,
       },
     },
   ],
