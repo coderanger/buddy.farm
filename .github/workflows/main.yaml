@@ -23,6 +23,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          GATSBY_CPU_COUNT: 2
         run: npm run build
 
       - name: Publish
