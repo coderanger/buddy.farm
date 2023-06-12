@@ -110,7 +110,9 @@ const QuestsPage = ({
               <span className="fw-bold me-1">From:</span>
               {q.npc}
             </div>
-            {!q.isHidden && <div className="mb-2">{q.description}</div>}
+            {!q.isHidden && (
+              <div className="mb-2" dangerouslySetInnerHTML={{ __html: q.cleanDescription }} />
+            )}
           </ListGroup.Item>
         ))}
       </ListGroup>
@@ -137,7 +139,7 @@ export const query = graphql`
         requiredTowerLevel
         requiredNpcId
         requiredNpcLevel
-        description
+        cleanDescription
         startDate
         endDate
         isHidden

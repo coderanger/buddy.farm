@@ -185,17 +185,14 @@ export default ({
     )
   }
 
-  let { description } = quest
-  description = description.replace(/<br>/g, "\n")
+  let { cleanDescription } = quest
   if (quest.isHidden) {
-    description = description.replace(/\S/g, "?")
+    cleanDescription = cleanDescription.replace(/\S/g, "?")
   }
 
   return (
     <Layout headerFrom={quest}>
-      {description.split("\n\n").map((s, i) => (
-        <p key={i}>{s}</p>
-      ))}
+      <div className="mb-3" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
       <List items={questData} bigLine={true} />
       <QuestItemList
         label="Request"
@@ -251,7 +248,7 @@ export const pageQuery = graphql`
         image: npcImg
         npc
         author
-        description
+        cleanDescription
         completedCount
         isHidden
         startDate
