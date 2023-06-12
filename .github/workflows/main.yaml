@@ -1,0 +1,33 @@
+name: Build and Deploy
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+  - cron:  '0 * * * *'
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy Gatsby site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Build
+        run: make build
+
+      - name: Publish
+        uses: cloudflare/wrangler-action@2
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages publish --project-name=buddy-farm
