@@ -38,4 +38,8 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-        run: npm run wrangler-deploy -- --project-name=buddy-farm --branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+        run: |
+          for i in {1..5}; do
+            npm run wrangler-deploy -- --project-name=buddy-farm --branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}} && rv=0 && break || rv=$? && sleep 15
+          done
+          exit $rv
