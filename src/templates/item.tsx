@@ -533,7 +533,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
   }
 
   // Shop sources.
-  if (item.buyPrice) {
+  if (item.canBuy && item.buyPrice) {
     listItems.push({
       key: "countryStore",
       image: "/img/items/store.png",
@@ -654,6 +654,7 @@ export const pageQuery = graphql`
         type
         description
         manualFishingOnly
+        canBuy
         canMail
         canCraft
         canCook
