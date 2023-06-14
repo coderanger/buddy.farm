@@ -83,6 +83,15 @@ export default ({ location }: SearchProps) => {
   // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
   useEffect(() => {
     if (inBrowser) {
+      console.log("search effect, typing state is", location?.state?.typing)
+      // THIS IS A VERY SILLY SOLUTION BUT ITS BETTER THAN NOTHING.
+      if (location?.state?.typing) {
+        setTimeout(() => {
+          console.log("search setting focus")
+          document.getElementById("nav-search")?.focus()
+        }, 1)
+      }
+
       if (location?.state?.typing && ctx.query !== null) {
         // Automatic navigation, assume we're taking over a query from another page.
         // In case the navigate got a little confused, update things.
@@ -155,6 +164,8 @@ export default ({ location }: SearchProps) => {
       setResults(scored)
     }
   }, [query, ctx.searchables])
+
+  console.log("search render, typing state is", location?.state?.typing)
 
   return (
     <Layout
