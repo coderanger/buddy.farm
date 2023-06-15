@@ -15,6 +15,27 @@ type Item = Queries.ItemTemplateQuery["farmrpg"]["items"][0]
 type DropRates = Item["dropRatesItems"]
 type Quest = Item["requiredForQuests"][0] & Item["rewardForQuests"][0]
 type RecipeItem = Item["recipeItems"][0] | Item["recipeIngredientItems"][0]
+type CardsTrade = Item["cardsTrades"][0]
+
+const formatCardsTradeCost = (trade: CardsTrade) => {
+  const parts = []
+  if (trade.spadesQuantity) {
+    parts.push(`♠️${trade.spadesQuantity}`)
+  }
+  if (trade.heartsQuantity) {
+    parts.push(`♥️${trade.heartsQuantity}`)
+  }
+  if (trade.diamondsQuantity) {
+    parts.push(`♦️${trade.diamondsQuantity}`)
+  }
+  if (trade.clubsQuantity) {
+    parts.push(`♣️${trade.clubsQuantity}`)
+  }
+  if (trade.jokerQuantity) {
+    parts.push(`🃏${trade.jokerQuantity}`)
+  }
+  return parts.join(" ")
+}
 
 interface QuestListProps {
   label: string
@@ -521,6 +542,20 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
     })
   }
 
+  // House of Cards.
+  if (item.cardsTrades.length !== 0) {
+    listItems.push(
+      ...item.cardsTrades.map((t) => ({
+        key: `hoc${t.id}`,
+        image: "/img/items/cardshop.png?1",
+        lineOne: "House of Cards",
+        lineTwo: formatCardsTradeCost(t),
+        href: `/cards/#${t.id}`,
+        value: t.outputQuantity.toLocaleString(),
+      }))
+    )
+  }
+
   // Trading.
   if (item.canMail) {
     listItems.push({
@@ -831,6 +866,15 @@ export const pageQuery = graphql`
           inputItem {
             ...ItemTemplateItem
           }
+        }
+        cardsTrades(filters: { isDisabled: false }, order: { id: ASC }) {
+          id
+          spadesQuantity
+          heartsQuantity
+          diamondsQuantity
+          clubsQuantity
+          jokerQuantity
+          outputQuantity
         }
         towerRewards {
           level
