@@ -156,6 +156,13 @@ const STATIC_SEARCHABLES: Searchable[] = [
     type: null,
     href: "/drop-pain/",
   },
+  {
+    name: "House of Cards",
+    image: "/img/items/joker.png",
+    searchText: "house of cards",
+    type: null,
+    href: "/cards/",
+  },
 ]
 
 export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql }) => {

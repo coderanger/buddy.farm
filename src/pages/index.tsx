@@ -150,6 +150,11 @@ const IndexPage = ({
               label="Useful Links"
               items={[
                 {
+                  name: "House of Cards",
+                  image: "/img/items/joker.png",
+                  href: "/cards/",
+                },
+                {
                   name: "Townsfolk",
                   image: "/img/items/town_sm.png",
                   href: "/townsfolk/",
