@@ -185,6 +185,9 @@ const ADJECTIVE_VALUE: Record<string, string> = {
 }
 
 const NPCList = ({ item }: NPCListProps) => {
+  if (!item.canMail) {
+    return <></>
+  }
   const listItems: ListItem[] = item.npcItems
     .slice()
     .sort((a, b) =>

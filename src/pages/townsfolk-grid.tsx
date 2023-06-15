@@ -186,7 +186,7 @@ export const query = graphql`
         shortName
         image
 
-        npcItems {
+        npcItems(filters: { item: { canMail: true } }) {
           ...TownsfolkGridPageNPCItem
         }
       }

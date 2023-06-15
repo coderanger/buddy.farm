@@ -68,7 +68,7 @@ export const pageQuery = graphql`
         __typename
         name
         image
-        npcItems {
+        npcItems(filters: { item: { canMail: true } }) {
           relationship
           item {
             __typename
