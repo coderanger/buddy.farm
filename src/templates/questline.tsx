@@ -50,6 +50,14 @@ const questText = (q: Quest, showText: boolean, showLevels: boolean) => {
         </span>
       )
     }
+    if (q.requiredNpc) {
+      levelsText.push(
+        <span className="me-2">
+          <b className="me-1">{q.requiredNpc.name} Friendship:</b>
+          {q.requiredNpcLevel}
+        </span>
+      )
+    }
     text.push(<div>{levelsText}</div>)
   }
   if (showText && !q.isHidden) {
@@ -192,7 +200,9 @@ export const pageQuery = graphql`
             requiredExploringLevel
             requiredCookingLevel
             requiredTowerLevel
-            requiredNpcId
+            requiredNpc {
+              name
+            }
             requiredNpcLevel
 
             requiredSilver

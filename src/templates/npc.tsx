@@ -57,6 +57,16 @@ export default ({
           bigLine={true}
         />
       ))}
+      <List
+        label="Friendship Level Quests"
+        items={npc.quests.map((q) => ({
+          lineOne: q.name,
+          image: q.image,
+          href: linkFor(q),
+          value: q.requiredNpcLevel.toLocaleString(),
+        }))}
+        bigLine={true}
+      />
     </Layout>
   )
 }
@@ -85,6 +95,12 @@ export const pageQuery = graphql`
             name
             image
           }
+        }
+        quests(order: { id: ASC }) {
+          __typename
+          name: title
+          image: npcImg
+          requiredNpcLevel
         }
       }
     }

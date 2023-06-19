@@ -106,6 +106,12 @@ const QuestsPage = ({
                 {q.requiredTowerLevel}
               </div>
             )}
+            {q.requiredNpc && (
+              <div className="mb-2">
+                <span className="fw-bold me-1">{q.requiredNpc.name} Friendship:</span>
+                {q.requiredNpcLevel}
+              </div>
+            )}
             <div className="mb-2">
               <span className="fw-bold me-1">From:</span>
               {q.npc}
@@ -137,7 +143,9 @@ export const query = graphql`
         requiredExploringLevel
         requiredCookingLevel
         requiredTowerLevel
-        requiredNpcId
+        requiredNpc {
+          name
+        }
         requiredNpcLevel
         cleanDescription
         startDate

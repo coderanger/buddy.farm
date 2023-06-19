@@ -134,6 +134,14 @@ export default ({
       value: quest.requiredTowerLevel.toLocaleString(),
     })
   }
+  if (quest.requiredNpc) {
+    questData.push({
+      image: quest.requiredNpc.image,
+      lineOne: `${quest.requiredNpc.name} Friendship`,
+      value: quest.requiredNpcLevel.toLocaleString(),
+      href: linkFor(quest.requiredNpc),
+    })
+  }
 
   // Temporary quest stuff.
   if (quest.startDate) {
@@ -267,7 +275,11 @@ export const pageQuery = graphql`
         requiredExploringLevel
         requiredCookingLevel
         requiredTowerLevel
-        requiredNpcId
+        requiredNpc {
+          __typename
+          name
+          image
+        }
         requiredNpcLevel
 
         requiredSilver
