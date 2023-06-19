@@ -80,6 +80,12 @@ const CardsPage = ({
 }: PageProps<Queries.CardsPageQuery>) => {
   return (
     <Layout title="House of Cards">
+      <p>
+        Access to the House of Cards requires the <Link to="/i/rune-dice/">Rune Dice</Link> item
+        from the{" "}
+        <Link to="/ql/secretly-a-society-summons-you/">Secretly A Society Summons You</Link> quest
+        line.
+      </p>
       <UpdateTime />
       <ListGroup variant="flush" css={{ maxWidth: 750, margin: "auto" }}>
         <div className="mb-1 d-flex justify-content-around">
