@@ -72,7 +72,12 @@ const TownsfolkGridPage = ({
 
   return (
     <Layout title="Townsfolk Grid">
-      <p className="d-xl-none">This may not display well on smaller screens.</p>
+      <p className="d-xl-none mb-2">This may not display well on smaller screens.</p>
+      <p className="mb-2">
+        Loved items provide 150 XP, Liked 25 XP, and Hated -50 XP.{" "}
+        <Link to="/i/heart-container/">Heart Containers</Link> provide{" "}
+        {(10_000_000).toLocaleString()} XP, all other items provide 1 XP.
+      </p>
       <div className="mb-3">
         <Form.Check
           inline

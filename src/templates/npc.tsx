@@ -43,7 +43,10 @@ export default ({
       <List label="Loves (150 XP)" items={npcItemsToList(loves)} bigLine={true} />
       <List label="Likes (25 XP)" items={npcItemsToList(likes)} bigLine={true} />
       <List label="Hates (-50 XP)" items={npcItemsToList(hates)} bigLine={true} />
-      <p className="mt-2">All other items provide 1 XP.</p>
+      <p className="mt-2">
+        <Link to="/i/heart-container/">Heart Containers</Link> provide {(10_000_000).toLocaleString()}{" "}
+        XP, all other items provide 1 XP.
+      </p>
       {rewardsByLevel.map((l) => (
         <List
           key={l.level}
