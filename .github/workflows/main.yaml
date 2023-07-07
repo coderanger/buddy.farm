@@ -25,6 +25,8 @@ jobs:
       - name: Build
         env:
           GATSBY_CPU_COUNT: 2
+          NODE_FETCH_RETRY_SOCKET_TIMEOUT: 60000
+          NODE_FETCH_RETRY_FORCE_TIMEOUT: true
         run: npm run build
 
       # - name: Publish
