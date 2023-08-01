@@ -7,6 +7,7 @@ interface WineData {
   maxValue: number
   cellarInsulation: boolean
   cellarInsulation2: boolean
+  cellarInsulation3: boolean
 }
 
 const DEFAULT_DATA: WineData = {
@@ -15,6 +16,7 @@ const DEFAULT_DATA: WineData = {
   maxValue: 10,
   cellarInsulation: true,
   cellarInsulation2: false,
+  cellarInsulation3: false,
 }
 
 export default () => {
@@ -25,11 +27,17 @@ export default () => {
       settings.cellarInsulation === undefined ? undefined : !!settings.cellarInsulation,
     cellarInsulation2:
       settings.cellarInsulation2 === undefined ? undefined : !!settings.cellarInsulation2,
+    cellarInsulation3:
+      settings.cellarInsulation3 === undefined ? undefined : !!settings.cellarInsulation3,
   }))
 
   // Calculations.
   const maxValue = data.maxValue * 1_000_000
-  const ciMul = 1 + (data.cellarInsulation ? 2 : 0) + (data.cellarInsulation2 ? 3 : 0)
+  const ciMul =
+    1 +
+    (data.cellarInsulation ? 2 : 0) +
+    (data.cellarInsulation2 ? 3 : 0) +
+    (data.cellarInsulation3 ? 3 : 0)
   const daysToMaxValue = Math.cbrt((maxValue - 1000) / (data.farmLevel * ciMul))
 
   const fullDaysToMaxValue = Math.ceil(daysToMaxValue)
@@ -82,6 +90,11 @@ export default () => {
           id="cellarInsulation2"
           label="Cellar Insulation II"
           defaultChecked={data.cellarInsulation2}
+        />
+        <Input.Switch
+          id="cellarInsulation3"
+          label="Cellar Insulation III"
+          defaultChecked={data.cellarInsulation3}
         />
       </Calculator.Perks>
 
