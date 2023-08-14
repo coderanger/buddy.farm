@@ -49,8 +49,11 @@ export default ({
               .filter((an) => an !== "")
               .map((an, i) => ({
                 lineOne: an,
-                background: a.correct === i + 1 ? "rgba(180, 255, 180, 0.5) !important" : undefined,
-                value: a.correct === i + 1 ? "✅" : "",
+                background:
+                  a.correct === i + 1 && !a.isHidden
+                    ? "rgba(180, 255, 180, 0.5) !important"
+                    : undefined,
+                value: a.correct === i + 1 && !a.isHidden ? "✅" : "",
               }))}
             bigLine={true}
           />
@@ -85,6 +88,7 @@ export const pageQuery = graphql`
           answer3
           answer4
           correct
+          isHidden
         }
       }
     }
