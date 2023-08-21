@@ -559,6 +559,20 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
     )
   }
 
+  // Temple chains.
+  if (item.templeRewardItems.length !== 0) {
+    listItems.push(
+      ...item.templeRewardItems.map((tr) => ({
+        key: `temple${tr.id}`,
+        image: "/img/items/temple.png?1",
+        lineOne: `Temple - ${tr.templeReward.inputItem.name}`,
+        lineTwo: `Donate ${tr.templeReward.inputQuantity.toLocaleString()}`,
+        href: linkFor(tr.templeReward.inputItem),
+        value: tr.quantity.toLocaleString(),
+      }))
+    )
+  }
+
   // Trading.
   if (item.canMail) {
     listItems.push({
@@ -584,7 +598,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
     listItems.push({
       key: "fleaMarket",
       image: "/img/items/streetmarket.png",
-      lineOne: "Flea Market",
+      lineOne: item.fleaMarketRotate ? "Flea Market (sometimes)" : "Flea Market",
       lineTwo: "Gold",
       value: item.fleaMarketPrice.toLocaleString(),
       alert: "Spending gold should be done carefully",
@@ -700,6 +714,7 @@ export const pageQuery = graphql`
         cookingLevel
         buyPrice
         fleaMarketPrice
+        fleaMarketRotate
         baseYieldMinutes
         locksmithGrabBag
         locksmithGold
@@ -896,6 +911,16 @@ export const pageQuery = graphql`
           inputQuantity
           progress
           outputQuantity
+        }
+        templeRewardItems {
+          id
+          quantity
+          templeReward {
+            inputQuantity
+            inputItem {
+              ...ItemTemplateItem
+            }
+          }
         }
       }
     }
