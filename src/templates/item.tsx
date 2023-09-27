@@ -45,10 +45,12 @@ interface QuestListProps {
 
 const QuestList = ({ label, quests, oldQuests }: QuestListProps) => {
   const now = DateTime.now()
-  let parsedQuests = quests.map((q) => ({
-    ...q,
-    expired: q.quest.endDate !== null && DateTime.fromISO(q.quest.endDate) < now,
-  }))
+  let parsedQuests = quests
+    .filter((q) => !q.quest.isHidden)
+    .map((q) => ({
+      ...q,
+      expired: q.quest.endDate !== null && DateTime.fromISO(q.quest.endDate) < now,
+    }))
   if (!oldQuests) {
     // Filter anything we don't need.
     const filteredQuests = parsedQuests.filter((q) => !q.expired)
@@ -726,6 +728,7 @@ export const pageQuery = graphql`
             name: title
             image: npcImg
             endDate
+            isHidden
           }
         }
         rewardForQuests {
@@ -736,6 +739,7 @@ export const pageQuery = graphql`
             name: title
             image: npcImg
             endDate
+            isHidden
           }
         }
         petItems {
