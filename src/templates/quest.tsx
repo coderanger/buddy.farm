@@ -224,7 +224,7 @@ export const pageQuery = graphql`
   fragment QuestTemplateLinkedQuest on FarmRPG_Quest {
     __typename
     id
-    name: title
+    name: cleanTitle
     npcImg
     endDate
   }
@@ -252,7 +252,7 @@ export const pageQuery = graphql`
     farmrpg {
       quests(filters: { title: $name }) {
         __typename
-        name: title
+        name: cleanTitle
         image: npcImg
         npc
         author

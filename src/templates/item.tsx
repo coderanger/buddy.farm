@@ -725,7 +725,7 @@ export const pageQuery = graphql`
           quest {
             __typename
             id
-            name: title
+            name: cleanTitle
             image: npcImg
             endDate
             isHidden
@@ -736,7 +736,7 @@ export const pageQuery = graphql`
           quest {
             __typename
             id
-            name: title
+            name: cleanTitle
             image: npcImg
             endDate
             isHidden

@@ -231,7 +231,7 @@ export const query = graphql`
 
       quests(order: { createdAt: DESC }, pagination: { limit: 5 }) {
         __typename
-        name: title
+        name: cleanTitle
         image: npcImg
       }
     }
