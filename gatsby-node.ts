@@ -184,7 +184,7 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
         quests(order: { id: ASC }) {
           __typename
           id
-          name: title
+          name: cleanTitle
           image: npcImg
         }
         questlines {

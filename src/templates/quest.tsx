@@ -248,9 +248,9 @@ export const pageQuery = graphql`
     quantity
   }
 
-  query QuestTemplate($name: String!) {
+  query QuestTemplate($id: ID) {
     farmrpg {
-      quests(filters: { title: $name }) {
+      quests(filters: { id: $id }) {
         __typename
         name: cleanTitle
         image: npcImg
