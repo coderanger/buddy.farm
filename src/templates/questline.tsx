@@ -189,7 +189,7 @@ export const pageQuery = graphql`
           order
           quest {
             __typename
-            name: title
+            name: cleanTitle
             image: npcImg
             description
             isHidden
