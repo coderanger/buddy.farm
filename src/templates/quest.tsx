@@ -115,7 +115,7 @@ export default ({
   }
   if (quest.requiredExploringLevel && quest.requiredExploringLevel !== 1) {
     questData.push({
-      image: "/img/items/6075.png",
+      image: "/img/items/6075.PNG",
       lineOne: "Exploring Level",
       value: quest.requiredExploringLevel.toLocaleString(),
     })
