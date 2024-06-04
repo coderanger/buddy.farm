@@ -67,6 +67,14 @@ export default ({
       value: pet.requiredExploringLevel.toString(),
     })
   }
+  if (pet.requiredCookingLevel) {
+    petData.push({
+      key: "cookingLevel",
+      image: "/img/items/2473.png",
+      lineOne: "Cooking Level",
+      value: pet.requiredCookingLevel.toString(),
+    })
+  }
 
   return (
     <Layout headerFrom={pet}>
@@ -90,6 +98,7 @@ export const pageQuery = graphql`
         requiredFishingLevel
         requiredCraftingLevel
         requiredExploringLevel
+        requiredCookingLevel
         petItems {
           level
           item {
