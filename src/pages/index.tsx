@@ -172,7 +172,7 @@ const IndexPage = ({
                 },
                 {
                   name: "Exploring",
-                  image: "/img/items/6075.PNG",
+                  image: "/img/items/6075.png",
                   href: "/exploring/",
                 },
                 { name: "Fishing", image: "/img/items/7783.png", href: "/fishing/" },
