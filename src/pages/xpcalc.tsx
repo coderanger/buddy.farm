@@ -423,9 +423,14 @@ const CookingXpCalc = ({ xp, data, values }: XpCalcProps) => {
         <option value="600,120">Cat’s Meow (level 15)</option>
         <option value="1500,180">Mushroom Stew (level 20)</option>
         <option value="2000,240">Quandary Chowder (level 25)</option>
+        <option value="4500,480">Cabbage Stew (level 25)</option>
         <option value="1500,180">Neigh Neigh (level 30)</option>
         <option value="3000,360">Sea Pincher Special (level 30)</option>
         <option value="750,120">Shrimp-a-Plenty (level 35)</option>
+        <option value="2000,240">Hickory Omelette (level 35)</option>
+        <option value="900,120">Breakfast Boost (level 40)</option>
+        <option value="6500,720">Red Berry Pie (level 40)</option>
+        <option value="6500,720">Concord Grape Pie (level 40)</option>
       </Input.Select>
       <p>
         Enabling a cooking action assumes you perform it immediately when available with perfect
