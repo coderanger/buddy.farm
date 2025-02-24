@@ -88,7 +88,7 @@ export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProp
         key="unitExploring"
         settingKey="unitExploring"
         units={[
-          { value: "", label: "Explores", image: "https://farmrpg.com/img/items/6075.PNG" },
+          { value: "", label: "Explores", image: "https://farmrpg.com/img/items/6075.png" },
           { value: "stamina", label: "Stamina", image: personRunning },
           {
             value: "oj",

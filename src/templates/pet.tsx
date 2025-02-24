@@ -62,7 +62,7 @@ export default ({
   if (pet.requiredExploringLevel) {
     petData.push({
       key: "exploringLevel",
-      image: "/img/items/6075.PNG",
+      image: "/img/items/6075.png",
       lineOne: "Exploring Level",
       value: pet.requiredExploringLevel.toString(),
     })
