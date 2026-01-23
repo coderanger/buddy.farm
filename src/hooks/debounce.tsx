@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const useDebounce = <T extends (...args: any[]) => void,>(func: T, wait: number) => {
   const [timeout, setTimeout_] = useState<number | undefined>(undefined)
@@ -11,6 +11,22 @@ export const useDebounce = <T extends (...args: any[]) => void,>(func: T, wait: 
     clearTimeout(timeout)
     setTimeout_(window.setTimeout(later, wait))
   }
+}
+
+export const useDebouncedValue = <T,>(value: T, delay: number): T => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
 }
 
 export const useDebounceAfter = <T extends (...args: any[]) => void,>(func: T, wait: number) => {

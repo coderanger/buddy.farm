@@ -1,21 +1,13 @@
 import { useContext, useEffect, useState } from "react"
-import { navigate } from "gatsby"
 
 import { keyframes } from "@emotion/react"
 import { CgSpinner } from "@react-icons/all-files/cg/CgSpinner"
 
 import Layout from "../components/layout"
 import List from "../components/list"
-import { useDebounce } from "../hooks/debounce"
 import { GlobalContext } from "../utils/context"
 
-import type { Searchable } from "../utils/context"
-
-declare global {
-  interface Window {
-    _farmSearchables?: Searchable[] | undefined
-  }
-}
+import { useDebouncedValue } from "../hooks/debounce"
 
 interface ScoredResult {
   name: string
@@ -62,50 +54,21 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `
 
-interface SearchProps {
-  location?: {
-    state?: {
-      typing: boolean
-      query: string
-    }
-  }
-}
-
-export default ({ location }: SearchProps) => {
+export default () => {
   const ctx = useContext(GlobalContext)
-  // const [searchables, setSearchables] = useState<Searchable[] | null>(null)
-  // const [inputFocus, setInputFocus] = useState(false)
-  const [query, setQuery] = useState<string | undefined>(ctx.query || undefined)
   const [results, setResults] = useState<ScoredResult[] | null>(null)
   const inBrowser = typeof document !== "undefined"
 
-  // Get the search query from the URL.
-  // Based on https://github.com/akash-joshi/gatsby-query-params/blob/f997c33cdee82d053c6591ff3b71b7d54cce07d3/src/index.js
+  // Debounce the query to reduce number of searches
+  const query = useDebouncedValue(ctx.query, 150)
+
+  // Initialize query from URL on mount
   useEffect(() => {
     if (inBrowser) {
-      console.log("search effect, typing state is", location?.state?.typing)
-      // THIS IS A VERY SILLY SOLUTION BUT ITS BETTER THAN NOTHING.
-      if (location?.state?.typing) {
-        setTimeout(() => {
-          console.log("search setting focus")
-          document.getElementById("nav-search")?.focus()
-        }, 1)
-      }
-
-      if (location?.state?.typing && ctx.query !== null) {
-        // Automatic navigation, assume we're taking over a query from another page.
-        // In case the navigate got a little confused, update things.
-        history.replaceState(null, "", `?q=${encodeURIComponent(ctx.query)}`)
-        // Transfer the global query into local state and clear it for the next page.
-        ctx.setQuery(null)
-        setQuery(ctx.query || undefined)
-      } else {
-        // Natural navigation, load the query from the URL.
-        const params = new URLSearchParams(document.location.search)
-        const q = params.get("q")
-        if (q !== null) {
-          setQuery(q)
-        }
+      const params = new URLSearchParams(document.location.search)
+      const q = params.get("q")
+      if (q !== null) {
+        ctx.setQuery(q)
       }
       if (ctx.searchables === null) {
         // Start loading the searchables.
@@ -118,28 +81,13 @@ export default ({ location }: SearchProps) => {
     }
   }, [])
 
-  const slowSetQuery = useDebounce(setQuery, 150)
-
-  const onSearch = (query: string) => {
-    slowSetQuery(query)
-    history.replaceState(null, "", `?q=${encodeURIComponent(query)}`)
-  }
-
-  const onSearchSubmit = () => {
-    if (results && results.length >= 1) {
-      void navigate(results[0].href)
-    }
-  }
-
-  // const onSearchFocus = (focus: boolean) => {
-  //   setInputFocus(focus)
-  // }
-
+  // Run search when debounced deferred query or searchables change
   useEffect(() => {
     if (ctx.searchables !== null) {
       // Filter and sort the results.
       if (!query) {
         setResults([])
+        ctx.setFirstResultHref(null)
         return
       }
 
@@ -148,6 +96,7 @@ export default ({ location }: SearchProps) => {
       const queryClean = queryLower.replace(/[()[\]]/g, "")
       if (queryClean.length < 2) {
         setResults([])
+        ctx.setFirstResultHref(null)
         return
       }
       const queryRegexp = prepScoring(queryClean)
@@ -162,19 +111,13 @@ export default ({ location }: SearchProps) => {
       }
       scored.sort((a, b) => a.score - b.score)
       setResults(scored)
+      // Update first result href for Enter key navigation
+      ctx.setFirstResultHref(scored.length > 0 ? scored[0].href : null)
     }
   }, [query, ctx.searchables])
 
-  console.log("search render, typing state is", location?.state?.typing)
-
   return (
-    <Layout
-      pageTitle="Buddy's Almanac"
-      query={query}
-      searchAutoFocus={!!location?.state?.typing}
-      onSearch={onSearch}
-      onSearchSubmit={onSearchSubmit}
-    >
+    <Layout pageTitle="Buddy's Almanac">
       <div>Search results</div>
       {results !== null ? (
         <List
@@ -203,4 +146,4 @@ export default ({ location }: SearchProps) => {
       )}
     </Layout>
   )
-}
+};

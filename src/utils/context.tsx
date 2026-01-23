@@ -16,6 +16,8 @@ interface ContextProps {
   setSearchables: React.Dispatch<React.SetStateAction<Searchable[] | null>>
   query: string | null
   setQuery: React.Dispatch<React.SetStateAction<string | null>>
+  firstResultHref: string | null
+  setFirstResultHref: React.Dispatch<React.SetStateAction<string | null>>
   settings: Settings
   setSettings: SetSettings
   setSetting: SetSetting
@@ -29,6 +31,8 @@ export const GlobalContext = React.createContext<ContextProps>({
   setSearchables: () => null,
   query: null,
   setQuery: () => null,
+  firstResultHref: null,
+  setFirstResultHref: () => null,
   settings: {},
   setSettings: () => null,
   setSetting: () => null,
@@ -44,6 +48,7 @@ interface ProviderProps {
 const Provider = ({ children }: ProviderProps) => {
   const [searchables, setSearchables] = useState<Searchable[] | null>(null)
   const [query, setQuery] = useState<string | null>(null)
+  const [firstResultHref, setFirstResultHref] = useState<string | null>(null)
   const [settings, setSettings, setSetting] = useSettings()
   const [toasts, addToast, removeToast] = useToasts()
 
@@ -58,7 +63,7 @@ const Provider = ({ children }: ProviderProps) => {
   }, [settings.darkMode])
 
   return (
-    <GlobalContext.Provider value={{ searchables, setSearchables, query, setQuery, settings, setSettings, setSetting, toasts, addToast, removeToast }}>
+    <GlobalContext.Provider value={{ searchables, setSearchables, query, setQuery, firstResultHref, setFirstResultHref, settings, setSettings, setSetting, toasts, addToast, removeToast }}>
       {children}
     </GlobalContext.Provider>
   )

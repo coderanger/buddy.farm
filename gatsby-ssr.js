@@ -1,5 +1,7 @@
 // @ts-check
+import React from "react"
 import Provider from "./src/utils/context"
+import { PersistentNav } from "./src/components/persistent-nav"
 
 /** @type {import('gatsby').GatsbySSR['onPreRenderHTML']} */
 export const onPreRenderHTML = ({ getHeadComponents, replaceHeadComponents }) => {
@@ -46,3 +48,8 @@ export const onPreRenderHTML = ({ getHeadComponents, replaceHeadComponents }) =>
 
 /** @type {import('gatsby').GatsbySSR['wrapRootElement']} */
 export const wrapRootElement = Provider
+
+/** @type {import('gatsby').GatsbySSR['wrapPageElement']} */
+export const wrapPageElement = ({ element }) => {
+  return <PersistentNav>{element}</PersistentNav>
+}
