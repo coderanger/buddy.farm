@@ -596,7 +596,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
       value: item.buyPrice.toLocaleString(),
     })
   }
-  if (item.fleaMarketPrice) {
+  if ((item.canFleaMarket || item.fleaMarketRotate) && item.fleaMarketPrice) {
     listItems.push({
       key: "fleaMarket",
       image: "/img/items/streetmarket.png",
@@ -712,6 +712,7 @@ export const pageQuery = graphql`
         canMail
         canCraft
         canCook
+        canFleaMarket
         craftingLevel
         cookingLevel
         buyPrice
