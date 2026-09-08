@@ -627,7 +627,13 @@ export default ({
   const settings = ctx.settings
   const [drops, setDrops] = useState(() =>
     item.dropRatesItems.filter(
-      (dr) => !(dr.dropRates.ironDepot || dr.dropRates.manualFishing || dr.dropRates.runecube),
+      (dr) =>
+        !(
+          dr.dropRates.ironDepot ||
+          dr.dropRates.manualFishing ||
+          dr.dropRates.runecube ||
+          dr.dropRates.frozen
+        ),
     ),
   )
 
@@ -637,7 +643,8 @@ export default ({
         !!dr.dropRates.runecube === !!settings.runecube &&
         (dr.dropRates.ironDepot === null || !!dr.dropRates.ironDepot === !!settings.ironDepot) &&
         (dr.dropRates.manualFishing === null ||
-          !!dr.dropRates.manualFishing === (!!settings.manualFishing || item.manualFishingOnly)),
+          !!dr.dropRates.manualFishing === (!!settings.manualFishing || item.manualFishingOnly)) &&
+        !dr.dropRates.frozen,
     )
     setDrops(drops)
   }, [
@@ -771,6 +778,7 @@ export const pageQuery = graphql`
             ironDepot
             manualFishing
             runecube
+            frozen
             location {
               __typename
               name
