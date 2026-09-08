@@ -17,7 +17,8 @@ export default ({
 
   const npcItemsToList = (items: typeof npc.npcItems) =>
     items
-      .toSorted((a, b) => (b.specialXp ?? 0) - (a.specialXp ?? 0))
+      .slice()
+      .sort((a, b) => (b.specialXp ?? 0) - (a.specialXp ?? 0))
       .map((i) => ({
         lineOne: i.item.name,
         image: i.item.image,
