@@ -176,6 +176,11 @@ const IndexPage = ({
                   href: "/exploring/",
                 },
                 { name: "Fishing", image: "/img/items/7783.png", href: "/fishing/" },
+                // {
+                //   name: "Mining",
+                //   image: "/img/items/6728.png",
+                //   href: "/mining/",
+                // },
                 {
                   name: "Calculators",
                   image: "/img/items/7210.png",
