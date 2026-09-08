@@ -159,7 +159,7 @@ const TradeList = ({ item }: TradeListProps) => {
     .filter(
       (t) =>
         DateTime.fromISO(t.lastSeen).diffNow("seconds").seconds * -1 < TRADE_LAST_SEEN_THRESHOLD &&
-        !t.oneshot
+        !t.oneshot,
     )
     .map((t) => ({
       image: t.outputItem.image,
@@ -181,9 +181,15 @@ const ADJECTIVE_ORDER: Record<string, number> = {
 }
 
 const ADJECTIVE_VALUE: Record<string, string> = {
-  loves: "Loves (150 XP)",
-  likes: "Likes (25 XP)",
-  hates: "Hates (-50 XP)",
+  loves: "Loves",
+  likes: "Likes",
+  hates: "Hates",
+}
+
+const ADJECTIVE_XP: Record<string, number> = {
+  loves: 150,
+  likes: 25,
+  hates: -50,
 }
 
 const NPCList = ({ item }: NPCListProps) => {
@@ -192,13 +198,13 @@ const NPCList = ({ item }: NPCListProps) => {
     .sort((a, b) =>
       a.relationship === b.relationship
         ? a.npc.name.localeCompare(b.npc.name)
-        : ADJECTIVE_ORDER[a.relationship] - ADJECTIVE_ORDER[b.relationship]
+        : ADJECTIVE_ORDER[a.relationship] - ADJECTIVE_ORDER[b.relationship],
     )
     .map((n) => ({
       image: n.npc.image,
       lineOne: n.npc.name,
       href: linkFor(n.npc),
-      value: ADJECTIVE_VALUE[n.relationship],
+      value: `${ADJECTIVE_VALUE[n.relationship]} (${n.specialXp ? n.specialXp.toLocaleString() : ADJECTIVE_XP[n.relationship]} XP)`,
     }))
   return <List label="Townsfolk" items={listItems} bigLine={true} />
 }
@@ -234,14 +240,16 @@ const CookingRecipeList = ({ item }: CookingRecipeListProps) => {
     item.recipeItems
       .slice()
       .sort((a, b) =>
-        a.quantity === b.quantity ? a.item.name.localeCompare(b.item.name) : b.quantity - a.quantity
+        a.quantity === b.quantity
+          ? a.item.name.localeCompare(b.item.name)
+          : b.quantity - a.quantity,
       )
       .map((r) => ({
         lineOne: r.item.name,
         image: r.item.image,
         href: linkFor(r.item),
         value: r.quantity.toLocaleString(),
-      }))
+      })),
   )
   if (item.cookingRecipeItem !== null) {
     listItems.unshift({
@@ -266,7 +274,7 @@ const CookingReverseList = ({ item }: CookingReverseListProps) => {
     .sort((a, b) =>
       a.item.cookingLevel === b.item.cookingLevel
         ? a.item.name.localeCompare(b.item.name)
-        : (a.item.cookingLevel || 0) - (b.item.cookingLevel || 0)
+        : (a.item.cookingLevel || 0) - (b.item.cookingLevel || 0),
     )
     .map((i) => ({
       lineOne: i.item.name,
@@ -345,7 +353,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
       locationType,
       rate.rate,
       item.manualFishingOnly || false,
-      baseDropRate
+      baseDropRate,
     )
     listItems.push({
       key: key,
@@ -362,7 +370,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
     ...item.petItems
       .slice()
       .sort((a, b) =>
-        a.level === b.level ? a.pet.name.localeCompare(a.pet.name) : a.level - b.level
+        a.level === b.level ? a.pet.name.localeCompare(a.pet.name) : a.level - b.level,
       )
       .map((pi) => ({
         key: `p${pi.pet.name}`,
@@ -371,7 +379,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: "Pet",
         value: `Level ${pi.level}`,
         href: linkFor(pi.pet),
-      }))
+      })),
   )
 
   // Locksmith sources.
@@ -383,7 +391,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
       lineTwo: "Locksmith",
       value: formatLocksmithQuantity(li),
       href: linkFor(li.item),
-    }))
+    })),
   )
 
   // Wishing well sources.
@@ -402,7 +410,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
             maximumFractionDigits: 1,
           }) + "%",
         href: linkFor(ww.inputItem),
-      }))
+      })),
   )
 
   // Manual sources.
@@ -416,7 +424,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineOne: b.lineOne,
         lineTwo: b.lineTwo,
         value: b.value,
-      }))
+      })),
   )
 
   // Exchange center sources.
@@ -426,7 +434,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         (t) =>
           DateTime.fromISO(t.lastSeen).diffNow("seconds").seconds * -1 <=
             TRADE_LAST_SEEN_THRESHOLD &&
-          (unusualDropMode || !t.oneshot)
+          (unusualDropMode || !t.oneshot),
       )
       .map((t) => ({
         key: `ec${t.inputItem.name}`,
@@ -435,7 +443,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: `Exchange Center${t.oneshot ? " - One Shot" : ""}`,
         value: t.outputQuantity.toLocaleString(),
         href: linkFor(t.inputItem),
-      }))
+      })),
   )
 
   // Quiz sources.
@@ -447,7 +455,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
       lineTwo: `Score ${q.score}%${q.score < 100 ? " or better" : ""}`,
       value: q.quantity.toLocaleString(),
       href: linkFor(q.quiz),
-    }))
+    })),
   )
 
   // Passwords sources.
@@ -462,7 +470,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: settings.showPasswords ? `x${pw.quantity}` : "Click for password clues",
         value: settings.showPasswords ? pw.password.password : pw.quantity.toLocaleString(),
         href: `/passwords/#${pw.password.id}`,
-      }))
+      })),
   )
 
   // Tower sources.
@@ -477,7 +485,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: `x${t.itemQuantity?.toLocaleString()}`,
         value: `Level ${t.level}`,
         href: `/tower/#level${t.level}`,
-      }))
+      })),
   )
 
   if (unusualDropMode) {
@@ -492,14 +500,14 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         alert:
           cc.progress !== null && cc.progress < cc.inputQuantity ? "Mission failed" : undefined,
         alertIcon: "error",
-      }))
+      })),
     )
 
     listItems.push(
       ...item.npcRewards
         .slice()
         .sort((a, b) =>
-          a.npc.name === b.npc.name ? a.level - b.level : a.npc.name.localeCompare(b.npc.name)
+          a.npc.name === b.npc.name ? a.level - b.level : a.npc.name.localeCompare(b.npc.name),
         )
         .map((i) => ({
           key: `npcreward${i.npc.name}-${i.level}`,
@@ -508,7 +516,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
           lineTwo: `Friendship Level ${i.level}`,
           value: i.quantity.toLocaleString(),
           href: linkFor(i.npc),
-        }))
+        })),
     )
   }
 
@@ -554,7 +562,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: formatCardsTradeCost(t),
         href: `/cards/#${t.id}`,
         value: t.outputQuantity.toLocaleString(),
-      }))
+      })),
     )
   }
 
@@ -568,7 +576,7 @@ const ItemList = ({ item, drops, settings }: ItemListProps) => {
         lineTwo: `Donate ${tr.templeReward.inputQuantity.toLocaleString()}`,
         href: linkFor(tr.templeReward.inputItem),
         value: tr.quantity.toLocaleString(),
-      }))
+      })),
     )
   }
 
@@ -619,8 +627,8 @@ export default ({
   const settings = ctx.settings
   const [drops, setDrops] = useState(() =>
     item.dropRatesItems.filter(
-      (dr) => !(dr.dropRates.ironDepot || dr.dropRates.manualFishing || dr.dropRates.runecube)
-    )
+      (dr) => !(dr.dropRates.ironDepot || dr.dropRates.manualFishing || dr.dropRates.runecube),
+    ),
   )
 
   useEffect(() => {
@@ -629,7 +637,7 @@ export default ({
         !!dr.dropRates.runecube === !!settings.runecube &&
         (dr.dropRates.ironDepot === null || !!dr.dropRates.ironDepot === !!settings.ironDepot) &&
         (dr.dropRates.manualFishing === null ||
-          !!dr.dropRates.manualFishing === (!!settings.manualFishing || item.manualFishingOnly))
+          !!dr.dropRates.manualFishing === (!!settings.manualFishing || item.manualFishingOnly)),
     )
     setDrops(drops)
   }, [
@@ -787,6 +795,7 @@ export const pageQuery = graphql`
         }
         npcItems {
           relationship
+          specialXp
           npc {
             __typename
             name

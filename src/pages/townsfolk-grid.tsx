@@ -21,12 +21,16 @@ const cellStyleByAdj = {
   hates: {
     backgroundColor: "rgba(255, 180, 180, 0.5) !important",
   },
+  special: {
+    backgroundColor: "rgba(180, 255, 180, 0.8) !important",
+  },
 }
 
 const emojiByRel = {
   loves: "❤️",
   likes: "✅",
   hates: "❌",
+  special: "ℹ️",
 }
 
 const stickyHeaderStyle = css({
@@ -46,10 +50,13 @@ const TownsfolkGridPage = ({
 
   const allItems: string[] = []
   const itemsByName: Record<string, Item> = {}
-  const relByNpc = npcs.reduce((p, c) => {
-    p[c.name] = {}
-    return p
-  }, {} as Record<string, Record<string, "loves" | "likes" | "hates">>)
+  const relByNpc = npcs.reduce(
+    (p, c) => {
+      p[c.name] = {}
+      return p
+    },
+    {} as Record<string, Record<string, "loves" | "likes" | "hates" | "special">>,
+  )
 
   for (const npc of npcs) {
     for (const ni of npc.npcItems) {
@@ -66,7 +73,9 @@ const TownsfolkGridPage = ({
         itemsByName[ni.item.name] = ni.item
       }
 
-      relByNpc[npc.name][ni.item.name] = ni.relationship as "loves" | "likes" | "hates"
+      relByNpc[npc.name][ni.item.name] = ni.specialXp
+        ? "special"
+        : (ni.relationship as "loves" | "likes" | "hates")
     }
   }
 
@@ -74,9 +83,8 @@ const TownsfolkGridPage = ({
     <Layout title="Townsfolk Grid">
       <p className="d-xl-none mb-2">This may not display well on smaller screens.</p>
       <p className="mb-2">
-        Loved items provide 150 XP, Liked 25 XP, and Hated -50 XP.{" "}
-        <Link to="/i/heart-container/">Heart Containers</Link> provide{" "}
-        {(10_000_000).toLocaleString()} XP, all other items provide 1 XP.
+        Loved items provide 150 XP, Liked 25 XP, and Hated -50 XP. Items with a ℹ️ provide special
+        amounts of XP, all other items provide 1 XP.
       </p>
       <div className="mb-3">
         <Form.Check
@@ -176,6 +184,7 @@ export default TownsfolkGridPage
 export const query = graphql`
   fragment TownsfolkGridPageNPCItem on FarmRPG_NPCItem {
     relationship
+    specialXp
     item {
       __typename
       name
