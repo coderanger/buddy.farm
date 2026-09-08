@@ -12,6 +12,7 @@ import linkFor from "../utils/links"
 const LOCATION_TYPE_TO_DROP_MODE: Record<string, string> = {
   explore: "explores",
   fishing: "fishes",
+  mining: "pickaxes",
 }
 
 type Location = Queries.LocationTemplateQuery["farmrpg"]["locations"][0]
@@ -24,7 +25,7 @@ interface LocationListProps {
 }
 
 const LocationList = ({ location, drops, settings }: LocationListProps) => {
-  const listItems: ListItem[] = drops.items
+  const listItems: ListItem[] = (drops?.items ?? [])
     .slice()
     .sort((a, b) => a.rate - b.rate)
     .map((itemRate) => {
@@ -33,7 +34,7 @@ const LocationList = ({ location, drops, settings }: LocationListProps) => {
         location.type,
         itemRate.rate,
         itemRate.item.manualFishingOnly,
-        location.baseDropRate
+        location.baseDropRate,
       )
       return {
         key: itemRate.item.id.toString(),
@@ -57,9 +58,14 @@ export default ({
   const ctx = useContext(GlobalContext)
   const settings = ctx.settings
   const [drops, setDrops] = useState(
-    () => location.dropRates.filter((dr) => !(dr.ironDepot || dr.manualFishing || dr.runecube))[0]
+    () => location.dropRates.filter((dr) => !(dr.ironDepot || dr.manualFishing || dr.runecube))[0],
   )
-  const breadcrumbLink = location.type === "explore" ? "/exploring/" : "/fishing/"
+  const breadcrumbLink =
+    location.type === "explore"
+      ? "/exploring/"
+      : location.type === "mining"
+        ? "/mining"
+        : "/fishing/"
 
   useEffect(() => {
     let drops = location.dropRates.filter((dr) => dr.runecube === !!settings.runecube)
@@ -83,7 +89,7 @@ export default ({
     >
       <p>
         <Link to={breadcrumbLink}>
-          Back to all {location.type === "explore" ? "exploring" : "fishing"} locations
+          Back to all {location.type === "explore" ? "exploring" : location.type} locations
         </Link>
       </p>
       <LocationList location={location} drops={drops} settings={settings} />
