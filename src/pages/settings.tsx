@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState } from "react"
 
-import { Input, SwitchInputProps, TextInputProps, SelectInputProps } from '../components/input'
-import Layout from '../components/layout'
-import { Settings } from '../hooks/settings'
-import { GlobalContext } from '../utils/context'
+import { Input, SwitchInputProps, TextInputProps, SelectInputProps } from "../components/input"
+import Layout from "../components/layout"
+import { Settings } from "../hooks/settings"
+import { GlobalContext } from "../utils/context"
 
 interface SwitchSettingProps extends Omit<SwitchInputProps, "defaultChecked"> {
   settings: Settings
@@ -38,54 +38,104 @@ export default () => {
   const [secretKnock, setSecretKnock] = useState(0)
 
   const secretKnockEnabled = secretKnock >= 3
-  return <Layout pageTitle="Settings" settingsBack={true}>
-    <Input.Form valueSetter={ctx.setSettings}>
-      <fieldset>
-        <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
-        <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} />
-        <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
-        <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
-        <SwitchSetting id="showPasswords" label="Show Mailbox Passwords" settings={settings} />
-        <div className={secretKnockEnabled ? "" : "d-none"}>
-          <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Units</legend>
-        <SelectSetting id="unitExploring" label="Exploring" settings={settings}>
-          <option value="">Explores</option>
-          <option value="stamina">Stamina</option>
-          <option value="oj">Orange Juices</option>
-          <option value="ciders">Apple Ciders</option>
-          <option value="lemonade">Lemonades</option>
-          <option value="palmers">Arnold Palmers</option>
-        </SelectSetting>
-        <SelectSetting id="unitFishing" label="Fishing" settings={settings}>
-          <option value="">Fishes</option>
-          <option value="nets">Fishing Nets</option>
-          <option value="largeNets">Large Nets</option>
-        </SelectSetting>
-        <SelectSetting id="unitFarming" label="Farming" settings={settings}>
-          <option value="">Seeds</option>
-          <option value="harvestAll">Harvest Alls</option>
-        </SelectSetting>
-        <TextSetting id="cropRows" label="Crop Rows" placeholder='2' type="number" settings={settings} />
-      </fieldset>
-      <fieldset>
-        <legend>Perks</legend>
-        <SwitchSetting id="ironDepot" label="Iron Depot" settings={settings} />
-        <TextSetting id="wanderer" label="Wanderer" placeholder='0' after="%" type="number" settings={settings} />
-        <SwitchSetting id="cinnamonSticks" label="Cinnamon Sticks" settings={settings} />
-        <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
-        <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
-        <SwitchSetting id="fishingTrawl" label="Fishing Trawl" settings={settings} />
-        <TextSetting id="primerFarming" label="Bonus Farming XP" placeholder='0' type="number" after="%" settings={settings} />
-        <TextSetting id="primerFishing" label="Bonus Fishing XP" placeholder='0' type="number" after="%" settings={settings} />
-        <TextSetting id="primerCrafting" label="Bonus Crafting XP" placeholder='0' type="number" after="%" settings={settings} />
-        <TextSetting id="primerExploring" label="Bonus Exploring XP" placeholder='0' type="number" after="%" settings={settings} />
-        <TextSetting id="resourceSaver" label="Resource Saver" placeholder='20' type="number" after="%" settings={settings} />
-        <SwitchSetting id="runecube" label="Eagle Eye (Runecube)" settings={settings} />
-      </fieldset>
-    </Input.Form>
-  </Layout>
+  return (
+    <Layout pageTitle="Settings" settingsBack={true}>
+      <Input.Form valueSetter={ctx.setSettings}>
+        <fieldset>
+          <legend onClick={() => setSecretKnock(secretKnock + 1)}>Settings</legend>
+          <SwitchSetting id="darkMode" label="Dark Mode" settings={settings} />
+          <SwitchSetting id="manualFishing" label="Manual Fishing" settings={settings} />
+          <SwitchSetting id="oldQuests" label="Show Unavailable Quests" settings={settings} />
+          <SwitchSetting id="showPasswords" label="Show Mailbox Passwords" settings={settings} />
+          <div className={secretKnockEnabled ? "" : "d-none"}>
+            <SwitchSetting id="staffMode" label="Staff Mode" settings={settings} />
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Units</legend>
+          <SelectSetting id="unitExploring" label="Exploring" settings={settings}>
+            <option value="">Explores</option>
+            <option value="stamina">Stamina</option>
+            <option value="oj">Orange Juices</option>
+            <option value="ciders">Apple Ciders</option>
+            <option value="lemonade">Lemonades</option>
+            <option value="palmers">Arnold Palmers</option>
+          </SelectSetting>
+          <SelectSetting id="unitFishing" label="Fishing" settings={settings}>
+            <option value="">Fishes</option>
+            <option value="nets">Fishing Nets</option>
+            <option value="largeNets">Large Nets</option>
+          </SelectSetting>
+          <SelectSetting id="unitFarming" label="Farming" settings={settings}>
+            <option value="">Seeds</option>
+            <option value="harvestAll">Harvest Alls</option>
+          </SelectSetting>
+          <TextSetting
+            id="cropRows"
+            label="Crop Rows"
+            placeholder="2"
+            type="number"
+            settings={settings}
+          />
+        </fieldset>
+        <fieldset>
+          <legend>Perks</legend>
+          <SwitchSetting id="ironDepot" label="Iron Depot" settings={settings} />
+          <TextSetting
+            id="wanderer"
+            label="Wanderer"
+            placeholder="0"
+            after="%"
+            type="number"
+            settings={settings}
+          />
+          <SwitchSetting id="cinnamonSticks" label="Cinnamon Sticks" settings={settings} />
+          <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
+          <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
+          <SwitchSetting id="fishingTrawl" label="Fishing Trawl" settings={settings} />
+          <TextSetting
+            id="primerFarming"
+            label="Bonus Farming XP"
+            placeholder="0"
+            type="number"
+            after="%"
+            settings={settings}
+          />
+          <TextSetting
+            id="primerFishing"
+            label="Bonus Fishing XP"
+            placeholder="0"
+            type="number"
+            after="%"
+            settings={settings}
+          />
+          <TextSetting
+            id="primerCrafting"
+            label="Bonus Crafting XP"
+            placeholder="0"
+            type="number"
+            after="%"
+            settings={settings}
+          />
+          <TextSetting
+            id="primerExploring"
+            label="Bonus Exploring XP"
+            placeholder="0"
+            type="number"
+            after="%"
+            settings={settings}
+          />
+          <TextSetting
+            id="resourceSaver"
+            label="Resource Saver"
+            placeholder="20"
+            type="number"
+            after="%"
+            settings={settings}
+          />
+          <SwitchSetting id="runecube" label="Eagle Eye (Runecube)" settings={settings} />
+        </fieldset>
+      </Input.Form>
+    </Layout>
+  )
 }
