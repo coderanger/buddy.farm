@@ -93,6 +93,10 @@ export default () => {
           <SwitchSetting id="lemonSqueezer" label="Lemon Squeezer" settings={settings} />
           <SwitchSetting id="reinforcedNetting" label="Reinforced Netting" settings={settings} />
           <SwitchSetting id="fishingTrawl" label="Fishing Trawl" settings={settings} />
+          <SwitchSetting id="effectiveMining1" label="Effective Mining I" settings={settings} />
+          <SwitchSetting id="effectiveMining2" label="Effective Mining II" settings={settings} />
+          <SwitchSetting id="depositDetector1" label="Deposit Detector I" settings={settings} />
+          <SwitchSetting id="depositDetector2" label="Deposit Detector II" settings={settings} />
           <TextSetting
             id="primerFarming"
             label="Bonus Farming XP"
