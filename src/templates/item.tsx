@@ -659,6 +659,8 @@ export default ({
     dropMode = "explores"
   } else if (drops.find((dr) => dr.dropRates.location?.type === "fishing")) {
     dropMode = "fishes"
+  } else if (drops.find((dr) => dr.dropRates.location?.type === "mining")) {
+    dropMode = "mines"
   } else if (drops.find((dr) => dr.dropRates.seed !== undefined) || item.dropRates.length !== 0) {
     dropMode = "harvests"
   }
