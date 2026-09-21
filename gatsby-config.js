@@ -63,6 +63,13 @@ module.exports = {
           maxBatchSize: 10,
         },
         fetch,
+        fetchOptions: {
+          retryInitialDelay: 1000,
+          retryMaxDuration: 300000,
+          socketTimeout: 300000,
+          forceSocketTimeout: true,
+          retryOnHttpError: () => true,
+        },
       },
     },
   ],
