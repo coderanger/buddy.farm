@@ -213,7 +213,7 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions, graphql 
       }
     }
   `)
-  if (data === undefined) {
+  if (data === undefined || data === null) {
     throw `gatsby-node query failed`
   }
   const types = [
