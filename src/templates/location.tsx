@@ -8,6 +8,8 @@ import { Settings } from "../hooks/settings"
 import { GlobalContext } from "../utils/context"
 import { formatDropRate } from "../utils/format"
 import linkFor from "../utils/links"
+import { miningBaseDropRate, miningFloorRound, miningFloorSettingKey } from "../utils/mining"
+import item from "./item"
 
 const LOCATION_TYPE_TO_DROP_MODE: Record<string, string> = {
   explore: "explores",
@@ -34,7 +36,9 @@ const LocationList = ({ location, drops, settings }: LocationListProps) => {
         location.type,
         itemRate.rate,
         itemRate.item.manualFishingOnly,
-        location.baseDropRate,
+        location.type === "mining"
+          ? miningBaseDropRate(location, settings, itemRate)
+          : location.baseDropRate,
       )
       return {
         key: itemRate.item.id.toString(),
@@ -68,24 +72,45 @@ export default ({
         : "/fishing/"
 
   useEffect(() => {
-    let drops = location.dropRates.filter((dr) => dr.runecube === !!settings.runecube)
+    let drops = location.dropRates
     switch (location.type) {
       case "explore":
-        drops = drops.filter((dr) => !!dr.ironDepot === !!settings.ironDepot)
+        drops = drops.filter(
+          (dr) => dr.runecube === !!settings.runecube && !!dr.ironDepot === !!settings.ironDepot,
+        )
         break
       case "fishing":
-        drops = drops.filter((dr) => !!dr.manualFishing === !!settings.manualFishing)
+        drops = drops.filter(
+          (dr) =>
+            dr.runecube === !!settings.runecube && !!dr.manualFishing === !!settings.manualFishing,
+        )
         break
+      case "mining": {
+        const miningFloor = miningFloorRound(settings[miningFloorSettingKey(location.name)])
+        drops = drops.filter((dr) => dr.miningFloor === miningFloor)
+        break
+      }
     }
     if (drops.length > 0) {
       setDrops(drops[0])
     }
-  }, [location.type, settings.ironDepot, settings.manualFishing, settings.runecube])
+  }, [
+    location.type,
+    settings.ironDepot,
+    settings.manualFishing,
+    settings.runecube,
+    settings[miningFloorSettingKey(location.name)],
+  ])
 
   return (
     <Layout
       headerFrom={location}
-      headerRight={<QuickSettings dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]} />}
+      headerRight={
+        <QuickSettings
+          dropMode={LOCATION_TYPE_TO_DROP_MODE[location.type]}
+          locationName={location.name}
+        />
+      }
     >
       <p>
         <Link to={breadcrumbLink}>
@@ -110,6 +135,7 @@ export const pageQuery = graphql`
           ironDepot
           manualFishing
           runecube
+          miningFloor
           silverPerHit
           xpPerHit
           items {

@@ -7,6 +7,7 @@ import { useOnClient } from "../hooks/client"
 import crossMark from "../images/cross-mark.png"
 import personRunning from "../images/person-running.png"
 import { GlobalContext } from "../utils/context"
+import { miningFloorRound, miningFloorSettingKey } from "../utils/mining"
 
 interface QuickSettingsUnitsProps {
   settingKey: "unitExploring" | "unitFishing" | "unitFarming"
@@ -71,12 +72,71 @@ const QuickSettingsRunecube = () => {
   )
 }
 
-interface QuickSettingsProps {
-  dropMode: string | undefined
-  manualFishingOnly?: boolean
+interface QuickSettingsFloorsProps {
+  locationName: string
 }
 
-export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProps) => {
+const QuickSettingsFloors = ({ locationName }: QuickSettingsFloorsProps) => {
+  const ctx = useContext(GlobalContext)
+  const key = miningFloorSettingKey(locationName)
+  const current: number = parseInt(ctx.settings[key], 10) || 1
+  return (
+    <ButtonGroup className="ms-2" aria-label="Mining floor setting">
+      <Button
+        size="sm"
+        variant={miningFloorRound(current) === 1 ? "secondary" : "outline-secondary"}
+        title="Floor 1"
+        onClick={() => ctx.setSetting(key, 1)}
+      >
+        1
+      </Button>
+      <Button
+        size="sm"
+        variant={miningFloorRound(current) === 10 ? "secondary" : "outline-secondary"}
+        title="Floor 10"
+        onClick={() => ctx.setSetting(key, 10)}
+      >
+        10
+      </Button>
+      <Button
+        size="sm"
+        variant={miningFloorRound(current) === 100 ? "secondary" : "outline-secondary"}
+        title="Floor 100"
+        onClick={() => ctx.setSetting(key, 100)}
+      >
+        100
+      </Button>
+      <Button
+        size="sm"
+        variant={miningFloorRound(current) === 1000 ? "secondary" : "outline-secondary"}
+        title="Floor 1000"
+        onClick={() => ctx.setSetting(key, 1000)}
+      >
+        1000
+      </Button>
+      <Button
+        size="sm"
+        variant={miningFloorRound(current) === 10000 ? "secondary" : "outline-secondary"}
+        title="Floor 100000"
+        onClick={() => ctx.setSetting(key, 10000)}
+      >
+        10000
+      </Button>
+    </ButtonGroup>
+  )
+}
+
+interface QuickSettingsProps {
+  dropMode?: string | undefined
+  manualFishingOnly?: boolean
+  locationName?: string
+}
+
+export const QuickSettings = ({
+  dropMode,
+  manualFishingOnly,
+  locationName,
+}: QuickSettingsProps) => {
   const onClient = useOnClient()
   if (!dropMode || !onClient) {
     return <></>
@@ -111,7 +171,7 @@ export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProp
             image: "https://farmrpg.com/img/items/ap.png",
           },
         ]}
-      />
+      />,
     )
   } else if (dropMode === "fishes" && !manualFishingOnly) {
     parts.push(
@@ -138,7 +198,7 @@ export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProp
             manualFishing: false,
           },
         ]}
-      />
+      />,
     )
   } else if (dropMode === "harvests") {
     parts.push(
@@ -153,11 +213,14 @@ export const QuickSettings = ({ dropMode, manualFishingOnly }: QuickSettingsProp
             image: "https://farmrpg.com/img/items/farm2_sm.png",
           },
         ]}
-      />
+      />,
     )
   }
   if (dropMode === "explores" || dropMode === "fishes") {
     parts.push(<QuickSettingsRunecube key="runecube" />)
+  }
+  if (locationName !== undefined && dropMode === "pickaxes") {
+    parts.push(<QuickSettingsFloors locationName={locationName} />)
   }
   return <ButtonToolbar aria-label="Item source settings">{parts}</ButtonToolbar>
 }
