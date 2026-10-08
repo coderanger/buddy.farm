@@ -95,6 +95,7 @@ export const formatDropRate = (
           return formatDropRateUnit(rate, "Seeds/drop", "Drops/seed")
       }
     case "mining": {
+      return ["?", "Data coming soon!"]
       return formatDropRateUnit((1 / rate) * (baseDropRate ?? 1), "Drops/pickaxe", "Pickaxes/drop")
     }
   }
