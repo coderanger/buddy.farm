@@ -6,7 +6,7 @@ const formatDropRateNumber = (rate: number) =>
 const formatDropRateUnit = (
   rate: number,
   unit: string,
-  reciprocalUnit: string
+  reciprocalUnit: string,
 ): [string, string] => {
   if (rate < 1) {
     return [formatDropRateNumber(1 / rate), reciprocalUnit]
@@ -20,7 +20,7 @@ export const formatDropRate = (
   locationType: string,
   rate: number,
   manualFishingOnly: boolean,
-  baseDropRate: number | null
+  baseDropRate: number | null,
 ): [string, string] => {
   switch (locationType) {
     case "fishing":
@@ -76,7 +76,7 @@ export const formatDropRate = (
             return formatDropRateUnit(
               rate / palmerExplores,
               "Arnold Palmers/drop",
-              "Drops/arnold palmer"
+              "Drops/arnold palmer",
             )
           }
         }
@@ -94,6 +94,9 @@ export const formatDropRate = (
         default:
           return formatDropRateUnit(rate, "Seeds/drop", "Drops/seed")
       }
+    case "mining": {
+      return formatDropRateUnit((1 / rate) * (baseDropRate ?? 1), "Drops/pickaxe", "Pickaxes/drop")
+    }
   }
   throw `Unknown location type ${locationType}`
 }
