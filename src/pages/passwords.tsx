@@ -101,6 +101,9 @@ const PasswordList = ({ pw, used, setUsed, showDefault }: PasswordListProps) => 
   const listItems = []
 
   if (!showDefault) {
+    if (!(pw.clue1 && pw.clue2 && pw.clue3)) {
+      return
+    }
     listItems.push(
       {
         lineOne: "Clue 1",
@@ -288,7 +291,7 @@ export default PasswordsPage
 export const query = graphql`
   query PasswordsPage {
     farmrpg {
-      passwords(filters: { hasClues: true }) {
+      passwords {
         id
         group {
           name
