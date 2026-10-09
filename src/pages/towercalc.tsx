@@ -38,7 +38,7 @@ export default () => {
   while (endCondition()) {
     levelsClimbed += 1
     const curLevel = data.fromLevel + levelsClimbed
-    totalSilver += curLevel * (curLevel > 100 ? (curLevel > 200 ? 150 : 100) : 50)
+    totalSilver += curLevel * (curLevel > 100 ? (curLevel > 200 ? (curLevel > 300 ? 500 : 300) : 100) : 50)
     totalAK += 100
   }
   const displaySilverUnit = totalSilver > 1000 ? "B" : "M"
