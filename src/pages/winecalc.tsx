@@ -8,6 +8,8 @@ interface WineData {
   cellarInsulation: boolean
   cellarInsulation2: boolean
   cellarInsulation3: boolean
+  inpergonsBlessing: boolean
+  towerLevel: number
 }
 
 const DEFAULT_DATA: WineData = {
@@ -17,6 +19,8 @@ const DEFAULT_DATA: WineData = {
   cellarInsulation: true,
   cellarInsulation2: false,
   cellarInsulation3: false,
+  inpergonsBlessing: false,
+  towerLevel: 190,
 }
 
 export default () => {
@@ -29,6 +33,9 @@ export default () => {
       settings.cellarInsulation2 === undefined ? undefined : !!settings.cellarInsulation2,
     cellarInsulation3:
       settings.cellarInsulation3 === undefined ? undefined : !!settings.cellarInsulation3,
+    inpergonsBlessing:
+      settings.inpergonsBlessing === undefined ? undefined : !!settings.inpergonsBlessing,
+    towerLevel: settings.towerLevel ? parseInt(settings.towerLevel, 10) : undefined,
   }))
 
   // Calculations.
@@ -38,13 +45,15 @@ export default () => {
     (data.cellarInsulation ? 2 : 0) +
     (data.cellarInsulation2 ? 3 : 0) +
     (data.cellarInsulation3 ? 3 : 0)
-  const daysToMaxValue = Math.cbrt((maxValue - 1000) / (data.farmLevel * ciMul))
+  const ibMul = data.inpergonsBlessing ? (0.4 * data.towerLevel) : 1
+  const allMul = ciMul * ibMul
+  const daysToMaxValue = Math.cbrt((maxValue - 1000) / (data.farmLevel * allMul))
 
   const fullDaysToMaxValue = Math.ceil(daysToMaxValue)
   const fullDayProfit = maxValue / fullDaysToMaxValue
 
   const prevDayToMaxValue = fullDaysToMaxValue - 1
-  const valueOnPrevDay = 1000 + Math.pow(prevDayToMaxValue, 3) * data.farmLevel * ciMul
+  const valueOnPrevDay = 1000 + Math.pow(prevDayToMaxValue, 3) * data.farmLevel * allMul
   const prevDayProfit = valueOnPrevDay / prevDayToMaxValue
 
   const daysToOptimal = prevDayProfit >= fullDayProfit ? prevDayToMaxValue : fullDaysToMaxValue
@@ -95,6 +104,20 @@ export default () => {
           id="cellarInsulation3"
           label="Cellar Insulation III"
           defaultChecked={data.cellarInsulation3}
+        />
+        <Input.Switch
+          id="inpergonsBlessing"
+          label="Inpergon's Blessing"
+          defaultChecked={data.inpergonsBlessing}
+        />
+        <Input.Text
+          id="towerLevel"
+          label="Tower Level"
+          placeholder={DEFAULT_DATA.towerLevel.toString()}
+          defaultValue={values.towerLevel?.toString()}
+          pattern="^\d{1,3}$"
+          type="number"
+          disabled={!data.inpergonsBlessing}
         />
       </Calculator.Perks>
 
