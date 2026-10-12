@@ -138,7 +138,7 @@ export default () => {
         id="maxValue"
         label="Max Value"
         disabled={true}
-        value={maxValue.toLocaleString()}
+        value={(maxValue * ibMul).toLocaleString()}
       />
       <Input.Text
         id="daysToOptimal"
