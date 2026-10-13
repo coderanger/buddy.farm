@@ -58,7 +58,7 @@ export default () => {
     (data.cellarInsulation ? 2 : 0) +
     (data.cellarInsulation2 ? 3 : 0) +
     (data.cellarInsulation3 ? 3 : 0)
-  const ibMul = data.inpergonsBlessing ? 0.4 * data.towerLevel : 1
+  const ibMul = data.towerLevel >= 190 && data.inpergonsBlessing ? 0.4 * data.towerLevel : 1
   const daysToMaxValue = Math.cbrt((maxValue - 1000) / (data.farmLevel * ciMul))
 
   const fullDaysToMaxValue = Math.ceil(daysToMaxValue)
@@ -127,11 +127,13 @@ export default () => {
           label="Cellar Insulation III"
           defaultChecked={data.cellarInsulation3}
         />
-        <Input.Switch
-          id="inpergonsBlessing"
-          label="Inpergon's Blessing"
-          defaultChecked={data.inpergonsBlessing}
-        />
+        {data.towerLevel >= 190 && (
+          <Input.Switch
+            id="inpergonsBlessing"
+            label="Inpergon's Blessing"
+            defaultChecked={data.inpergonsBlessing}
+          />
+        )}
       </Calculator.Perks>
 
       <Input.Text
