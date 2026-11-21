@@ -68,7 +68,7 @@ export default ({
     location.type === "explore"
       ? "/exploring/"
       : location.type === "mining"
-        ? "/mining"
+        ? "/mining/"
         : "/fishing/"
 
   useEffect(() => {
