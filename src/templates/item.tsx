@@ -665,6 +665,10 @@ export default ({
     dropMode = "harvests"
   }
 
+  if (item.isHidden) {
+    return <Layout headerFrom={item} children={null} />
+  }
+
   return (
     <Layout
       headerFrom={item}
@@ -735,6 +739,7 @@ export const pageQuery = graphql`
         baseYieldMinutes
         locksmithGrabBag
         locksmithGold
+        isHidden
         requiredForQuests {
           quantity
           quest {
